@@ -1,0 +1,7 @@
+Code-Review+2: LF Jenkins CI <releng+lf-jobbuilder@linuxfoundation.org>
+Verified+1: LF Jenkins CI <releng+lf-jobbuilder@linuxfoundation.org>
+Submitted-by: LF Jenkins CI <releng+lf-jobbuilder@linuxfoundation.org>
+Submitted-at: Fri, 22 May 2020 22:50:41 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/oam/tr069-adapter/+/3805
+Project: oam/tr069-adapter
+Branch: refs/heads/master
