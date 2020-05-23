@@ -1,0 +1,58 @@
+project: "oam"
+project_creation_date: "2019-08-08"
+project_category: ""
+lifecycle_state: "Incubation"
+project_lead: &oran_oam_ptl
+  name: "Martin Skorupski"
+  email: "martin.skorupski@highstreet-technologies.com"
+  id: "demx8as6"
+  company: "highstreet technologies GmbH"
+  timezone: "Germany/Berlin"
+primary_contact: *oran_oam_ptl
+issue_tracking:
+  type: "jira"
+  url: "https://jira.o-ran-sc.org/projects/OAM"
+  key: "OAM"
+mailing_list:
+  type: "groups.io"
+  url: "https://lists.o-ran-sc.org/g/main"
+  tag: "<[oam]>"
+realtime_discussion:
+  type: "irc"
+  server: "freenode.net"
+  channel: "#o-ran-sc"
+meetings:
+  - type: "zoom"
+    agenda: ""
+    url: ""
+    server: "n/a"
+    channel: "n/a"
+    repeats: "weekly"
+    time: "Mondays, 13:00 UTC"
+repositories:
+  - "oam/tr069-adapter"
+committers:
+  - <<: *oran_oam_ptl
+  - name: Sambandan, Devaraj
+    email: Devaraj.Sambandan@commscope.com
+    company: CommScope Inc
+    id: sdevaraj665
+    timezone: Asia/Kolkata
+  - name: Chikka Kempegowda, Sharath Chandra
+    email: Sharath.ChandraCK@commscope.com
+    company: CommScope Inc
+    id: sharathchandra.ck
+    timezone: Asia/Kolkata
+  - name: Setti, Ravi
+    email: Ravi.Setti@commscope.com
+    company: CommScope Inc
+    id: ravi.setti
+    timezone: Asia/Kolkata
+  - name: Chowdam, Chandra Sekhar
+    email: ChandraSekhar.Chowdam@commscope.com
+    company: CommScope Inc
+    id: cschowdam
+    timezone: Asia/Kolkata
+tsc:
+  # yamllint disable-line rule:line-length
+  approval: "https://lists.o-ran-sc.org/g/toc/topic/new_repo_oam_tr069_adapter/74342238?p=,,,20,0,0,0::recentpostdate%2Fsticky,,,20,2,0,74342238"
