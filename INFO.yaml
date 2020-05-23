@@ -57,3 +57,4 @@ committers:
 tsc:
     # yamllint disable-line rule:line-length
     approval: 'https://lists.o-ran-sc.org/g/toc/topic/new_repo_oam_tr069_adapter/74342238?p=,,,20,0,0,0::recentpostdate%2Fsticky,,,20,2,0,74342238'
+
