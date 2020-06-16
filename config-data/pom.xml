@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * ============LICENSE_START========================================================================
+ * ONAP : tr-069-adapter
+ * =================================================================================================
+ * Copyright (C) 2020 CommScope Inc Intellectual Property.
+ * =================================================================================================
+ * This tr-069-adapter software file is distributed by CommScope Inc
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ===============LICENSE_END=======================================================================
+*/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.commscope.tr069adapter</groupId>
+      <artifactId>tr069adapter</artifactId>
+      <version>1.0.0</version>
+   </parent>
+   <groupId>org.commscope.tr069adapter.config</groupId>
+   <artifactId>config-data</artifactId>
+   <name>config-data</name>
+   <description>Configuration data import project for Spring Boot</description>
+   <licenses>
+      <license>
+         <name>The Apache Software License, Version 2.0</name>
+         <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+   </licenses>
+   <repositories>
+      <repository>
+         <id>onap-releases</id>
+         <name>onap-releases</name>
+         <url>https://nexus.onap.org/content/repositories/releases/</url>
+      </repository>
+   </repositories>
+   <properties>
+      <docker.image.name>tr069adapter-acs-initialpnpdb</docker.image.name>
+   </properties>
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+         <exclusions>
+            <exclusion>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-starter-logging</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-log4j2</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.mariadb.jdbc</groupId>
+         <artifactId>mariadb-java-client</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit-dep</artifactId>
+         <version>4.11</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+         </plugin>
+         <plugin>
+            <groupId>net.revelc.code.formatter</groupId>
+            <artifactId>formatter-maven-plugin</artifactId>
+            <version>${formatter-maven-plugin.version}</version>
+            <configuration>
+               <configFile>${project.parent.basedir}/eclipse-formatter.xml</configFile>
+            </configuration>
+            <!-- https://code.revelc.net/formatter-maven-plugin/ use mvn formatter:format
+                                        spotless:apply process-sources -->
+         </plugin>
+         <plugin>
+            <groupId>com.diffplug.spotless</groupId>
+            <artifactId>spotless-maven-plugin</artifactId>
+            <version>${spotless-maven-plugin.version}</version>
+            <configuration>
+               <java>
+                  <removeUnusedImports />
+                  <importOrder>
+                     <order>com,java,javax,org</order>
+                  </importOrder>
+               </java>
+            </configuration>
+            <!-- https://github.com/diffplug/spotless/tree/master/plugin-maven use
+                                        mvn spotless:apply to rewrite source files use mvn spotless:check to validate
+                                        source files -->
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+               <skipTests>false</skipTests>
+            </configuration>
+         </plugin>
+         <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+         </plugin>
+         <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker-maven-plugin}</version>
+            <inherited>false</inherited>
+            <executions>
+               <execution>
+                  <id>generate-policy-agent-image</id>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>build</goal>
+                     <goal>save</goal>
+                  </goals>
+                  <configuration>
+                     <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
+                     <images>
+                        <image>
+                           <name>${docker.image.name}</name>
+                           <build>
+                              <cleanup>try</cleanup>
+                              <contextDir>${basedir}</contextDir>
+                              <dockerFile>Dockerfile</dockerFile>
+                              <args>
+                                 <JAR>${project.build.finalName}.jar</JAR>
+                              </args>
+                              <tags>
+                                 <tag>${project.version}</tag>
+                              </tags>
+                           </build>
+                        </image>
+                     </images>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>push-policy-agent-image</id>
+                  <goals>
+                     <goal>build</goal>
+                     <goal>push</goal>
+                  </goals>
+                  <configuration>
+                     <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
+                     <pushRegistry>${env.CONTAINER_PUSH_REGISTRY}</pushRegistry>
+                     <images>
+                        <image>
+                           <name>${docker.image.name}:${project.version}</name>
+                           <build>
+                              <contextDir>${basedir}</contextDir>
+                              <dockerFile>Dockerfile</dockerFile>
+                              <args>
+                                 <JAR>${project.build.finalName}.jar</JAR>
+                              </args>
+                              <tags>
+                                 <tag>latest</tag>
+                              </tags>
+                           </build>
+                        </image>
+                     </images>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <!-- support sonar in multi-module project -->
+         <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>${sonar-maven-plugin.version}</version>
+         </plugin>
+      </plugins>
+   </build>
+   <issueManagement>
+      <system>JIRA</system>
+      <url>https://jira.o-ran-sc.org/</url>
+   </issueManagement>
+</project>
