@@ -1,0 +1,254 @@
+{ 
+   "0":{ 
+      "errorMessage":"Success",
+      "errorType":"",
+      "errorTag":"",
+      "errorSeverity":""
+   },
+   "9000":{ 
+      "errorMessage":"Method not supported",
+      "errorType":"application",
+      "errorTag":"invalid-value",
+      "errorSeverity":"ERROR"
+   },
+   "9001":{ 
+      "errorMessage":"Request denied",
+      "errorType":"application",
+      "errorTag":"operation-not-supported",
+      "errorSeverity":"ERROR"
+   },
+   "9002":{ 
+      "errorMessage":"Device Internal error",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9003":{ 
+      "errorMessage":"Invalid arguments",
+      "errorType":"application",
+      "errorTag":"missing-attribute",
+      "errorSeverity":"ERROR"
+   },
+   "9004":{ 
+      "errorMessage":"Resources exceeded",
+      "errorType":"application",
+      "errorTag":"InUse",
+      "errorSeverity":"ERROR"
+   },
+   "9005":{ 
+      "errorMessage":"Invalid Parameter name",
+      "errorType":"application",
+      "errorTag":"missing-attribute",
+      "errorSeverity":"ERROR"
+   },
+   "9006":{ 
+      "errorMessage":"Invalid Parameter type",
+      "errorType":"application",
+      "errorTag":"bad-attribute",
+      "errorSeverity":"ERROR"
+   },
+   "9007":{ 
+      "errorMessage":"Invalid Parameter value",
+      "errorType":"application",
+      "errorTag":"invalid-value",
+      "errorSeverity":"ERROR"
+   },
+   "9008":{ 
+      "errorMessage":"Attempt to set a non-writable Parameter",
+      "errorType":"application",
+      "errorTag":"invalid-value",
+      "errorSeverity":"ERROR"
+   },
+   "9009":{ 
+      "errorMessage":"Notification request rejected",
+      "errorType":"application",
+      "errorTag":"AccessDenied",
+      "errorSeverity":"ERROR"
+   },
+   "9010":{ 
+      "errorMessage":"File transfer failure",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9011":{ 
+      "errorMessage":"Upload failure",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9012":{ 
+      "errorMessage":"File transfer server authentication failure",
+      "errorType":"application",
+      "errorTag":"AccessDenied",
+      "errorSeverity":"ERROR"
+   },
+   "9013":{ 
+      "errorMessage":"Unsupported protocol for file transfer",
+      "errorType":"application",
+      "errorTag":"operation-not-supported",
+      "errorSeverity":"ERROR"
+   },
+   "9014":{ 
+      "errorMessage":"File transfer failure: unable to join multicast group",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9015":{ 
+      "errorMessage":"File transfer failure: unable to contact file server",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9016":{ 
+      "errorMessage":"File transfer failure: unable to access file",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9017":{ 
+      "errorMessage":"File transfer failure: unable to complete download",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9018":{ 
+      "errorMessage":"File transfer failure: file corrupted or otherwise unusable",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9019":{ 
+      "errorMessage":"File transfer failure: file authentication failure",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9020":{ 
+      "errorMessage":"File transfer failure: unable to complete download within specified time windows",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9021":{ 
+      "errorMessage":"Cancelation of file transfer not permitted in current transfer state",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9022":{ 
+      "errorMessage":"Invalid UUID Format",
+      "errorType":"application",
+      "errorTag":"invalid-value",
+      "errorSeverity":"ERROR"
+   },
+   "9023":{ 
+      "errorMessage":"Unknown Execution Environment",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9024":{ 
+      "errorMessage":"Disabled Execution Environment",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9025":{ 
+      "errorMessage":"Deployment Unit to Execution Environment Mismatch",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9026":{ 
+      "errorMessage":"Duplicate Deployment Unit",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9027":{ 
+      "errorMessage":"System Resources Exceeded",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9028":{ 
+      "errorMessage":"Unknown Deployment Unit",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9029":{ 
+      "errorMessage":"Invalid Deployment Unit State",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9030":{ 
+      "errorMessage":"Invalid Deployment Unit Update – Downgrade not permitted",
+      "errorType":"application",
+      "errorTag":"operation-not-supported",
+      "errorSeverity":"ERROR"
+   },
+   "9031":{ 
+      "errorMessage":"Invalid Deployment Unit Update – Version not specified",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9032":{ 
+      "errorMessage":"Invalid Deployment Unit Update – Version already exists",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "9816":{ 
+      "errorMessage":"Already Upgrade is in progress",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "8000":{ 
+      "errorMessage":"Device not exists",
+      "errorType":"application",
+      "errorTag":"invalid-value",
+      "errorSeverity":"ERROR"
+   },
+   "8001":{ 
+      "errorMessage":"Device not Activated",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "8002":{ 
+      "errorMessage":"Operation Aborted",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "8003":{ 
+      "errorMessage":"Operation Timedout",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "8004":{ 
+      "errorMessage":"Invalid NBI request",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "8006":{ 
+      "errorMessage":"Operation Timed out",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   },
+   "8007":{ 
+      "errorMessage":"Unable to perform Operation",
+      "errorType":"application",
+      "errorTag":"operation-failed",
+      "errorSeverity":"ERROR"
+   }
+}
