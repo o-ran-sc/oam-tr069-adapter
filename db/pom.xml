@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * ============LICENSE_START========================================================================
+ * ONAP : tr-069-adapter
+ * =================================================================================================
+ * Copyright (C) 2020 CommScope Inc Intellectual Property.
+ * =================================================================================================
+ * This tr-069-adapter software file is distributed by CommScope Inc
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ===============LICENSE_END=======================================================================
+*/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <parent>
+      <groupId>org.commscope.tr069adapter</groupId>
+      <artifactId>tr069adapter</artifactId>
+      <version>1.0.0</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.commscope.tr069adapter.db</groupId>
+   <artifactId>maria-db</artifactId>
+   <name>maria-db</name>
+   <url>http://maven.apache.org</url>
+   <properties>
+      <docker.image.name>tr069adapter-mariadb</docker.image.name>
+   </properties>
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker-maven-plugin}</version>
+            <inherited>false</inherited>
+            <executions>
+               <execution>
+                  <id>generate-policy-agent-image</id>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>build</goal>
+					 <goal>save</goal>
+                  </goals>
+                  <configuration>
+                     <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
+                     <images>
+                        <image>
+                           <name>${docker.image.name}</name>
+                           <build>
+                              <cleanup>try</cleanup>
+                              <contextDir>${basedir}</contextDir>
+                              <dockerFile>Dockerfile</dockerFile>
+                              <tags>
+                                 <tag>${project.version}</tag>
+                              </tags>
+                           </build>
+                        </image>
+                     </images>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>push-policy-agent-image</id>
+                  <goals>
+                     <goal>build</goal>
+                     <goal>push</goal>
+                  </goals>
+                  <configuration>
+                     <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
+                     <pushRegistry>${env.CONTAINER_PUSH_REGISTRY}</pushRegistry>
+                     <images>
+                        <image>
+                           <name>${docker.image.name}:${project.version}</name>
+                           <build>
+                              <contextDir>${basedir}</contextDir>
+                              <dockerFile>Dockerfile</dockerFile>
+                              <args>
+                                 <JAR>${project.build.finalName}.jar</JAR>
+                              </args>
+                              <tags>
+                                 <tag>latest</tag>
+                              </tags>
+                           </build>
+                        </image>
+                     </images>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+</project>
