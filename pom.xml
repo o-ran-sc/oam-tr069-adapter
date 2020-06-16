@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * ============LICENSE_START========================================================================
+ * ONAP : tr-069-adapter
+ * =================================================================================================
+ * Copyright (C) 2020 CommScope Inc Intellectual Property.
+ * =================================================================================================
+ * This tr-069-adapter software file is distributed by CommScope Inc
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ===============LICENSE_END=======================================================================
+*/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>2.2.1.RELEASE</version>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.commscope.tr069adapter</groupId>
+   <artifactId>tr069adapter</artifactId>
+   <version>1.0.0</version>
+   <packaging>pom</packaging>
+   <name>tr069adapter</name>
+   <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <build.version>1.12.0</build.version>
+      <jdk.version>1.7</jdk.version>
+      <java.version>1.8</java.version>
+      <org.apache.axis.version>1.4</org.apache.axis.version>
+      <junit.version>4.12</junit.version>
+      <junit.scope>test</junit.scope>
+      <jta.version>1.1</jta.version>
+      <jaxb-api.version>2.1</jaxb-api.version>
+      <org.mockito.version>1.8.4</org.mockito.version>
+      <maven-clean-plugin.version>2.4.1</maven-clean-plugin.version>
+      <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+      <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
+      <maven-assembly-plugin.version>2.2</maven-assembly-plugin.version>
+      <maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
+      <log4j.extras>1.2.17</log4j.extras>
+      <docker-maven-plugin>0.30.0</docker-maven-plugin>
+	  <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+	  <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+	  <spotless-maven-plugin.version>1.18.0</spotless-maven-plugin.version>
+	  <formatter-maven-plugin.version>2.8.1</formatter-maven-plugin.version>
+   </properties>
+   <modules>
+      <module>common</module>
+      <module>db</module>
+      <module>factory</module>
+      <module>acs</module>
+      <module>mapper</module>
+      <module>netconf-server</module>
+      <module>ves-agent</module>
+      <module>config-data</module>
+   </modules>
+</project>
