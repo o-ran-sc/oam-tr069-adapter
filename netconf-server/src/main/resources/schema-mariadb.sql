@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS netconf_server_details (ID int null,DEVICE_ID varchar(30),ENODEB_NAME varchar(255), PORT varchar(10));
