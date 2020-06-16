@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <target>
+    	<candidate />
+    </target>
+    <config>
+    	<device xmlns="urn:onf:otcc:wireless:yang:radio-access:commscope-onecell">
+    		<services>
+    			<fap-service>
+    				<index>1</index>
+    				<cell-config>
+    					<lte>
+    						<epc xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0"
+    							a:operation="replace">
+    							<plmn-list>
+    								<index>1</index>
+    								<plmnid>310767</plmnid>
+    								<is-primary>false</is-primary>
+    								<cell-reserved-for-operator-use>true</cell-reserved-for-operator-use>
+    								<alias>cpe-131</alias>
+    								<enable>true</enable>
+    							</plmn-list>
+    						</epc>
+    					</lte>
+    				</cell-config>
+    			</fap-service>
+    		</services>
+    	</device>
+    </config>
+</edit-config>
