@@ -16,5 +16,7 @@ TR069 Adapter
 
    overview.rst
    release-notes.rst
+   deployment-guide.rst
+   user-guide.rst
 
 * :ref:`search`
