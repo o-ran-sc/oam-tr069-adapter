@@ -37,15 +37,17 @@ Scope
 
 The TR069 Adapter enables any TR-069 compliant device to be managed in the 
 ONAP Environment by translating TR-069 messages (SOAP) to O-RAN O1 interface 
-messages for NetConf/YANG, VES and vice versa. The TR-069 Adapter also 
-supports translation of object models between TR Models (TR-196, TR-181) 
-to  O-RAN O1 interface Yang Models.
+messages for NetConf/YANG and vice versa. Also converting TR-069 BootStrap, 
+Alarm Value changes to VES pnfRegstration and VES Faults respectively. 
+The TR-069 Adapter also  supports translation of object models between 
+TR Models (TR-196, TR-181) to  O-RAN O1 interface Yang Models.
 
 
 TR-069Adapter Overview
 ----------------------
 
-The following image shows how the BBF-TR069 Device, TR-069Adapter, SDN-R, and DMaap are connected.Each component depicted in the image is briefly described further below:
+The following image shows how the BBF-TR069 Device, TR-069Adapter, SDN-R, and DMaap are connected. 
+Each component depicted in the image is briefly described further below:
 
 
 .. image:: _static/TR-069AdapterOverview.png
@@ -54,7 +56,8 @@ The following image shows how the BBF-TR069 Device, TR-069Adapter, SDN-R, and DM
 Maria DB
 --------
 
-The Maria DB container instance is used to support data persistence for the TR-069Adapter, such as Factory Table, Initial PnP Config Table, TR-069 Session and Device Connection Request URL information.
+The Maria DB container instance is used to support data persistence for the TR-069Adapter covering 
+Initial PnP Configuration Data, TR-069 Session Data and Device Connection Request URL information.
 
 ACS
 ---
@@ -64,15 +67,15 @@ The Auto Configuration Service (ACS) Module is used to communicate with the Devi
 Factory
 -------
 
-This module supports Rest APIs to authenticate Device TR-069 sessions using basic authentication. It also supports REST APIs to import a Factory Equipment  file which contains Device authentication information. 
+This module supports Rest APIs to authenticate Device TR-069 sessions using basic authentication. 
 
 Initial Config
 --------------
 
-This module supports importing 3GPP Config XML for Device. The configurations from XML are used to provision as Initial PnP Parameters to devices as part of BootStrap. This module also supports REST APIs to import Config XML which contains Device Initial PnP Configurations. The initial PnP Parameters are optional and could be used to emulate PnP using TR-069Adapter.
+This module supports importing 3GPP Configuration XML (3GPP TS 32.594) for Device. The configurations from XML are used to provision as Initial PnP Parameters to devices as part of BootStrap. This module also supports REST APIs to import Config XML which contains Device Initial PnP Configurations. The initial PnP Parameters are optional and could be used to emulate PnP using TR-069Adapter.
 
-Mapper
-------
+TR-069 to NETCONF Mapper
+------------------------
 
 The main function of this mapper is to map the request between NETCONF server and ACS (conversion of NETCONF protocol specific message to TR-069 message and vice versa) and to forward notifications to the VES Notifier.
 
