@@ -47,6 +47,8 @@ public class TR069RequestProcessorUtility {
 
   protected static final int BLOCK_SIZE = 3999;
   protected static final int MAX_SIZE = 11998;
+  public static final int DEVICE_REACHABLE_STATUS_CODE = 100;
+
 
   private TR069RequestProcessorUtility() {
     super();

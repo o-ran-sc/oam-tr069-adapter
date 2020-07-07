@@ -28,6 +28,7 @@ import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationCode;
 import org.commscope.tr069adapter.acs.common.OperationDetails;
+import org.commscope.tr069adapter.acs.common.OperationResponse;
 import org.commscope.tr069adapter.acs.common.dto.CustomOperationCode;
 import org.commscope.tr069adapter.acs.common.dto.DeviceOperationRequestDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
@@ -99,7 +100,11 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
       deviceId = deviceRPCRequest.getDeviceDetails().getDeviceId();
       try {
         tr069DeviceDetails = deviceOperationInterface.getDeviceDetails(deviceId);
-      } catch (DeviceOperationException deo) {
+        deviceRPCResponse = checkForDeviceAvailabilityRequest(deviceRPCRequest, tr069DeviceDetails);
+        if (null != deviceRPCResponse) {
+          return;
+        }
+      } catch (DeviceOperationException | SessionManagerException deo) {
         logger.error(deo.getMessage());
         deviceRPCResponse = tr069RequestProcessEngineUtility.buildAbortedOperationresult(
             tr069DeviceDetails, deviceRPCRequest, AcsFaultCode.FAULT_CODE_8000);
@@ -150,6 +155,35 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
             deviceRPCRequest.getOperationId());
       }
     }
+  }
+
+  private DeviceRPCResponse checkForDeviceAvailabilityRequest(DeviceRPCRequest deviceRPCRequest,
+      TR069DeviceDetails tr069DeviceDetails) throws SessionManagerException {
+    DeviceRPCResponse deviceRPCResponse = null;
+
+    if (!deviceRPCRequest.getOpDetails().getOpCode().equals(CustomOperationCode.CONNECT)) {
+      return deviceRPCResponse;
+    }
+
+    SessionDTO sessionDTO = getSession(tr069DeviceDetails.getDeviceId());
+
+    if (null != sessionDTO && !SessionState.TERMINATED.equals(sessionDTO.getSessionState())) {
+      logger.debug("Device is reachable as device tr069 session is in {} state.",
+          sessionDTO.getSessionState());
+
+      deviceRPCResponse = new DeviceRPCResponse();
+      deviceRPCResponse.setDeviceDetails(tr069DeviceDetails);
+      deviceRPCResponse.setOperationId(deviceRPCRequest.getOperationId());
+
+      OperationResponse operationResponse = new OperationResponse();
+      // device reachable...change value 1 to some constant or enum
+      operationResponse.setStatus(TR069RequestProcessorUtility.DEVICE_REACHABLE_STATUS_CODE);
+      operationResponse.setOperationCode(deviceRPCRequest.getOpDetails().getOpCode());
+
+      deviceRPCResponse.setOperationResponse(operationResponse);
+    }
+
+    return deviceRPCResponse;
   }
 
   /**
@@ -312,19 +346,8 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
             DeviceRPCRequest operationRequest = customOperationData.getDeviceRPCRequest();
             deviceRPCResponse = customOperationData.getDeviceRPCResponse();
             if (operationRequest != null) {
-              operationRequest.addContextParam(SESSION_ID, newSessionId);
-              updateSessionCurOpId(tr069RequestProcessorData, deviceRPCRequest.getOperationId());
-              changeSessionState(tr069RequestProcessorData, SessionState.LOCKED);
-              updateSession(session);
-              if (deviceRPCResponse != null && operationRequest.getOperationId() != null
-                  && !operationRequest.getOperationId()
-                      .equals(deviceRPCResponse.getOperationId())) {
-                logger.debug(
-                    "Sending the Device RPC response for a configure Multiple object prior operation");
-                // Sending the operation response to NBI
-                tr069EventNotificationService.sendOperationResultToNBI(deviceRPCResponse);
-              }
-              return operationRequest;
+              return handleOperationRequest(deviceRPCResponse, session, deviceRPCRequest,
+                  newSessionId, tr069RequestProcessorData, operationRequest);
             } else {
               logger.debug(PENDING_RPC_CHECK);
               deviceRPCRequest =
@@ -366,6 +389,23 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
     }
 
     return deviceRPCRequest;
+  }
+
+  private DeviceRPCRequest handleOperationRequest(DeviceRPCResponse deviceRPCResponse,
+      SessionDTO session, DeviceRPCRequest deviceRPCRequest, String newSessionId,
+      TR069RequestProcessorData tr069RequestProcessorData, DeviceRPCRequest operationRequest) {
+    operationRequest.addContextParam(SESSION_ID, newSessionId);
+    updateSessionCurOpId(tr069RequestProcessorData, deviceRPCRequest.getOperationId());
+    changeSessionState(tr069RequestProcessorData, SessionState.LOCKED);
+    updateSession(session);
+    if (deviceRPCResponse != null && operationRequest.getOperationId() != null
+        && !operationRequest.getOperationId().equals(deviceRPCResponse.getOperationId())) {
+      logger
+          .debug("Sending the Device RPC response for a configure Multiple object prior operation");
+      // Sending the operation response to NBI
+      tr069EventNotificationService.sendOperationResultToNBI(deviceRPCResponse);
+    }
+    return operationRequest;
   }
 
   /**

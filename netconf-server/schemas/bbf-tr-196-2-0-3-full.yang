@@ -17,7 +17,7 @@ module bbf-tr-196-2-0-3-full {
   description
     "This module contains a collection of YANG definitions for managing radio access network (RAN) devices.";
 
-  revision 2020-06-23 {
+  revision 2020-06-24 {
     description
       "Initial version, used only for ONAP PoC 2018-06-25
 	   

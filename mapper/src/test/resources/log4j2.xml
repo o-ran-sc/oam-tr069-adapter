@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * ============LICENSE_START========================================================================
+ * ONAP : tr-069-adapter
+ * =================================================================================================
+ * Copyright (C) 2020 CommScope Inc Intellectual Property.
+ * =================================================================================================
+ * This tr-069-adapter software file is distributed by CommScope Inc
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ===============LICENSE_END=======================================================================
+*/
+-->
+<Configuration status="DEBUG" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %m%n</Property>
+        <Property name="APP_LOG_ROOT">./target/test-logs</Property>
+    </Properties>
+    <Appenders>
+    	<Console name="console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        
+        <RollingFile name="applicationLog"
+            fileName="${APP_LOG_ROOT}/debug/application-debug.log"
+            filePattern="${APP_LOG_ROOT}/debug/application-debug-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+            	<pattern>[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%X{client}] [%.-40t] %-25.45c{1} %-5p: %m%n</pattern>
+            	<header>Debug Log started at: $${date:yyyy-MM-dd HH:mm:ss}</header>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="4MB" />
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
+                    <IfFileName glob="application-debug-*.log" />
+                    <IfAccumulatedFileCount exceeds="10" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+  
+  		<RollingFile name="springLog" 
+  			fileName="${APP_LOG_ROOT}/thirdparty/spring-framework.log"
+            filePattern="${APP_LOG_ROOT}/thirdparty/spring-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="4MB" />
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_ROOT}/thirdparty/" maxDepth="1">
+                    <IfFileName glob="spring-*.log" />
+                    <IfAccumulatedFileCount exceeds="10" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+   
+     	<RollingFile name="thirdPartyLog" 
+  			fileName="${APP_LOG_ROOT}/thirdparty/third-party-framework.log"
+            filePattern="${APP_LOG_ROOT}/thirdparty/third-party-framework-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="4MB" />
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_ROOT}/thirdparty/" maxDepth="1">
+                    <IfFileName glob="third-party-framework*.log" />
+                    <IfAccumulatedFileCount exceeds="10" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+             
+    </Appenders>
+    
+    <Loggers>
+    	<Logger name="org.commscope.tr069adapter" level="debug" additivity="false">
+    		<appender-ref ref="console"/>
+			<appender-ref ref="applicationLog"/>
+		</Logger>
+
+		<Logger name="org" level="debug" additivity="false">
+			<appender-ref ref="console"/>
+            <AppenderRef ref="thirdPartyLog" />
+        </Logger>
+		
+		<Logger name="org.springframework" level="debug" additivity="false">
+			<appender-ref ref="console"/>
+            <AppenderRef ref="springLog" />
+        </Logger>
+        
+        <Root level="DEBUG" additivity="false"/>
+    </Loggers>
+</Configuration>

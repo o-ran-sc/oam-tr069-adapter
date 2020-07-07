@@ -22,88 +22,88 @@
 -->
 
 <Configuration status="DEBUG" monitorInterval="30">
-    <Properties>
-    	<Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %m%n</Property>
-    	<Property name="APP_LOG_ROOT">/logs</Property>
-    	<Property name="LOG_FILE_NAME">configurationServiceLogs</Property>
-    </Properties>
-    <Appenders>
-    	<Console name="console" target="SYSTEM_OUT" follow="true">
-    		<PatternLayout pattern="${LOG_PATTERN}" />
-    	</Console>
+	<Properties>
+		<Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %m%n</Property>
+		<Property name="APP_LOG_ROOT">/logs</Property>
+		<Property name="LOG_FILE_NAME">configurationServiceLogs</Property>
+	</Properties>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT" follow="true">
+			<PatternLayout pattern="${LOG_PATTERN}" />
+		</Console>
 
-    	<RollingFile name="applicationLog"
-    		fileName="${APP_LOG_ROOT}/debug/${LOG_FILE_NAME}-debug.log"
-    		filePattern="${APP_LOG_ROOT}/debug/${LOG_FILE_NAME}-debug-%d{yyyy-MM-dd}-%i.log">
-    		<PatternLayout>
-    			<pattern>[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%X{client}] [%.-40t]
-    				%-25.45c{1} %-5p: %m%n</pattern>
-    			<header>Debug Log started at: $${date:yyyy-MM-dd HH:mm:ss}</header>
-    		</PatternLayout>
-    		<Policies>
-    			<SizeBasedTriggeringPolicy size="4MB" />
-    			<TimeBasedTriggeringPolicy interval="1"
-    				modulate="true" />
-    		</Policies>
-    		<DefaultRolloverStrategy>
-    			<Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
-    				<IfFileName glob="application-debug*.log" />
-    				<IfAccumulatedFileCount exceeds="10" />
-    			</Delete>
-    		</DefaultRolloverStrategy>
-    	</RollingFile>
+		<RollingFile name="applicationLog"
+			fileName="${APP_LOG_ROOT}/debug/${LOG_FILE_NAME}-debug.log"
+			filePattern="${APP_LOG_ROOT}/debug/${LOG_FILE_NAME}-debug-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout>
+				<pattern>[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%X{client}] [%.-40t]
+					%-25.45c{1} %-5p: %m%n</pattern>
+				<header>Debug Log started at: $${date:yyyy-MM-dd HH:mm:ss}</header>
+			</PatternLayout>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="4MB" />
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy>
+				<Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
+					<IfFileName glob="application-debug*.log" />
+					<IfAccumulatedFileCount exceeds="10" />
+				</Delete>
+			</DefaultRolloverStrategy>
+		</RollingFile>
 
-    	<RollingFile name="springLog"
-    		fileName="${APP_LOG_ROOT}/debug/spring-framework.log" filePattern="${APP_LOG_ROOT}/debug/spring-%d{yyyy-MM-dd}-%i.log">
-    		<PatternLayout pattern="${LOG_PATTERN}" />
-    		<Policies>
-    			<SizeBasedTriggeringPolicy size="4MB" />
-    			<TimeBasedTriggeringPolicy interval="1"
-    				modulate="true" />
-    		</Policies>
-    		<DefaultRolloverStrategy>
-    			<Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
-    				<IfFileName glob="spring*.log" />
-    				<IfAccumulatedFileCount exceeds="10" />
-    			</Delete>
-    		</DefaultRolloverStrategy>
-    	</RollingFile>
+		<RollingFile name="springLog"
+			fileName="${APP_LOG_ROOT}/debug/spring-framework.log" filePattern="${APP_LOG_ROOT}/debug/spring-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="4MB" />
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy>
+				<Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
+					<IfFileName glob="spring*.log" />
+					<IfAccumulatedFileCount exceeds="10" />
+				</Delete>
+			</DefaultRolloverStrategy>
+		</RollingFile>
 
-    	<RollingFile name="hibernateLog" fileName="${APP_LOG_ROOT}/debug/database.log"
-    		filePattern="${APP_LOG_ROOT}/debug/database-%d{yyyy-MM-dd}-%i.log">
-    		<PatternLayout pattern="${LOG_PATTERN}" />
-    		<Policies>
-    			<SizeBasedTriggeringPolicy size="4MB" />
-    			<TimeBasedTriggeringPolicy interval="1"
-    				modulate="true" />
-    		</Policies>
-    		<DefaultRolloverStrategy>
-    			<Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
-    				<IfFileName glob="application-debug*.log" />
-    				<IfAccumulatedFileCount exceeds="10" />
-    			</Delete>
-    		</DefaultRolloverStrategy>
-    	</RollingFile>
+		<RollingFile name="hibernateLog" fileName="${APP_LOG_ROOT}/debug/database.log"
+			filePattern="${APP_LOG_ROOT}/debug/database-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="4MB" />
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy>
+				<Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
+					<IfFileName glob="application-debug*.log" />
+					<IfAccumulatedFileCount exceeds="10" />
+				</Delete>
+			</DefaultRolloverStrategy>
+		</RollingFile>
 
-    </Appenders>
+	</Appenders>
 
-    <Loggers>
-    	<Logger name="org.commscope.tr069adapter.config" level="debug"
-    		additivity="false">
-    		<appender-ref ref="console" />
-    		<appender-ref ref="applicationLog" />
-    	</Logger>
+	<Loggers>
+		<Logger name="org.commscope.tr069adapter.config" level="debug"
+			additivity="false">
+			<appender-ref ref="console" />
+			<appender-ref ref="applicationLog" />
+		</Logger>
 
-    	<Logger name="org.springframework" level="error" additivity="false">
-    		<appender-ref ref="console" />
-    		<AppenderRef ref="springLog" />
-    	</Logger>
+		<Logger name="org.springframework" level="error" additivity="false">
+			<appender-ref ref="console" />
+			<AppenderRef ref="springLog" />
+		</Logger>
 
-    	<Logger name="org.hibernate" level="error" additivity="false">
-    		<appender-ref ref="console" />
-    		<AppenderRef ref="hibernateLog" />
-    	</Logger>
+		<Logger name="org.hibernate" level="error" additivity="false">
+			<appender-ref ref="console" />
+			<AppenderRef ref="hibernateLog" />
+		</Logger>
 
-    	<Root level="DEBUG" additivity="false" />
-    </Loggers>
+		<Root level="DEBUG" additivity="false" />
+	</Loggers>
 </Configuration>

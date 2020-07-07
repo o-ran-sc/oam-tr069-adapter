@@ -214,7 +214,7 @@
                      <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
                      <images>
                         <image>
-                           <name>${docker.image.name}</name>
+                           <name>${docker.image.name}:${build.version}</name>
                            <build>
                               <cleanup>try</cleanup>
                               <contextDir>${basedir}</contextDir>

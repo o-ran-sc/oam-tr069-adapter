@@ -79,6 +79,14 @@
          <version>1.0.0</version>
       </dependency>
       <dependency>
+		<groupId>org.mariadb.jdbc</groupId>
+		<artifactId>mariadb-java-client</artifactId>
+	</dependency>
+	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+      <dependency>
          <groupId>commons-io</groupId>
          <artifactId>commons-io</artifactId>
          <version>2.6</version>
@@ -97,6 +105,11 @@
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>
@@ -133,7 +146,7 @@
                <configFile>${project.parent.basedir}/eclipse-formatter.xml</configFile>
             </configuration>
             <!-- https://code.revelc.net/formatter-maven-plugin/ use mvn formatter:format 
-    				spotless:apply process-sources -->
+					spotless:apply process-sources -->
          </plugin>
          <plugin>
             <groupId>com.diffplug.spotless</groupId>
@@ -148,8 +161,8 @@
                </java>
             </configuration>
             <!-- https://github.com/diffplug/spotless/tree/master/plugin-maven use 
-    				mvn spotless:apply to rewrite source files use mvn spotless:check to validate 
-    				source files -->
+					mvn spotless:apply to rewrite source files use mvn spotless:check to validate 
+					source files -->
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -179,7 +192,7 @@
                      <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
                      <images>
                         <image>
-                           <name>${docker.image.name}</name>
+                           <name>${docker.image.name}:${build.version}</name>
                            <build>
                               <cleanup>try</cleanup>
                               <contextDir>${basedir}</contextDir>

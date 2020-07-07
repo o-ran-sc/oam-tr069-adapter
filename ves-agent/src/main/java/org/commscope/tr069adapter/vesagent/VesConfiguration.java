@@ -40,6 +40,9 @@ public class VesConfiguration {
   private String unitType;
   private String faultEventSourcePrefix;
 
+  private String requestTimeout;
+  private String mapperPath;
+
   public String getFaultvesCollectorHost() {
     return faultvesCollectorHost;
   }
@@ -161,4 +164,21 @@ public class VesConfiguration {
   public void setPnfRegEventType(String pnfRegEventType) {
     this.pnfRegEventType = pnfRegEventType;
   }
+
+  public String getRequestTimeout() {
+    return requestTimeout;
+  }
+
+  public void setRequestTimeout(String requestTimeout) {
+    this.requestTimeout = requestTimeout;
+  }
+
+  public String getMapperPath() {
+    return mapperPath;
+  }
+
+  public void setMapperPath(String mapperPath) {
+    this.mapperPath = mapperPath;
+  }
+
 }

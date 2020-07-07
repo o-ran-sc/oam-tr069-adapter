@@ -28,10 +28,6 @@ public class TR069DeviceDetails extends DeviceDetails {
   private String username;
   private String password;
 
-  // Device version details
-  private String softwareVersion;
-  private String hardwareVersion;
-
   // Device connection request URL
   private String connectionRequestURL;
 
@@ -49,22 +45,6 @@ public class TR069DeviceDetails extends DeviceDetails {
 
   public void setPassword(String password) {
     this.password = password;
-  }
-
-  public String getSoftwareVersion() {
-    return softwareVersion;
-  }
-
-  public void setSoftwareVersion(String softwareVersion) {
-    this.softwareVersion = softwareVersion;
-  }
-
-  public String getHardwareVersion() {
-    return hardwareVersion;
-  }
-
-  public void setHardwareVersion(String hardwareVersion) {
-    this.hardwareVersion = hardwareVersion;
   }
 
   public String getConnectionRequestURL() {

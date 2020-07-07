@@ -21,87 +21,87 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.commscope.tr069adapter.acs.requestprocessor</groupId>
-    <artifactId>requestprocessor</artifactId>
-    <name>TR069 Request Processor</name>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.commscope.tr069adapter.acs.requestprocessor</groupId>
+	<artifactId>requestprocessor</artifactId>
+	<name>TR069 Request Processor</name>
 
-    <parent>
-    	<groupId>org.commscope.tr069adapter.acs</groupId>
-    	<artifactId>acs</artifactId>
-    	<version>1.0.0</version>
-    </parent>
-    
-    <dependencies>
-    	<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-jms</artifactId>
-    	</dependency>
-    	<dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-web</artifactId>
-    		<exclusions>
+	<parent>
+		<groupId>org.commscope.tr069adapter.acs</groupId>
+		<artifactId>acs</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jms</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
             </exclusions>
-    	</dependency>
-    	<dependency>
+		</dependency>
+		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-log4j2</artifactId>
-    	</dependency>
-    	<dependency>
+		</dependency>
+		<dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
             <version>3.4.2</version>
         </dependency>
-    	<dependency>
+		<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-activemq</artifactId>
         </dependency>
-    	<dependency>
-    		<groupId>org.apache.activemq</groupId>
-    		<artifactId>activemq-broker</artifactId>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-broker</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+		      <groupId>org.mariadb.jdbc</groupId>
+		      <artifactId>mariadb-java-client</artifactId>
     	</dependency>
     	<dependency>
-    		<groupId>com.fasterxml.jackson.core</groupId>
-    		<artifactId>jackson-databind</artifactId>
-    	</dependency>
+			<groupId>com.fasterxml.uuid</groupId>
+			<artifactId>java-uuid-generator</artifactId>
+			<version>3.1.3</version>
+		</dependency>
     	<dependency>
-    		<groupId>javax.ws.rs</groupId>
-    		<artifactId>javax.ws.rs-api</artifactId>
-    		<version>2.0</version>
-    	</dependency>
-    	<dependency>
-    	      <groupId>org.mariadb.jdbc</groupId>
-    	      <artifactId>mariadb-java-client</artifactId>
-    	</dependency>
-    	<dependency>
-    		<groupId>com.fasterxml.uuid</groupId>
-    		<artifactId>java-uuid-generator</artifactId>
-    		<version>3.1.3</version>
-    	</dependency>
-    	<dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-data-jpa</artifactId>
-    	</dependency>
-    	<dependency>
-    		<groupId>com.google.code.gson</groupId>
-    		<artifactId>gson</artifactId>
-    	</dependency>
-    	<dependency>
-    		<groupId>org.commscope.tr069adapter.common</groupId>
-    		<artifactId>common</artifactId>
-    		<version>1.0.0</version>
-    	</dependency>
-    	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.commscope.tr069adapter.common</groupId>
+			<artifactId>common</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
          <groupId>org.commscope.tr069adapter.acs.common</groupId>
          <artifactId>acs-common</artifactId>
          <version>1.0.0</version>
       </dependency>
-    </dependencies>
+	</dependencies>
    <build>
       <plugins>
          <plugin>

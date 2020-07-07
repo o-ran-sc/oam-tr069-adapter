@@ -21,8 +21,8 @@ package org.commscope.tr069adapter.config.service;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.constants.Utility;
-import org.commscope.tr069adapter.config.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.exceptions.InvalidConfigurationServiceException;
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 import org.commscope.tr069adapter.config.parser.ConfigurationXMLDataParser;

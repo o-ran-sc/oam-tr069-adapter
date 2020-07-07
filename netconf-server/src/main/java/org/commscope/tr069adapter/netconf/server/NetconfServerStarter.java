@@ -18,16 +18,21 @@
 
 package org.commscope.tr069adapter.netconf.server;
 
+import com.google.common.base.Preconditions;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
 import org.commscope.tr069adapter.netconf.operations.CustomOperationsCreator;
 import org.opendaylight.netconf.test.tool.NetconfDeviceSimulator;
@@ -39,13 +44,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import com.google.common.base.Preconditions;
 
 @Component
 @Scope("singleton")
 public class NetconfServerStarter {
 
   private static final Logger LOG = LoggerFactory.getLogger(NetconfServerStarter.class);
+
+  private static Map<String, NetconfDevice> serversMap = new HashMap<>();
 
   @Autowired
   NetConfServerProperties config;
@@ -95,19 +101,36 @@ public class NetconfServerStarter {
       return false;
     }
 
-    try(final NetconfDevice netconfDevice = new NetconfDevice(configuration)){
+    try (final NetconfDevice netconfDevice = new NetconfDevice(configuration)) {
       final List<Integer> openDevices = netconfDevice.start();
       if (openDevices.isEmpty()) {
         LOG.debug("Failed to start netconf server instance {}", macID);
         return false;
       }
       netconfDevice.setAutoClose(false);
+      serversMap.put(macID, netconfDevice);
     } catch (RuntimeException e) {
       LOG.error("Unhandled exception. Failed to start the server", e);
       return false;
     }
 
     return true;
+  }
+
+  public boolean stopServer(String macID) {
+    try {
+      LOG.debug("Stopping Netconf server for MACID {}", macID);
+      NetconfDevice netconf = serversMap.get(macID);
+      netconf.setAutoClose(true);
+      netconf.close();
+      LOG.debug("Completed stopping Netconf server for MACID {}", macID);
+      return true;
+    } catch (Exception e) {
+      LOG.debug("Error while stopping Netconf server for MACID {}; error message {}", macID,
+          e.getMessage());
+    }
+
+    return false;
   }
 
   private boolean loadSchemas(File schemasDir) {

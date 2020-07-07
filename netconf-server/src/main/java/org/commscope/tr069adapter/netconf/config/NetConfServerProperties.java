@@ -32,10 +32,10 @@ public class NetConfServerProperties {
   private String mapperPath;
   private String netconfServerRestPort;
   private String netconfServersStartPort;
-  private String netconfServersEndPort;
   private String maxNumOfNetconfServers;
   private String netconfServerIP;
   private String schemaDirPath;
+  private String vesURI;
 
   public String getRequestTimeOut() {
     return requestTimeOut;
@@ -77,14 +77,6 @@ public class NetConfServerProperties {
     this.netconfServersStartPort = netconfServersStartPort;
   }
 
-  public String getNetconfServersEndPort() {
-    return netconfServersEndPort;
-  }
-
-  public void setNetconfServersEndPort(String netconfServersEndPort) {
-    this.netconfServersEndPort = netconfServersEndPort;
-  }
-
   public Integer getDefaultNetconfStartPort() {
     return defaultNetconfStartPort;
   }
@@ -117,4 +109,11 @@ public class NetConfServerProperties {
     this.schemaDirPath = schemaDirPath;
   }
 
+  public String getVesURI() {
+    return vesURI;
+  }
+
+  public void setVesURI(String vesURI) {
+    this.vesURI = vesURI;
+  }
 }

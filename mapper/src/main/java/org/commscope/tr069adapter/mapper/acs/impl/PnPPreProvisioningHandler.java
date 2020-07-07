@@ -26,10 +26,8 @@ import java.util.Map;
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
-import org.commscope.tr069adapter.acs.common.OperationOptions;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
-import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationDetails;
 import org.commscope.tr069adapter.acs.common.inform.BootInform;
@@ -38,6 +36,7 @@ import org.commscope.tr069adapter.mapper.MOMetaData;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.sync.SynchronizedRequestHandler;
 import org.commscope.tr069adapter.mapper.util.MOMetaDataUtil;
+import org.commscope.tr069adapter.mapper.util.NetconfToTr069MapperUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -238,18 +237,9 @@ public class PnPPreProvisioningHandler {
   private DeviceRPCRequest createNBIOperationRequest(String deviceId, List<ParameterDTO> params) {
     TR069OperationDetails opDetails = new TR069OperationDetails();
     opDetails.setOpCode(TR069OperationCode.SET_PARAMETER_VALUES);
-    opDetails.setParmeters(params);
 
-    DeviceRPCRequest deviceRPCRequest = new DeviceRPCRequest();
-    TR069DeviceDetails tr069DeviceDetails = new TR069DeviceDetails();
-    tr069DeviceDetails.setDeviceId(deviceId);
-    deviceRPCRequest.setOpDetails(opDetails);
-    deviceRPCRequest.setDeviceDetails(tr069DeviceDetails);
-    OperationOptions options = new OperationOptions();
-    options.setExecutionTimeout(300l);
-    deviceRPCRequest.setOptions(options);
+    return NetconfToTr069MapperUtil.handleParamsOperation(params, opDetails, deviceId);
 
-    return deviceRPCRequest;
   }
 
   /**

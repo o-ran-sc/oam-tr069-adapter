@@ -1,21 +1,3 @@
-/*
- * ============LICENSE_START========================================================================
- * ONAP : tr-069-adapter
- * =================================================================================================
- * Copyright (C) 2020 CommScope Inc Intellectual Property.
- * =================================================================================================
- * This tr-069-adapter software file is distributed by CommScope Inc under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except in compliance with the License. You
- * may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions and
- * limitations under the License.
- * ===============LICENSE_END=======================================================================
- */
-
 package org.commscope.tr069adapter.netconf.notification;
 
 import java.io.IOException;
@@ -27,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,8 +17,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
 import org.commscope.tr069adapter.netconf.rpc.CreateSubscription;
 import org.opendaylight.netconf.api.NetconfMessage;
 import org.opendaylight.netconf.api.xml.XmlNetconfConstants;
@@ -58,37 +39,39 @@ public class NetConfSessionUtil {
   private static final String INDEX_REGEX = "[0-9]{1,}";
   private static final String NS_URI = "urn:onf:otcc:wireless:yang:tr069-notification";
 
-  public void sendNetConfNotification(DeviceInform notification) {
-    NetconfMessage netconfMessage = convertToNetConfMessage(notification);
-    LOG.debug("Notification converted to NetConf format {}", netconfMessage);
-    CreateSubscription.sendNotification(netconfMessage,
-        notification.getDeviceDetails().getDeviceId());
+  public void sendNetConfNotification(NetConfNotificationDTO netConNotifDTO) {
+    NetconfMessage netconfMessage = convertToNetConfMessage(netConNotifDTO);
+    LOG.debug("Notification converted to NetConf format" + netconfMessage);
+    CreateSubscription.sendNotification(netconfMessage, netConNotifDTO.getDeviceID());
   }
 
-  private NetconfMessage convertToNetConfMessage(DeviceInform notification) {
+  private NetconfMessage convertToNetConfMessage(NetConfNotificationDTO netConNotifDTO) {
     try {
-      String netConfXmlMsg = getNetconfResponseXML(notification);
-      if (netConfXmlMsg == null)
-        throw new IllegalArgumentException("There are no parameters found in the response");
-      return new NetconfMessage(XmlUtil.readXmlToDocument(netConfXmlMsg));
+      String nameSpace = "";
+      if (netConNotifDTO.getUri() != null) {
+        nameSpace = netConNotifDTO.getUri();
+      } else {
+        nameSpace = NS_URI;
+      }
+      return new NetconfMessage(
+          XmlUtil.readXmlToDocument(getNetconfResponseXML(netConNotifDTO, nameSpace)));
     } catch (SAXException | IOException e) {
       throw new IllegalArgumentException("Cannot parse notifications", e);
     }
   }
 
-  private static String getNetconfResponseXML(DeviceInform notification) {
-    if (notification == null || notification.getParameters().isEmpty()) {
+  private static String getNetconfResponseXML(NetConfNotificationDTO netConNotifDTO,
+      String nameSpace) {
+    if (netConNotifDTO == null || netConNotifDTO.getParameters().isEmpty()) {
       LOG.debug("There are no parameters found in the response.");
       return null;
     }
 
-    List<ParameterDTO> parameters = notification.getParameters();
+    List<ParameterDTO> parameters = netConNotifDTO.getParameters();
 
     String result = null;
     try {
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
       Document doc = docBuilder.newDocument();
 
@@ -100,35 +83,38 @@ public class NetConfSessionUtil {
         String paramValue = paramDto.getParamValue();
         StringTokenizer tokenizer = new StringTokenizer(paramName, ".");
         String parentNodeName = null;
-        StringBuilder parentNodeKey = null;
+        String parentNodeKey = null;
         Element parentNode = null;
         while (tokenizer.hasMoreElements()) {
           String nodeName = (String) tokenizer.nextElement();
           if (null == parentNodeName) { // construct first node or
                                         // Device node
             parentNodeName = nodeName;
-            parentNodeKey = new StringBuilder(nodeName);
+            parentNodeKey = nodeName;
             // check if the node already exists in parentNodeMap
-            parentNode = parentNodeMap.get(parentNodeKey.toString());
+            parentNode = parentNodeMap.get(parentNodeKey);
             if (null == dataNode) {
               dataNode = parentNode;
             }
+            continue;
           } else if (nodeName.matches(INDEX_REGEX)) { // construct
                                                       // tabular and
                                                       // index nodes
 
             // get parent tabular node from parent MAP
-            parentNodeKey = parentNodeKey.append(".").append(nodeName);
-            Element node = parentNodeMap.get(parentNodeKey.toString());
+            parentNodeKey = parentNodeKey + "." + nodeName;
+            Element node = parentNodeMap.get(parentNodeKey);
 
             // create a tabular parent node if doesn't exit in MAP
             if (null == node) {
               node = doc.createElement(parentNodeName);
-              parentNodeMap.put(parentNodeKey.toString(), node);
+              parentNodeMap.put(parentNodeKey, node);
 
               // update current tabular parent node.
               if (null != parentNode)
                 parentNode.appendChild(node);
+              else
+                parentNode = node;
 
               // prepare and add index node to tabular parent node
               Element indexNode = doc.createElement(INDEX_STR);
@@ -145,23 +131,23 @@ public class NetConfSessionUtil {
                                                             // attribute
                                                             // is
                                                             // found
-            parentNodeKey = parentNodeKey.append(".").append(nodeName);
+            parentNodeKey = parentNodeKey + "." + nodeName;
             parentNodeName = nodeName;
           } else {
             // construct intermediate nodes
-            Element node = parentNodeMap.get(parentNodeKey.toString());
+            Element node = parentNodeMap.get(parentNodeKey);
             if (null == node) {
               if (null == dataNode) {
-                node = doc.createElementNS(NS_URI, parentNodeName);
+                node = doc.createElementNS(nameSpace, parentNodeName);
                 dataNode = node;
               } else {
                 node = doc.createElement(parentNodeName);
               }
-              parentNodeMap.put(parentNodeKey.toString(), node);
+              parentNodeMap.put(parentNodeKey, node);
               if (null != parentNode)
                 parentNode.appendChild(node);
             }
-            parentNodeKey = parentNodeKey.append(".").append(nodeName);
+            parentNodeKey = parentNodeKey + "." + nodeName;
             parentNodeName = nodeName;
             parentNode = node;
           }
@@ -169,8 +155,7 @@ public class NetConfSessionUtil {
         // construct leaf node
         Element leafNode = doc.createElement(parentNodeName);
         leafNode.setTextContent(paramValue);
-        if (null != parentNode)
-          parentNode.appendChild(leafNode);
+        parentNode.appendChild(leafNode);
       }
 
       if (null != dataNode) {
@@ -178,16 +163,21 @@ public class NetConfSessionUtil {
         final Element eventTime = doc.createElement(XmlNetconfConstants.EVENT_TIME);
         eventTime
             .setTextContent(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date()));
-
-        final Element evtTypeElement =
-            doc.createElementNS(NS_URI, notification.getInformTypeList().get(0).toString());
-        evtTypeElement.appendChild(dataNode);
         element.appendChild(element.getOwnerDocument().importNode(eventTime, true));
-        element.appendChild(element.getOwnerDocument().importNode(evtTypeElement, true));
+
+        if (netConNotifDTO.getNotificationType() != null) {
+          final Element evtTypeElement =
+              doc.createElementNS(nameSpace, netConNotifDTO.getNotificationType());
+          evtTypeElement.appendChild(dataNode);
+          element.appendChild(element.getOwnerDocument().importNode(evtTypeElement, true));
+        } else {
+          element.appendChild(element.getOwnerDocument().importNode(dataNode, true));
+        }
+
         result = convertDocumentToString(element);
       }
     } catch (ParserConfigurationException pce) {
-      LOG.error("Error while getNetconfResponseXML {}", pce.toString());
+      pce.printStackTrace();
     }
 
     return result;
@@ -197,17 +187,15 @@ public class NetConfSessionUtil {
     String strxml = null;
     try {
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
       Transformer transformer = transformerFactory.newTransformer();
       DOMSource source = new DOMSource(element);
       StreamResult result = new StreamResult(new StringWriter());
       transformer.transform(source, result);
       strxml = result.getWriter().toString();
     } catch (Exception e) {
-      LOG.error("Error while converting Element to String {}", e.toString());
+      LOG.error("Error while converting Element to String" + e);
     }
-    LOG.debug("Converted XML is : {}", strxml);
+    LOG.debug("Converted XML is : " + strxml);
     return strxml;
   }
 

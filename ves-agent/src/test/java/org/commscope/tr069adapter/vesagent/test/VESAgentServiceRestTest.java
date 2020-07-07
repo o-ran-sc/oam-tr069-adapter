@@ -28,7 +28,6 @@ import org.commscope.tr069adapter.acs.common.InformType;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069InformType;
 import org.commscope.tr069adapter.acs.common.inform.BootstrapInform;
-import org.commscope.tr069adapter.acs.common.inform.PeriodicInform;
 import org.commscope.tr069adapter.acs.common.inform.ValueChangeInform;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.VESNotification;
@@ -209,58 +208,35 @@ public class VESAgentServiceRestTest {
     }
   }
 
-  @Test
-  public void processHBEventTest() {
-    try {
-      VESNotificationResponse res =
-          new VESNotificationResponse(HttpStatus.ACCEPTED.value(), "Sucess");
-      Mockito.when(sender.postRequest(Mockito.anyString(), Mockito.anyString())).thenReturn(res);
-      VESNotification ves = new VESNotification();
-      ves.seteNodeBName("0005B9A1");
-      ves.setNetconfDetails(getNetConfDetails());
-      DeviceInform inform = new PeriodicInform();
-      inform.setDeviceDetails(getDeviceDetails());
-      ArrayList<InformType> list = new ArrayList<>();
-      list.add(TR069InformType.PERIODIC);
-      inform.setInformTypeList(list);
-      inform.setParameters(getGeneralParams());
-      ves.setDevnotification(inform);
-
-      VESNotificationResponse vesResponse = agent.processDeviceNotificationAsVESEvent(ves);
-      Assert.assertNotNull(vesResponse);
-      Assert.assertEquals(HttpStatus.ACCEPTED.value(), vesResponse.getStatusCode());
-      res.getStatusCode();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Test
-  public void processHBEventWhenEnbNullTest() {
-    try {
-      VESNotificationResponse res =
-          new VESNotificationResponse(HttpStatus.ACCEPTED.value(), "Sucess");
-      Mockito.when(sender.postRequest(Mockito.anyString(), Mockito.anyString())).thenReturn(res);
-      VESNotification ves = new VESNotification();
-      ves.seteNodeBName(null);
-      ves.setNetconfDetails(getNetConfDetails());
-      DeviceInform inform = new PeriodicInform();
-      inform.setDeviceDetails(getDeviceDetails());
-      ArrayList<InformType> list = new ArrayList<>();
-      list.add(TR069InformType.PERIODIC);
-      inform.setInformTypeList(list);
-      inform.setParameters(getGeneralParams());
-      ves.setDevnotification(inform);
-
-      VESNotificationResponse vesResponse = agent.processDeviceNotificationAsVESEvent(ves);
-      Assert.assertNotNull(vesResponse);
-      Assert.assertEquals(HttpStatus.ACCEPTED.value(), vesResponse.getStatusCode());
-      res.getStatusCode();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
+  /*
+   * @Test public void processHBEventTest() { try { VESNotificationResponse res = new
+   * VESNotificationResponse(HttpStatus.ACCEPTED.value(), "Sucess");
+   * Mockito.when(sender.postRequest(Mockito.anyString(), Mockito.anyString())).thenReturn(res);
+   * VESNotification ves = new VESNotification(); ves.seteNodeBName("0005B9A1");
+   * ves.setNetconfDetails(getNetConfDetails()); DeviceInform inform = new PeriodicInform();
+   * inform.setDeviceDetails(getDeviceDetails()); ArrayList<InformType> list = new ArrayList<>();
+   * list.add(TR069InformType.PERIODIC); inform.setInformTypeList(list);
+   * inform.setParameters(getGeneralParams()); ves.setDevnotification(inform);
+   * 
+   * VESNotificationResponse vesResponse = agent.processDeviceNotificationAsVESEvent(ves);
+   * Assert.assertNotNull(vesResponse); Assert.assertEquals(HttpStatus.ACCEPTED.value(),
+   * vesResponse.getStatusCode()); res.getStatusCode(); } catch (Exception e) { e.printStackTrace();
+   * } }
+   * 
+   * @Test public void processHBEventWhenEnbNullTest() { try { VESNotificationResponse res = new
+   * VESNotificationResponse(HttpStatus.ACCEPTED.value(), "Sucess");
+   * Mockito.when(sender.postRequest(Mockito.anyString(), Mockito.anyString())).thenReturn(res);
+   * VESNotification ves = new VESNotification(); ves.seteNodeBName(null);
+   * ves.setNetconfDetails(getNetConfDetails()); DeviceInform inform = new PeriodicInform();
+   * inform.setDeviceDetails(getDeviceDetails()); ArrayList<InformType> list = new ArrayList<>();
+   * list.add(TR069InformType.PERIODIC); inform.setInformTypeList(list);
+   * inform.setParameters(getGeneralParams()); ves.setDevnotification(inform);
+   * 
+   * VESNotificationResponse vesResponse = agent.processDeviceNotificationAsVESEvent(ves);
+   * Assert.assertNotNull(vesResponse); Assert.assertEquals(HttpStatus.ACCEPTED.value(),
+   * vesResponse.getStatusCode()); res.getStatusCode(); } catch (Exception e) { e.printStackTrace();
+   * } }
+   */
   @Test
   public void processOnRestartEventTest() {
     try {

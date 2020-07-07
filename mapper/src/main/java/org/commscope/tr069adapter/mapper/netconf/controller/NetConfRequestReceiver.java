@@ -74,8 +74,9 @@ public class NetConfRequestReceiver {
   @PostMapping("/softwareDowload")
   public NetConfResponse swDownloadRequest(@RequestBody NetConfRequest request) {
     LOG.info("Received request for SW-DOWNLOAD. Request : {}", request);
+    NetConfResponse response = handler.handleSWDownloadRequest(request);
     LOG.info("Processed SW-DOWNLOAD request. Response : ");
-    return null;
+    return response;
   }
 
   @PostMapping("/softwareActivate")

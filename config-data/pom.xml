@@ -94,6 +94,11 @@
          <artifactId>spring-boot-starter-test</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>org.commscope.tr069adapter.acs.common</groupId>
+         <artifactId>acs-common</artifactId>
+         <version>1.0.0</version>
+      </dependency>
    </dependencies>
    <build>
       <plugins>
@@ -154,7 +159,7 @@
                      <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
                      <images>
                         <image>
-                           <name>${docker.image.name}</name>
+                           <name>${docker.image.name}:${build.version}</name>
                            <build>
                               <cleanup>try</cleanup>
                               <contextDir>${basedir}</contextDir>

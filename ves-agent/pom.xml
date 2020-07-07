@@ -82,6 +82,10 @@
          <scope>test</scope>
       </dependency>
       <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
          <scope>test</scope>
@@ -90,6 +94,11 @@
          <groupId>junit</groupId>
          <artifactId>junit-dep</artifactId>
          <version>4.11</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>
@@ -115,6 +124,15 @@
          <artifactId>mapper</artifactId>
          <version>1.0.0</version>
          <classifier>lib</classifier>
+      </dependency>
+      <dependency>
+         <groupId>org.mariadb.jdbc</groupId>
+         <artifactId>mariadb-java-client</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.googlecode.json-simple</groupId>
+         <artifactId>json-simple</artifactId>
+         <version>1.1</version>
       </dependency>
    </dependencies>
    <build>
@@ -152,7 +170,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-             <version>2.17</version>
+            <version>2.17</version>
             <configuration>
                <skipTests>false</skipTests>
             </configuration>
@@ -171,13 +189,13 @@
                   <phase>package</phase>
                   <goals>
                      <goal>build</goal>
-    				 <goal>save</goal>
+                     <goal>save</goal>
                   </goals>
                   <configuration>
                      <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
                      <images>
                         <image>
-                           <name>${docker.image.name}</name>
+                           <name>${docker.image.name}:${build.version}</name>
                            <build>
                               <cleanup>try</cleanup>
                               <contextDir>${basedir}</contextDir>

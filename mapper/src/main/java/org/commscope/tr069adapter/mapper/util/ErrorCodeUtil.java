@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
-import org.commscope.tr069adapter.mapper.ErrorCodeMetaData;
+import org.commscope.tr069adapter.mapper.model.ErrorCodeDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,11 +38,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ErrorCodeUtil {
 
-
   private static final Logger LOG = LoggerFactory.getLogger(ErrorCodeUtil.class);
 
   private static final String ERROR_CODE_FILE = "error-code-mapping.json";
-  private static Map<String, ErrorCodeMetaData> errorCodeMap;
+  private static Map<String, ErrorCodeDetails> errorCodeMap;
 
   @PostConstruct
   public static void loadErrorCodeData() {
@@ -55,20 +54,20 @@ public class ErrorCodeUtil {
   }
 
   public void printErrorCodeMap() {
-    for (Entry<String, ErrorCodeMetaData> entry : errorCodeMap.entrySet()) {
+    for (Entry<String, ErrorCodeDetails> entry : errorCodeMap.entrySet()) {
       LOG.debug("KEY= {}", entry.getKey());
       LOG.debug("VALUE= {}", entry.getValue());
     }
   }
 
-  private static Map<String, ErrorCodeMetaData> getMetaDataAsMap(File file) throws IOException {
+  private static Map<String, ErrorCodeDetails> getMetaDataAsMap(File file) throws IOException {
 
     String json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 
-    Map<String, ErrorCodeMetaData> result = null;
+    Map<String, ErrorCodeDetails> result = null;
     ObjectMapper mapper = new ObjectMapper();
     try {
-      result = mapper.readValue(json, new TypeReference<Map<String, ErrorCodeMetaData>>() {});
+      result = mapper.readValue(json, new TypeReference<Map<String, ErrorCodeDetails>>() {});
     } catch (IOException e) {
       LOG.error("IOException while loading device model meta data {}", e.toString());
       LOG.error("Exception : {}", e.getMessage());
@@ -76,7 +75,7 @@ public class ErrorCodeUtil {
     return result;
   }
 
-  public ErrorCodeMetaData getErrorCodeMetaData(String errorCode) {
+  public ErrorCodeDetails getErrorCodeMetaData(String errorCode) {
     return errorCodeMap.get(errorCode);
   }
 

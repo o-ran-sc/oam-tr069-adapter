@@ -49,7 +49,6 @@ public class MOMetaDataUtil {
   private Map<String, MOMetaData> metaDataMap;
   private Map<String, String> metaDataReverseMap;
   public static final String ORAN_SW_MGMT_URI = "urn:o-ran:software-management:1.0";
-  private static HashMap<String, String> nameSpaces = new HashMap<>();
 
   @PostConstruct
   public void loadMetaData() {
@@ -79,45 +78,56 @@ public class MOMetaDataUtil {
           continue;
         }
         if (line != null && line.split(",").length >= 3) {
-          String[] split = line.split(",");
-          boolean isReadOnly = false;
-          boolean isTabluar = false;
-          boolean isTabObject = false;
-          String dataType = "";
 
-          if (split[2].contains("-")) {
-            String[] dataAttr = split[2].split("-");
-            if ("Tabular".equalsIgnoreCase(dataAttr[0]))
-              isTabluar = true;
-            if ("ReadOnly".equalsIgnoreCase(dataAttr[1]))
-              isReadOnly = true;
-          } else if ("TabularObject".equalsIgnoreCase(split[2])) {
-            isTabObject = true;
-          }
-          if (split.length > 3) {
-            dataType = split[3];
-          }
-          if (isTabObject) {
-            String logMessage = split[1].substring(0, split[1].length() - 5);
-            LOG.info("Adding Parent Objects {}", logMessage);
-            String substring = split[0].substring(0, split[0].length() - 4);
-            MOMetaData metaTabData =
-                new MOMetaData(substring, dataType, isReadOnly, isTabluar, isTabObject);
-            if ((split.length > 4 && split[4] != null) && split[4].trim().length() > 0) {
-              metaTabData.setURI(split[4]);
-            }
-            metaDataMap.put(logMessage, metaTabData);
-          }
-          MOMetaData metaData =
-              new MOMetaData(split[0], dataType, isReadOnly, isTabluar, isTabObject);
-          if ((split.length > 4 && split[4] != null) && split[4].trim().length() > 0) {
-            metaData.setURI(split[4]);
-          }
-          metaDataMap.put(split[1], metaData);
-          metaDataReverseMap.put(split[0], split[1]);
+          parseMetaDataLine(line, metaDataMap, metaDataReverseMap);
+
         }
       }
     }
+  }
+
+  private static void parseMetaDataLine(String line, Map<String, MOMetaData> metaDataMap,
+      Map<String, String> metaDataReverseMap) {
+    String[] split = line.split(",");
+    boolean isReadOnly = false;
+    boolean isTabluar = false;
+    boolean isTabObject = false;
+    if (split[2].contains("-")) {
+      String[] dataAttr = split[2].split("-");
+      if ("Tabular".equalsIgnoreCase(dataAttr[0]))
+        isTabluar = true;
+      if ("ReadOnly".equalsIgnoreCase(dataAttr[1]))
+        isReadOnly = true;
+    } else if ("TabularObject".equalsIgnoreCase(split[2])) {
+      isTabObject = true;
+    }
+    prepareMOMetaData(isReadOnly, isTabluar, split, isTabObject, metaDataMap, metaDataReverseMap);
+  }
+
+  private static void prepareMOMetaData(boolean isReadOnly, boolean isTabluar, String[] split,
+      boolean isTabObject, Map<String, MOMetaData> metaDataMap,
+      Map<String, String> metaDataReverseMap) {
+    String dataType = "";
+    if (split.length > 3) {
+      dataType = split[3];
+    }
+    if (isTabObject) {
+      String logMessage = split[1].substring(0, split[1].length() - 5);
+      LOG.info("Adding Parent Objects {}", logMessage);
+      String substring = split[0].substring(0, split[0].length() - 4);
+      MOMetaData metaTabData =
+          new MOMetaData(substring, dataType, isReadOnly, isTabluar, isTabObject);
+      if ((split.length > 4 && split[4] != null) && split[4].trim().length() > 0) {
+        metaTabData.setURI(split[4]);
+      }
+      metaDataMap.put(logMessage, metaTabData);
+    }
+    MOMetaData metaData = new MOMetaData(split[0], dataType, isReadOnly, isTabluar, isTabObject);
+    if ((split.length > 4 && split[4] != null) && split[4].trim().length() > 0) {
+      metaData.setURI(split[4]);
+    }
+    metaDataMap.put(split[1], metaData);
+    metaDataReverseMap.put(split[0], split[1]);
   }
 
   public MOMetaData getMetaDataByNetConfName(String moName) {
@@ -145,10 +155,6 @@ public class MOMetaDataUtil {
 
   public Set<String> getAllMONames() {
     return metaDataMap.keySet();
-  }
-
-  public String getNameSpace(String nodeName) {
-    return nameSpaces.get(nodeName);
   }
 
   public List<ParameterDTO> getSupportedChildParameters(List<ParameterDTO> parameters) {

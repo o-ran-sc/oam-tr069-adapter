@@ -86,16 +86,16 @@
     <Loggers>
     	<Logger name="org.commscope.tr069adapter" level="debug" additivity="false">
     		<appender-ref ref="console"/>
-    		<appender-ref ref="applicationLog"/>
-    	</Logger>
+			<appender-ref ref="applicationLog"/>
+		</Logger>
 
-    	<Logger name="org" level="debug" additivity="false">
-    		<appender-ref ref="console"/>
+		<Logger name="org" level="debug" additivity="false">
+			<appender-ref ref="console"/>
             <AppenderRef ref="thirdPartyLog" />
         </Logger>
-    	
-    	<Logger name="org.springframework" level="debug" additivity="false">
-    		<appender-ref ref="console"/>
+		
+		<Logger name="org.springframework" level="debug" additivity="false">
+			<appender-ref ref="console"/>
             <AppenderRef ref="springLog" />
         </Logger>
         
