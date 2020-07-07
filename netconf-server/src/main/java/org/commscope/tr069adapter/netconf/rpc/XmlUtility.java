@@ -70,6 +70,7 @@ public class XmlUtility {
     }
 
     return strxml;
+
   }
 
   public static Element convertStringToDocument(String xmlStr) {

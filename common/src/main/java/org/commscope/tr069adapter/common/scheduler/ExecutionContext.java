@@ -83,7 +83,7 @@ public class ExecutionContext implements Serializable {
     return subSystemName;
   }
 
-  private Map<String, Object> context = new HashMap<>();
+  private transient Map<String, Object> context = new HashMap<>();
 
   /**
    * Can be used to get some job related data, at the time of job execution.

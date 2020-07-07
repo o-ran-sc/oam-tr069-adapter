@@ -113,7 +113,7 @@ public class TR069RequestProcessEngineHelper {
    * @return
    */
   protected TR069RequestProcessorData getTR069RequestProcessorData() {
-    return requestCacheUtil.get();
+    return TR069RequestProcessorCacheUtil.get();
   }
 
   /**

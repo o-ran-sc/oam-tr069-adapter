@@ -1,0 +1,4 @@
+TRMONAME,YANGMONAME,MOTYPE,TRDATATYPE,YANGNAMESPACE
+heartbeat.,heartbeat,ScalarObject,object,urn:o-ran:heartbeat-management:1.0
+heartbeat.heartbeatPeriod,heartbeat.heartbeatPeriod,Scalar-ReadWrite,unsignedInt
+heartbeat.countDownTimer,heartbeat.countDownTimer,Scalar-ReadWrite,unsignedInt

@@ -34,6 +34,13 @@ ENV pnfRegEventType=CommScope_RAN_pnfRegistration
 ENV unitFamily=OneCell
 ENV unitType=BasebandController
 ENV faultEventSourcePrefix=OneCell
+ENV DB_SERVICE=tr069adapter-mariadb
+ENV DB_NAME=dmsdb
+ENV DB_USERNAME=root
+ENV DB_PASSWORD=root
+ENV MAPPER_REST_HOST=tr069adapter-netconfig-mapper
+ENV MAPPER_REST_PORT=9999
+ENV CONFIG_MAP_ENABLE=true
 
 WORKDIR /opt/CSAdapter/
 

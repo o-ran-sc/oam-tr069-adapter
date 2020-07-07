@@ -24,15 +24,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.commscope.tr069adapter.acs.common.OperationDetails;
+import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.NetconfServerManagementError;
+import org.commscope.tr069adapter.mapper.model.VESNotification;
+import org.commscope.tr069adapter.mapper.model.VESNotificationResponse;
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
 import org.commscope.tr069adapter.netconf.dao.NetConfServerDetailsRepository;
 import org.commscope.tr069adapter.netconf.entity.NetConfServerDetailsEntity;
 import org.commscope.tr069adapter.netconf.error.RetryFailedException;
 import org.commscope.tr069adapter.netconf.error.ServerPortAllocationException;
 import org.commscope.tr069adapter.netconf.server.helper.ServerPortAllocationHelper;
+import org.commscope.tr069adapter.netconf.server.utils.NetConfServerConstants;
+import org.commscope.tr069adapter.netconf.server.ves.VESNotificationSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,21 +70,26 @@ public class NetConfServerManagerImpl {
   @Autowired
   RestartNetconfServerHandler restartServersHandler;
 
+  @Autowired
+  VESNotificationSender vesNotificationSender;
+
+  ExecutorService executorService = Executors.newFixedThreadPool(10);
+
   public void restartServers() {
     LOG.debug("Restarting all netconf servers during startup...");
     Iterable<NetConfServerDetailsEntity> entities = netconfDAO.findAll();
-    List<NetConfServerDetailsEntity> serverDetailsList = new ArrayList<>();
-    for (NetConfServerDetailsEntity entity : entities) {
-      serverDetailsList.add(entity);
-    }
-    restartServersOnStartup(serverDetailsList);
 
-    if (!serverDetailsList.isEmpty()) {
-      LOG.debug("Attempting to start failed netconf servers {}", serverDetailsList);
-      try {
-        restartServersHandler.restart(serverDetailsList);
-      } catch (RetryFailedException e) {
-        LOG.error("Failed to restart all netconf servers. {}", e.toString());
+    for (NetConfServerDetailsEntity entity : entities) {
+      boolean isReserved = serverPortAllocator.checkAndReserveServerPort(entity.getListenPort());
+      if (isReserved) {
+        ServerStartTask task = new ServerStartTask(entity, this);
+        executorService.execute(task);
+      } else {
+        try {
+          restartServersHandler.restart(entity);
+        } catch (RetryFailedException e) {
+          e.printStackTrace();
+        }
       }
     }
     LOG.debug("Restarting netconf servers during startup is completed.");
@@ -110,17 +124,25 @@ public class NetConfServerManagerImpl {
     try {
 
       String port = serverPortAllocator.reserveServerPort();
-      LOG.debug("Successfully reserved a port for deviceID={} ,port={}", deviceId, port);
-
-      // start the server
-      boolean isServerStarted = ncServerStarter.startServer(port, deviceId);
-      boolean isPortInUse = serverPortAllocator.isServerPortInUse(port);
-
-      if (!isServerStarted || !isPortInUse) {
+      if (port == null) {
+        result.setError(NetconfServerManagementError.PORT_NOT_AVAILBLE);
         LOG.error(
-            "Failed to start netconf server for deviceID: {}, at port:{} , isServerStarted={} ,isPortInUse={}",
-            deviceId, port, isServerStarted, isPortInUse);
-        return null;
+            "All ports are exhausted. Hence cannot allocate a port to start new netconf server");
+        return result;
+      } else {
+        LOG.debug("Successfully reserved a port for deviceID={} ,port={}", deviceId, port);
+
+        // start the server
+        boolean isServerStarted = ncServerStarter.startServer(port, deviceId);
+        boolean isPortInUse = serverPortAllocator.isServerPortInUse(port);
+
+        if (!isServerStarted || !isPortInUse) {
+          LOG.error(
+              "Failed to start netconf server for deviceID: {}, at port:{} , isServerStarted={} ,isPortInUse={}",
+              deviceId, port, isServerStarted, isPortInUse);
+          result.setError(NetconfServerManagementError.PORT_IN_USE);
+          return result;
+        }
       }
 
       // save the record in db
@@ -150,52 +172,41 @@ public class NetConfServerManagerImpl {
     return result;
   }
 
-  public void restartServersOnStartup(List<NetConfServerDetailsEntity> serverDetailsList) {
+  public boolean restartServersOnStartup(NetConfServerDetailsEntity entity) {
+    boolean isSuccess = false;
 
-    List<NetConfServerDetailsEntity> startedServers = new ArrayList<>();
-    for (NetConfServerDetailsEntity entity : serverDetailsList) {
+    boolean isServerStarted =
+        ncServerStarter.startServer(entity.getListenPort(), entity.getDeviceId());
+    if (isServerStarted) {
+      LOG.info("Successfully restarted NETCONF server {}  on port {}  upon application startup.",
+          entity.getDeviceId(), entity.getListenPort());
+      // we need to push the pnfEntry for IP updated
+      NetConfServerDetails details = getNetConfServerDetails(entity.getDeviceId(), entity);
 
-      serverPortAllocator.checkAndReserveServerPort(entity.getListenPort());
-
-      serverPortAllocator.isServerPortInUse(entity.getListenPort());
-      boolean isServerStarted =
-          ncServerStarter.startServer(entity.getListenPort(), entity.getDeviceId());
-
-      if (isServerStarted) {
-        LOG.info("Successfully restarted NETCONF server {}  on port {}  upon application startup.",
-            entity.getDeviceId(), entity.getListenPort());
-        // we need to push the pnfEntry for IP updated
-        NetConfServerDetails details = getNetConfServerDetails(entity.getDeviceId(), entity);
-
-        final String baseUrl = config.getMapperPath() + "/registerNetconfServer";
-        URI uri = null;
-        try {
-          uri = new URI(baseUrl);
-        } catch (URISyntaxException e) {
-          LOG.error("error while contructing the URI {}", e.toString());
-        }
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<NetConfServerDetails> httpentity = new HttpEntity<>(details, headers);
-        boolean isSuccess = false;
-        if (uri != null) {
-          isSuccess = restTemplate.postForObject(uri, httpentity, Boolean.class);
-        }
-
-        if (!isSuccess) {
-          LOG.error("Netconf Register request is failed update the updated host details..");
-        } else {
-          LOG.debug("successfully started the server");
-        }
-        startedServers.add(entity);
-      } else {
-        LOG.error("Failed to restart NETCONF server {}  on port {}  upon application startup.",
-            entity.getDeviceId(), entity.getListenPort());
+      final String baseUrl = config.getMapperPath() + "/registerNetconfServer";
+      URI uri = null;
+      try {
+        uri = new URI(baseUrl);
+      } catch (URISyntaxException e) {
+        LOG.error("error while contructing the URI {}", e.toString());
       }
+      RestTemplate restTemplate = new RestTemplate();
+      HttpHeaders headers = new HttpHeaders();
+      HttpEntity<NetConfServerDetails> httpentity = new HttpEntity<>(details, headers);
+      if (uri != null) {
+        isSuccess = restTemplate.postForObject(uri, httpentity, Boolean.class);
+      }
+
+      if (!isSuccess) {
+        LOG.error("Netconf Register request is failed update the updated host details..");
+      } else {
+        LOG.debug("successfully started the server");
+      }
+    } else {
+      LOG.error("Failed to restart NETCONF server {}  on port {}  upon application startup.",
+          entity.getDeviceId(), entity.getListenPort());
     }
-    if (!serverDetailsList.isEmpty()) {
-      serverDetailsList.removeAll(startedServers);
-    }
+    return isSuccess;
   }
 
   private NetConfServerDetails getNetConfServerDetails(String deviceId,
@@ -213,9 +224,67 @@ public class NetConfServerManagerImpl {
     return result;
   }
 
-  public boolean unregister(String deviceId, String enodeBName) {
-    LOG.debug("Unregister is not yet supported deviceId={} enodeBName={}", deviceId, enodeBName);
-    return false;
+  public String unregister(String deviceId, String enodeBName) {
+    String resultMsg = null;
+    NetConfServerDetailsEntity entity = null;
+    if (deviceId != null) {
+      entity = this.netconfDAO.findByDeviceId(deviceId);
+    } else if (enodeBName != null) {
+      entity = this.netconfDAO.findByEnodeBName(enodeBName);
+    } else {
+      LOG.error(
+          "Both deviceID and enodeBName are null. Hence failed to unregister the netconf server.");
+      resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName
+          + ". Invalid deviceId/enodeBName specified.";
+    }
+    if (entity == null) {
+      resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName
+          + ". Invalid deviceId/enodeBName specified.";
+      LOG.info(resultMsg);
+    }
+    boolean result = this.ncServerStarter.stopServer(deviceId);
+    if (result) {
+      resultMsg =
+          "Successfully unregistered the device " + deviceId + " and enodeBName=" + enodeBName;
+      this.serverPortAllocator.unReserveServerPort(entity.getListenPort());
+      this.netconfDAO.delete(entity);
+      LOG.info(resultMsg);
+      delteHeartBeatTimer(deviceId);
+    } else {
+      resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName;
+      LOG.error(resultMsg);
+    }
+
+    return resultMsg;
+  }
+
+  private void delteHeartBeatTimer(String deviceId) {
+    VESNotification vesNotification = new VESNotification();
+
+    vesNotification.seteNodeBName(deviceId);
+
+    ParameterDTO paramDTO = new ParameterDTO();
+    paramDTO.setParamName(NetConfServerConstants.HEART_BEAT);
+
+    List<ParameterDTO> paramDTOList = new ArrayList<>();
+    paramDTOList.add(paramDTO);
+
+    OperationDetails opDetails = new OperationDetails();
+    opDetails.setOpCode(TR069OperationCode.DELETE_OBJECT);
+    opDetails.setParmeters(paramDTOList);
+
+    vesNotification.setOperationDetails(opDetails);
+
+    VESNotificationResponse response =
+        vesNotificationSender.sendDeleteConfigNotification(vesNotification);
+
+    if (response.getStatusCode() == NetConfServerConstants.SUCCESS) {
+      LOG.info("Heart beat timer is deleted successfully for device {}", deviceId);
+    } else {
+      LOG.error("Failed to delete heart beat timer for device {}. ErrorMsg : {}", deviceId,
+          response.getResponseMsg());
+    }
+
   }
 
   public List<NetConfServerDetails> getServersInfo() {
@@ -246,5 +315,30 @@ public class NetConfServerManagerImpl {
       }
     }
     return null;
+  }
+
+  class ServerStartTask implements Runnable {
+
+    NetConfServerDetailsEntity entity;
+    NetConfServerManagerImpl netconfServerManager;
+
+    public ServerStartTask(NetConfServerDetailsEntity entity,
+        NetConfServerManagerImpl netconfServerManager) {
+      this.entity = entity;
+      this.netconfServerManager = netconfServerManager;
+    }
+
+    @Override
+    public void run() {
+      boolean isSuccess = netconfServerManager.restartServersOnStartup(entity);
+      if (isSuccess) {
+        try {
+          netconfServerManager.restartServersHandler.restart(entity);
+        } catch (RetryFailedException e) {
+          e.printStackTrace();// TODO: logg
+        }
+      }
+    }
+
   }
 }

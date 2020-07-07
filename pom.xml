@@ -34,7 +34,7 @@
    <name>tr069adapter</name>
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <build.version>1.12.0</build.version>
+      <build.version>latest</build.version>
       <jdk.version>1.7</jdk.version>
       <java.version>1.8</java.version>
       <org.apache.axis.version>1.4</org.apache.axis.version>

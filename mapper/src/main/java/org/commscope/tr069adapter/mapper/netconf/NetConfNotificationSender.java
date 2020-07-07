@@ -25,6 +25,7 @@ import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.mapper.MOMetaData;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
+import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
 import org.commscope.tr069adapter.mapper.util.MOMetaDataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +59,13 @@ public class NetConfNotificationSender {
     try {
       LOG.debug("deviceInform : {} {}", deviceInform.getInformTypeList(),
           deviceInform.getParameters());
-      convertTR069ToNetConfParams(deviceInform);
+      NetConfNotificationDTO netConfDTO =
+          new NetConfNotificationDTO(deviceInform.getDeviceDetails().getDeviceId(),
+              deviceInform.getInformType().toString(), false);
+      netConfDTO.setParameters(deviceInform.getParameters());
+      convertTR069ToNetConfParams(netConfDTO);
       LOG.debug("Posting notification to netconf server");
-      response = restTemplate.postForObject(uri, deviceInform, ResponseEntity.class);
+      response = restTemplate.postForObject(uri, netConfDTO, ResponseEntity.class);
       LOG.debug("Posting notification to netconf server completed ");
     } catch (Exception e) {
       LOG.error("Exception while sending the notification.", e);
@@ -68,10 +73,23 @@ public class NetConfNotificationSender {
     return response;
   }
 
-  private void convertTR069ToNetConfParams(DeviceInform deviceInform) {
+  public ResponseEntity sendCustomNotification(NetConfNotificationDTO netConfDTO) {
+    ResponseEntity response = null;
+    final String uri = getUri();
+    LOG.debug("Posting custom notification to netconf server " + uri);
+    try {
+      response = restTemplate.postForObject(uri, netConfDTO, ResponseEntity.class);
+      LOG.debug("Posting custom notification to netconf server sucessfull");
+    } catch (Exception e) {
+      LOG.error("Exception while sending the custom notification.", e.toString());
+    }
+    return response;
+  }
+
+  private void convertTR069ToNetConfParams(NetConfNotificationDTO netConfDTO) {
     List<ParameterDTO> removeList = new ArrayList<>();
-    if (null != deviceInform) {
-      for (ParameterDTO param : deviceInform.getParameters()) {
+    if (null != netConfDTO) {
+      for (ParameterDTO param : netConfDTO.getParameters()) {
         if (param.getParamValue() == null || param.getParamValue().trim().length() <= 0) {
           continue;
         }
@@ -85,8 +103,7 @@ public class NetConfNotificationSender {
             removeList.add(param); // unknown parameter found.
         }
       }
-      deviceInform.getParameters().removeAll(removeList); // remove unknown
-      // parameters
+      netConfDTO.getParameters().removeAll(removeList);
     }
   }
 

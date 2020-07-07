@@ -59,14 +59,14 @@ public class NetConfServerManagerRestApi {
   }
 
   @PostMapping("/unregisterServer")
-  public boolean unregisterNetConfServerInstance(@RequestParam String deviceId,
+  public String unregisterNetConfServerInstance(@RequestParam String deviceId,
       @RequestParam String enodeBName) {
-    LOG.info("Received request for Unregister NetConf Server for deviceID: {}, enodeBName: {}",
+    LOG.info("Received request for Unregister NetConf Server for deviceID: {}, enodeBName: {} ",
         deviceId, enodeBName);
-    boolean status = manager.unregister(deviceId, enodeBName);
-    LOG.info("Unregister request is processed. NetConf Server for deviceID: {} , unregistered= {}",
-        deviceId, status);
-    return status;
+    String result = manager.unregister(deviceId, enodeBName);
+    LOG.info("Unregister request is processed. NetConf Server for deviceID: {} , unregisted= {}",
+        deviceId, result);
+    return result;
   }
 
 }

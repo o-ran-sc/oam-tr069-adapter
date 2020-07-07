@@ -36,16 +36,14 @@ import javax.xml.validation.Validator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.constants.ConfigurationServiceConstant;
-import org.commscope.tr069adapter.config.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.exceptions.InvalidConfigurationServiceException;
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 import org.springframework.stereotype.Component;
 import org.xml.sax.Attributes;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -113,7 +111,7 @@ public class ConfigurationXMLDataParser extends DefaultHandler {
       parser = factory.newSAXParser();
       parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
       parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-      setProperty(parser);
+      setProperty();
 
       parser.parse(xmlFileContentInputStream, this);
 
@@ -269,9 +267,8 @@ public class ConfigurationXMLDataParser extends DefaultHandler {
     logger.debug("File is valid.");
   }
 
-  protected void setProperty(SAXParser parser)
-      throws SAXNotRecognizedException, SAXNotSupportedException {
-      logger.debug("property added.");
+  protected void setProperty() {
+    logger.debug("property added.");
   }
 
 }

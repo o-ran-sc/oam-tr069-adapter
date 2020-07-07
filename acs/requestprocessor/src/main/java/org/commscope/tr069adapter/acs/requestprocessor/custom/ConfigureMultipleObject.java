@@ -39,7 +39,6 @@ import org.commscope.tr069adapter.acs.common.response.AddObjectResponse;
 import org.commscope.tr069adapter.acs.common.response.DeleteObjectResponse;
 import org.commscope.tr069adapter.acs.common.response.GetParameterValueResponse;
 import org.commscope.tr069adapter.acs.common.response.SetParameterValueResponse;
-import org.commscope.tr069adapter.acs.common.utils.ErrorCode;
 import org.commscope.tr069adapter.acs.requestprocessor.dao.DeviceRPCRequestRepositoryHelper;
 import org.commscope.tr069adapter.acs.requestprocessor.dto.CustomOperationData;
 import org.commscope.tr069adapter.acs.requestprocessor.entity.TR069DeviceRPCRequestEntity;
@@ -400,16 +399,8 @@ public class ConfigureMultipleObject implements CustomOperation {
 
   }
 
-  private DeviceRPCRequest cloneNBIRequest(DeviceRPCRequest nbiDeviceOperationRequest)
-      throws TR069EventProcessingException {
-    DeviceRPCRequest clonedOpRequest = null;
-    try {
-      clonedOpRequest = (DeviceRPCRequest) nbiDeviceOperationRequest.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new TR069EventProcessingException(ErrorCode.UNKNOWN_ERROR, e.getMessage());
-    }
-
-    return clonedOpRequest;
+  private DeviceRPCRequest cloneNBIRequest(DeviceRPCRequest nbiDeviceOperationRequest) {
+    return new DeviceRPCRequest(nbiDeviceOperationRequest);
   }
 
   private ParameterDTO prepareParamDTO(String name, String value, ParameterDTO paramDTO) {

@@ -81,6 +81,7 @@ public class ServerPortAllocationHelper {
     if (availablePorts.isEmpty()) {
       LOG.debug(
           "All ports are exhausted. Hence cannot allocate a port to start new netconf server.");
+      return null;
     }
 
     String port = availablePorts.peek();
@@ -102,6 +103,23 @@ public class ServerPortAllocationHelper {
     semaphore.release();
     LOG.debug("Rserved port is {}", port);
     return port;
+  }
+
+  public boolean unReserveServerPort(String port) {
+
+    try {
+      Semaphore semaphore = semaphoreMap.get(port);
+      semaphore.acquire();
+      availablePorts.add(port);
+      semaphore.release();
+      LOG.error("Successfully un-reserved the port " + port + " to start netconf server.");
+    } catch (InterruptedException e) {
+      LOG.warn("Failed to un-reserve the port " + port, e);
+      Thread.currentThread().interrupt();
+      return false;
+    }
+
+    return true;
   }
 
   public boolean checkAndReserveServerPort(String port) {

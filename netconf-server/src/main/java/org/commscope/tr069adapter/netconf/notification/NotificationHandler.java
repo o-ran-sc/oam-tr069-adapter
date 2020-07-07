@@ -18,7 +18,7 @@
 
 package org.commscope.tr069adapter.netconf.notification;
 
-import org.commscope.tr069adapter.acs.common.DeviceInform;
+import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +32,9 @@ public class NotificationHandler {
   @Autowired
   NetConfSessionUtil netConfSessionUtil;
 
-  public void handleNetConfNotification(DeviceInform notification) {
-    LOG.debug("processing netconf notification {}", notification);
-    netConfSessionUtil.sendNetConfNotification(notification);
+  public void handleNetConfNotification(NetConfNotificationDTO netConNotifDTO) {
+    LOG.debug("processing netconf notification " + netConNotifDTO);
+    netConfSessionUtil.sendNetConfNotification(netConNotifDTO);
   }
 
 }

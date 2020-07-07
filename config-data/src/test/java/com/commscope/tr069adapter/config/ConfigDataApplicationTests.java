@@ -22,7 +22,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.commscope.tr069adapter.config.dto.ConfigurationData;
+import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 import org.springframework.web.client.RestTemplate;
 

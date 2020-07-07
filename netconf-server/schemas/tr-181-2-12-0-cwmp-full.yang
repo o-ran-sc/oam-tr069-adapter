@@ -27,7 +27,7 @@ module tr-181-2-12-0-cwmp-full {
        See the License for the specific language governing permissions and
        limitations under the License.";
 
-  revision 2020-06-23 {
+  revision 2020-06-24 {
     description
       "Initial version, used only for ONAP PoC 2018-06-25";
     reference
