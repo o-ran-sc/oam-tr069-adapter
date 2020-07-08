@@ -1,0 +1,2765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     /*
+ * ============LICENSE_START========================================================================
+ * ONAP : tr-069-adapter
+ * =================================================================================================
+ * Copyright (C) 2020 CommScope Inc Intellectual Property.
+ * =================================================================================================
+ * This tr-069-adapter software file is distributed by CommScope Inc
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ===============LICENSE_END=======================================================================
+*/
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="configDataFile">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="fileHeader">
+					<xs:complexType>
+						<xs:attribute name="fileFormatVersion" type="xs:string" use="required"/>
+						<xs:attribute name="senderName" type="xs:string" use="optional"/>
+						<xs:attribute name="vendorName" type="xs:string" use="optional"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="configData" minOccurs="1" maxOccurs="1"/>
+				<xs:element name="fileFooter">
+					<xs:complexType>
+						<xs:attribute name="dateTime" type="xs:dateTime" use="required"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>		
+
+	<xs:element name="configData">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="managedElement" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="Device" minOccurs="1" maxOccurs="1" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="managedElement">
+		<xs:complexType>
+			<xs:attribute name="OUI" type="xs:string" use="required"/>
+			<xs:attribute name="localDn" type="xs:string" use="required"/>
+			<xs:attribute name="ProductClass" type="xs:string" use="required"/>
+			<xs:attribute name="swVersion" type="xs:string" use="required"/>
+			<xs:attribute name="hwVersion" type="xs:string" use="optional"/>
+		</xs:complexType>
+
+	</xs:element>
+	<xs:element name="Device">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DeviceInfo" minOccurs="0"/>
+				<xs:element ref="Ethernet" minOccurs="0"/>
+				<xs:element ref="FAP" minOccurs="0"/>
+				<xs:element ref="FaultMgmt" minOccurs="0"/>
+				<xs:element ref="IP" minOccurs="0"/>
+				<xs:element ref="IPsec" minOccurs="0"/>
+				<xs:element ref="ManagementServer" minOccurs="0"/>
+				<xs:element ref="NeighborDiscovery" minOccurs="0"/>
+				<xs:element ref="PeriodicStatistics" minOccurs="0"/>
+				<xs:element ref="QoS" minOccurs="0"/>
+				<xs:element ref="Security" minOccurs="0"/>
+				<xs:element ref="Services" minOccurs="0"/>
+				<xs:element ref="Time" minOccurs="0"/>
+				<xs:element ref="UserInterface" minOccurs="0"/>
+				<xs:element ref="X_0005B9_FHMgmt" minOccurs="0"/>
+				<xs:element ref="X_0005B9_IPsec2" minOccurs="0"/>
+				<xs:element ref="X_0005B9_IPsecCA" minOccurs="0"/>
+				<xs:element ref="X_0005B9_License" minOccurs="0"/>
+				<xs:element ref="X_0005B9_MIGRATION" minOccurs="0"/>
+				<xs:element ref="X_0005B9_SoftwareManagement" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DeviceInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="X_0005B9_OperatorName" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Ethernet">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Interface" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="Link" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="VLANTermination" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Interface">
+			<xs:selector xpath="Interface" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-Link">
+			<xs:selector xpath="Link" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-VLANTermination">
+			<xs:selector xpath="VLANTermination" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Interface">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="DuplexMode" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="LowerLayers" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxBitRate" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Link">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="LowerLayers" type="xs:string" minOccurs="0"/>
+				<xs:element name="PriorityTagging" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="VLANTermination">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="LowerLayers" type="xs:string" minOccurs="0"/>
+				<xs:element name="VLANID" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FAP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="GPS" minOccurs="0"/>
+				<xs:element ref="PerfMgmt" minOccurs="0"/>
+				<xs:element name="X_0005B9_DasRttDelay" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EnableDasMode" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_FileTransfer" minOccurs="0"/>
+				<xs:element ref="X_0005B9_FileTransfersEnh" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="X_0005B9_LogLevelConfiguration" minOccurs="0"/>
+				<xs:element ref="X_0005B9_Logging" minOccurs="0"/>
+				<xs:element name="X_0005B9_PlatformManagementEnable" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_RPLogManagement" minOccurs="0"/>
+				<xs:element ref="X_0005B9_RU" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="X_0005B9_RUBlacklisted" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_RUSoftwareManagement" minOccurs="0"/>
+				<xs:element name="X_0005B9_RUWhiteList" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_SlotReservation" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="X_0005B9_Trace" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="X_0005B9_TraceFileTransfer" minOccurs="0"/>
+				<xs:element ref="X_0005B9_UserManagement" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-X_0005B9_FileTransfersEnh">
+			<xs:selector xpath="X_0005B9_FileTransfersEnh" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-X_0005B9_RU">
+			<xs:selector xpath="X_0005B9_RU" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-X_0005B9_SlotReservation">
+			<xs:selector xpath="X_0005B9_SlotReservation" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-X_0005B9_Trace">
+			<xs:selector xpath="X_0005B9_Trace" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="GPS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="AGPSServerConfig" minOccurs="0"/>
+				<xs:element name="ContinuousGPS" type="xs:string" minOccurs="0"/>
+				<xs:element ref="ContinuousGPSStatus" minOccurs="0"/>
+				<xs:element name="GPSReset" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="ScanOnBoot" type="xs:string" minOccurs="0"/>
+				<xs:element name="ScanPeriodically" type="xs:string" minOccurs="0"/>
+				<xs:element name="ScanTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_HoldoverTimeOutDuration" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_NominalGPS" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AGPSServerConfig">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="Password" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReferenceLatitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReferenceLongitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerPort" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerURL" type="xs:string" minOccurs="0"/>
+				<xs:element name="Username" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_aGPSRetryPeriodMax" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ContinuousGPSStatus">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="FirstFixTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="LockTimeOutDuration" type="xs:string" minOccurs="0"/>
+				<xs:element name="SatelliteTrackingInterval" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_NominalGPS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Altitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="Confidence" type="xs:string" minOccurs="0"/>
+				<xs:element name="DegreesOfLatitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="DegreesOfLongitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="DirectionOfAltitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="LatitudeSign" type="xs:string" minOccurs="0"/>
+				<xs:element name="OrientationOfMajorAxis" type="xs:string" minOccurs="0"/>
+				<xs:element name="UncertaintyAltitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="UncertaintySemiMajor" type="xs:string" minOccurs="0"/>
+				<xs:element name="UncertaintySemiMinor" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PerfMgmt">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Config" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Config">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="X_0005B9_FileType" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_XMLFormat" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_FileTransfer">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="FileDetails" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="HistOMFileWithDebugLog" type="xs:string" minOccurs="0"/>
+				<xs:element name="Password" type="xs:string" minOccurs="0"/>
+				<xs:element name="RPOMFileWithDebugLog" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerURL" type="xs:string" minOccurs="0"/>
+				<xs:element name="Username" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-FileDetails">
+			<xs:selector xpath="FileDetails" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="FileDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="FileName" type="xs:string" minOccurs="0"/>
+				<xs:element name="IncludeRadioPointLog" type="xs:string" minOccurs="0"/>
+				<xs:element name="LocationOnServer" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferNow" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferType" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferWindowDuration" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferWindowInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferWindowStartTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_FileTransfersEnh">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="FileDetails" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="FileCompressionEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="FileCompressionType" type="xs:string" minOccurs="0"/>
+				<xs:element name="FileName" type="xs:string" minOccurs="0"/>
+				<xs:element name="IncludeRadioPointLog" type="xs:string" minOccurs="0"/>
+				<xs:element name="LocationOnServer" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferNow" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferType" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferWindowDuration" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferWindowInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferWindowStartTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+				<xs:element name="Password" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerURL" type="xs:string" minOccurs="0"/>
+				<xs:element name="Username" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+		<xs:unique name="uniqueId-FileDetails1">
+			<xs:selector xpath="FileDetails" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="X_0005B9_LogLevelConfiguration">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CUAPP_CURURecvSendT" type="xs:string" minOccurs="0"/>
+				<xs:element name="DIMClient" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_FAPController" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_FAPManagement" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_L2L3MessagingInterface" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_RRM" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_RRMUEMGR" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_RuMgr" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_SON" type="xs:string" minOccurs="0"/>
+				<xs:element name="LTEAPP_STACKController" type="xs:string" minOccurs="0"/>
+				<xs:element name="RRC" type="xs:string" minOccurs="0"/>
+				<xs:element name="RUAPP_RUDiscoveryConfigClient" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_Logging">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SyslogNg" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SyslogNg">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="EventTypes" type="xs:string" minOccurs="0"/>
+				<xs:element name="MonitoredInterface" type="xs:string" minOccurs="0"/>
+				<xs:element name="Port" type="xs:string" minOccurs="0"/>
+				<xs:element name="Server" type="xs:string" minOccurs="0"/>
+				<xs:element name="UseIPSecTunnel" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_RPLogManagement">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="IncludePlatformLog" type="xs:string" minOccurs="0"/>
+				<xs:element name="TransferLogsToController" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_RU">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="Device" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="DeviceInfo" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="DeviceType" type="xs:string" minOccurs="0"/>
+				<xs:element name="InstallationType" type="xs:string" minOccurs="0"/>
+				<xs:element ref="Location" minOccurs="0"/>
+				<xs:element ref="NGRP" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="PHY" minOccurs="0"/>
+				<xs:element ref="RAN" minOccurs="0"/>
+				<xs:element ref="SlotReservation" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="RUIndex" type="xs:string" minOccurs="0"/>
+				<xs:element name="Reboot" type="xs:string" minOccurs="0"/>
+				<xs:element name="Reset" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Location">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Altitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="Confidence" type="xs:string" minOccurs="0"/>
+				<xs:element name="DataObject" type="xs:string" minOccurs="0"/>
+				<xs:element name="DegreesOfLatitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="DegreesOfLongitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="DirectionOfAltitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="LatitudeSign" type="xs:string" minOccurs="0"/>
+				<xs:element name="OrientationOfMajorAxis" type="xs:string" minOccurs="0"/>
+				<xs:element name="UncertaintyAltitude" type="xs:string" minOccurs="0"/>
+				<xs:element name="UncertaintySemiMajor" type="xs:string" minOccurs="0"/>
+				<xs:element name="UncertaintySemiMinor" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="NGRP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="REBOOT" type="xs:string" minOccurs="0"/>
+				<xs:element name="RESET" type="xs:string" minOccurs="0"/>
+				<xs:element name="TimingSource" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PHY">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="AntennaInfo" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AntennaInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AntennaType" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RAN">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="RF" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RF">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="RfTxPower" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SlotReservation">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AntennaPortNumber" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_RUSoftwareManagement">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ApplyImage" type="xs:string" minOccurs="0"/>
+				<xs:element name="EnableNGRPUpgrade" type="xs:string" minOccurs="0"/>
+				<xs:element name="FileTransferProtocol" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_SlotReservation">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AntennaPortNumber" type="xs:string" minOccurs="0"/>
+				<xs:element name="PARTNUMBER" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_Trace">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="UeSpecificTraceEnable" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_TraceFileTransfer">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="FileUploadPeriodicity" type="xs:string" minOccurs="0"/>
+				<xs:element name="LocationOnServer" type="xs:string" minOccurs="0"/>
+				<xs:element name="Password" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerPort" type="xs:string" minOccurs="0"/>
+				<xs:element name="Username" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_UserManagement">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ExternalAuthAccess" type="xs:string" minOccurs="0"/>
+				<xs:element ref="LDAP" minOccurs="0"/>
+				<xs:element ref="RADIUS" minOccurs="0"/>
+				<xs:element ref="UserAccount" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-UserAccount">
+			<xs:selector xpath="UserAccount" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="LDAP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AdminDN" type="xs:string" minOccurs="0"/>
+				<xs:element name="AdminPassword" type="xs:string" minOccurs="0"/>
+				<xs:element name="BaseDN" type="xs:string" minOccurs="0"/>
+				<xs:element name="ConnectionTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="Filter" type="xs:string" minOccurs="0"/>
+				<xs:element name="Port" type="xs:string" minOccurs="0"/>
+				<xs:element name="RetryCount" type="xs:string" minOccurs="0"/>
+				<xs:element name="SASL" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerIPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerName" type="xs:string" minOccurs="0"/>
+				<xs:element name="TLSCertificate" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RADIUS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ConnectionTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="NASIPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="NASIdentifier" type="xs:string" minOccurs="0"/>
+				<xs:element name="Port" type="xs:string" minOccurs="0"/>
+				<xs:element name="RetryCount" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerIPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="SharedSecretKey" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UserAccount">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Password" type="xs:string" minOccurs="0"/>
+				<xs:element name="Privileges" type="xs:string" minOccurs="0"/>
+				<xs:element name="ResetPassword" type="xs:string" minOccurs="0"/>
+				<xs:element name="Status" type="xs:string" minOccurs="0"/>
+				<xs:element name="UserName" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FaultMgmt">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="CurrentAlarm" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="ExpeditedEvent" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="HistoryEvent" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="SupportedAlarm" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="X_0005B9_SendTestAlarm" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-CurrentAlarm">
+			<xs:selector xpath="CurrentAlarm" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-ExpeditedEvent">
+			<xs:selector xpath="ExpeditedEvent" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-HistoryEvent">
+			<xs:selector xpath="HistoryEvent" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-SupportedAlarm">
+			<xs:selector xpath="SupportedAlarm" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="CurrentAlarm">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CurrentAlarmIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ExpeditedEvent">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ExpediteAlarmIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="HistoryEvent">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="HistoryAlarmIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SupportedAlarm">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ReportingMechanism" type="xs:string" minOccurs="0"/>
+				<xs:element name="SupportedAlarmIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IP">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="Interface" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AutoIPEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element ref="IPv4Address" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="IPv4Enable" type="xs:string" minOccurs="0"/>
+				<xs:element ref="IPv6Address" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="IPv6Enable" type="xs:string" minOccurs="0"/>
+				<xs:element ref="IPv6Prefix" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="Loopback" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxMTUSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="Reset" type="xs:string" minOccurs="0"/>
+				<xs:element name="Router" type="xs:string" minOccurs="0"/>
+				<xs:element name="ULAEnable" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Interface1">
+			<xs:selector xpath="Interface" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-IPv4Address">
+			<xs:selector xpath="IPv4Address" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-IPv6Address">
+			<xs:selector xpath="IPv6Address" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-IPv6Prefix">
+			<xs:selector xpath="IPv6Prefix" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="IPv4Address">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AddressingType" type="xs:string" minOccurs="0"/>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="IPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="SubnetMask" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DNS" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IPv6Address">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Anycast" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="IPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="Origin" type="xs:string" minOccurs="0"/>
+				<xs:element name="PreferredLifetime" type="xs:string" minOccurs="0"/>
+				<xs:element name="Prefix" type="xs:string" minOccurs="0"/>
+				<xs:element name="ValidLifetime" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DNS" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Prefix" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IPv6Prefix">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildPrefixBits" type="xs:string" minOccurs="0"/>
+				<xs:element name="Origin" type="xs:string" minOccurs="0"/>
+				<xs:element name="ParentPrefix" type="xs:string" minOccurs="0"/>
+				<xs:element name="PreferredLifetime" type="xs:string" minOccurs="0"/>
+				<xs:element name="Prefix" type="xs:string" minOccurs="0"/>
+				<xs:element name="StaticType" type="xs:string" minOccurs="0"/>
+				<xs:element name="ValidLifetime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IPsec">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element ref="Filter" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="IKEv2SA" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="LogLevel" minOccurs="0"/>
+				<xs:element ref="Profile" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="Tunnel" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="X_0005B9_ExcludeCP" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IgnoreBasicConstraint" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Filter">
+			<xs:selector xpath="Filter" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-IKEv2SA">
+			<xs:selector xpath="IKEv2SA" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-Profile">
+			<xs:selector xpath="Profile" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-Tunnel">
+			<xs:selector xpath="Tunnel" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Filter">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AllInterfaces" type="xs:string" minOccurs="0"/>
+				<xs:element name="Interface" type="xs:string" minOccurs="0"/>
+				<xs:element name="Order" type="xs:string" minOccurs="0"/>
+				<xs:element name="Profile" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IKEv2SA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element ref="ChildSA" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+		<xs:unique name="uniqueId-ChildSA">
+			<xs:selector xpath="ChildSA" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="ChildSA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LogLevel">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="X_0005B9_cfg" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_chd" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_dmn" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_enc" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ike" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_knl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_lib" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_mgr" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_net" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Profile">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AHAllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AntiReplayWindowSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildSATimeLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildSATrafficLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="DSCPMarkPolicy" type="xs:string" minOccurs="0"/>
+				<xs:element name="DoNotFragment" type="xs:string" minOccurs="0"/>
+				<xs:element name="ESPAllowedEncryptionAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="ESPAllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedDiffieHellmanGroupTransforms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedEncryptionAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedPseudoRandomFunctions" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AuthenticationMethod" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2DeadPeerDetectionTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2NATTKeepaliveTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2SATimeLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxChildSAs" type="xs:string" minOccurs="0"/>
+				<xs:element name="Protocol" type="xs:string" minOccurs="0"/>
+				<xs:element name="RemoteEndpoints" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IKEv2RekeyMargin" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IPsec_IKERetryCount" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IPsec_IKERetryTimeOut" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IPsec_IKETunnelBounce" type="xs:string" minOccurs="0"/>
+				<xs:element name="gtpFragmentation" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Tunnel">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ManagementServer">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ConnectionRequestPassword" type="xs:string" minOccurs="0"/>
+				<xs:element name="ConnectionRequestUsername" type="xs:string" minOccurs="0"/>
+				<xs:element name="Password" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicInformEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicInformInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicInformTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="URL" type="xs:string" minOccurs="0"/>
+				<xs:element name="UpgradesManaged" type="xs:string" minOccurs="0"/>
+				<xs:element name="Username" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="NeighborDiscovery">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element ref="InterfaceSetting" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-InterfaceSetting">
+			<xs:selector xpath="InterfaceSetting" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="InterfaceSetting">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="Interface" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxRtrSolicitations" type="xs:string" minOccurs="0"/>
+				<xs:element name="NUDEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="RSEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="RetransTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="RtrSolicitationInterval" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PeriodicStatistics">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SampleSet" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-SampleSet">
+			<xs:selector xpath="SampleSet" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="SampleSet">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SampleInterval" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="QoS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Classification" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Classification">
+			<xs:selector xpath="Classification" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Classification">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="DSCPMark" type="xs:string" minOccurs="0"/>
+				<xs:element name="Protocol" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Security">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Certificate" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="X_0005B9_CMPv2" minOccurs="0"/>
+				<xs:element ref="X_0005B9_WebGUI" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Certificate">
+			<xs:selector xpath="Certificate" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Certificate">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CertIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_CMPv2">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CAServer" type="xs:string" minOccurs="0"/>
+				<xs:element name="Port" type="xs:string" minOccurs="0"/>
+				<xs:element name="RenewBefore" type="xs:string" minOccurs="0"/>
+				<xs:element name="SecGWServer" type="xs:string" minOccurs="0"/>
+				<xs:element name="URI" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_WebGUI">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ResetAdminUserPassword" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Services">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="FAPService" minOccurs="0" maxOccurs="2"/>
+				<xs:element ref="VoiceService" minOccurs="0" maxOccurs="2"/>
+				<xs:element name="X_0005B9_FNEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOCNEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_nRrc4CatM1" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_numSectorsPerBC" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FAPService">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="AccessMgmt" minOccurs="0"/>
+				<xs:element ref="Capabilities" minOccurs="0"/>
+				<xs:element ref="CellConfig" minOccurs="0"/>
+				<xs:element ref="FAPControl" minOccurs="0"/>
+				<xs:element ref="REM" minOccurs="0"/>
+				<xs:element ref="Transport" minOccurs="0"/>
+				<xs:element ref="X_0005B9_AutoConfig" minOccurs="0"/>
+				<xs:element ref="X_0005B9_AutoTxPower" minOccurs="0"/>
+				<xs:element ref="X_0005B9_ExpressREM" minOccurs="0"/>
+				<xs:element ref="X_0005B9_LTE" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AccessMgmt">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="LTE" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LTE">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AccessMode" type="xs:string" minOccurs="0"/>
+				<xs:element name="CSGID" type="xs:string" minOccurs="0"/>
+				<xs:element name="HNBName" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxCSGMembers" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxNonCSGMembers" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxResourceNonCSGMembers" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxUEsServed" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Capabilities">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="X_0005B9_MaxNumX2" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="CellConfig">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EPC" minOccurs="0"/>
+	<xs:element name="RAN" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="CellRestriction" minOccurs="0"/>
+				<xs:element ref="Common" minOccurs="0"/>
+				<xs:element ref="MAC" minOccurs="0"/>
+				<xs:element ref="Mobility" minOccurs="0"/>
+				<xs:element ref="NeighborList" minOccurs="0"/>
+				<xs:element ref="NeighborListInUse" minOccurs="0"/>
+	<xs:element name="PHY" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PDSCH" minOccurs="0"/>
+				<xs:element ref="PRACH" minOccurs="0"/>
+				<xs:element ref="PUCCH" minOccurs="0"/>
+				<xs:element ref="PUSCH" minOccurs="0"/>
+				<xs:element ref="SRS" minOccurs="0"/>
+				<xs:element ref="ULPowerControl" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RF" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="DLBandwidth" type="xs:string" minOccurs="0"/>
+				<xs:element name="EARFCNDL" type="xs:string" minOccurs="0"/>
+				<xs:element name="EARFCNUL" type="xs:string" minOccurs="0"/>
+				<xs:element name="FreqBandIndicator" type="xs:string" minOccurs="0"/>
+				<xs:element name="PBCHPowerOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="PSCHPowerOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="PhyCellID" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReferenceSignalPower" type="xs:string" minOccurs="0"/>
+				<xs:element name="SSCHPowerOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="ULBandwidth" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Imargin" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Imax" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxTxPower" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="RLC" minOccurs="0"/>
+				<xs:element ref="RRCTimers" minOccurs="0"/>
+				<xs:element ref="S1AP" minOccurs="0"/>
+				<xs:element ref="S1U" minOccurs="0"/>
+				<xs:element ref="X_0005B9_X2AP_CE" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="X_0005B9_CE" minOccurs="0"/>
+				<xs:element ref="X_0005B9_CarrierAggregation" minOccurs="0"/>
+				<xs:element ref="X_0005B9_RrcConnection" minOccurs="0"/>
+				<xs:element ref="X_0005B9_RrcConnectionRejection" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EPC">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AllowedCipheringAlgorithmList" type="xs:string" minOccurs="0"/>
+				<xs:element name="AllowedIntegrityProtectionAlgorithmList" type="xs:string" minOccurs="0"/>
+				<xs:element name="EAID" type="xs:string" minOccurs="0"/>
+				<xs:element ref="PLMNList" minOccurs="0" maxOccurs="unbounded"/>
+	<xs:element name="QoS" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PacketelayBudget" type="xs:string" minOccurs="0"/>
+				<xs:element name="Priority" type="xs:string" minOccurs="0"/>
+				<xs:element name="QCI" type="xs:string" minOccurs="0"/>
+				<xs:element name="Type" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DSCP" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DeltaBundle" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_PacketLossRate" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_RLCMode" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_RTPBundle" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_SPSPeriodDL" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_SPSPeriodUL" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+				<xs:element name="TAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxConcurrentCMASBroadcasts" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_PWSMode" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-PLMNList">
+			<xs:selector xpath="PLMNList" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-QoS">
+			<xs:selector xpath="QoS" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="PLMNList">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReservedForOperatorUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="IsPrimary" type="xs:string" minOccurs="0"/>
+				<xs:element name="PLMNID" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringForEmergency" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringSkipForMMTELVideo" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringSkipForMMTELVoice" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringSkipForSMS" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_ImpendingOverload" minOccurs="0"/>
+				<xs:element name="X_0005B9_MODataBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MODataBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MODataBarringTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOSigBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOSigBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOSigBarringTime" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_NormalLoad" minOccurs="0"/>
+				<xs:element ref="X_0005B9_Overload" minOccurs="0"/>
+				<xs:element name="X_0005B9_PLMNListIndex" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Type" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_WarningLoadLvl" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_ImpendingOverload">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="acBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_NormalLoad">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="acBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_Overload">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="acBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_WarningLoadLvl">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="acBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="acBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="CellRestriction">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="BarringForEmergency" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellBarred" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReservedForOperatorUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_AccBarStaticEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_AutoACBEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringSkipForMMTELVideo" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringSkipForMMTELVoice" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_BarringSkipForSMS" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_ImpendingOverload" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ACBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="X_0005B9_L3_ImpendingOverload" minOccurs="0"/>
+				<xs:element ref="X_0005B9_L3_OK" minOccurs="0"/>
+				<xs:element ref="X_0005B9_L3_Overload" minOccurs="0"/>
+				<xs:element ref="X_0005B9_L3_Warning" minOccurs="0"/>
+				<xs:element name="X_0005B9_MODataBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MODataBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MODataBarringTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOSigBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOSigBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MOSigBarringTime" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_NormalLoad" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ACBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_Overload" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ACBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_WarningLoadLvl" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ACBarringFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringForSpecialAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="ACBarringTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="X_0005B9_cellLock" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_guardTimer" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_L3_ImpendingOverload">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MaxS1PagesPerRRCPage" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_L3_OK">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MaxS1PagesPerRRCPage" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_L3_Overload">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MaxS1PagesPerRRCPage" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_L3_Warning">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MaxS1PagesPerRRCPage" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Common">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CellIdentity" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_CellMode" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_CellName" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="MAC">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DRX" minOccurs="0"/>
+				<xs:element ref="RACH" minOccurs="0"/>
+				<xs:element ref="ULSCH" minOccurs="0"/>
+				<xs:element name="X_0005B9_DlMssClampVal" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DynDciCQIThreshDl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DynDciCQIThreshUl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_GratUlDciTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_GtpMtu" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_HighCQIAggLevelDl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_HighCQIAggLevelUl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_LowCQIAggLevelDl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_LowCQIAggLevelUl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MacSuspendEnbRlfEnabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxCcchMsgRetx" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxDLUePerTTI" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxGbrBearers" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxGbrDLUePerTTI" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxGbrDlBitsPerSec" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxGbrULUePerTTI" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxGbrUlBitsPerSec" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxHarqReTxDl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxNumCzvRp" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MaxULUePerTTI" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MinCzvThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MssClampEnabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_PriorityMetricMethod" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_PucchPrbReserved" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_QCI6MinDlBitsPerSec" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_QCI6MinUlBitsPerSec" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ReuseInterferenceThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_SingleLayerCLSMEnabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_UlMssClampVal" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DRX">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="DRXEnabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="DRXInactivityTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="DRXRetransmissionTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="DRXShortCycleTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="DRXStartOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="LongDRXCycle" type="xs:string" minOccurs="0"/>
+				<xs:element name="OnDurationTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="ShortDRXCycle" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_maxDrxUe" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RACH">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ContentionResolutionTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxHARQMsg3Tx" type="xs:string" minOccurs="0"/>
+				<xs:element name="MessagePowerOffsetGroupB" type="xs:string" minOccurs="0"/>
+				<xs:element name="MessageSizeGroupA" type="xs:string" minOccurs="0"/>
+				<xs:element name="NumberOfRaPreambles" type="xs:string" minOccurs="0"/>
+				<xs:element name="PowerRampingStep" type="xs:string" minOccurs="0"/>
+				<xs:element name="PreambleInitialReceivedTargetPower" type="xs:string" minOccurs="0"/>
+				<xs:element name="PreambleTransMax" type="xs:string" minOccurs="0"/>
+				<xs:element name="ResponseWindowSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="SizeOfRaGroupA" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PreambleTransMax" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="X_0005B9_CE0" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_CE0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ContentionResolutionTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="ResponseWindowSize" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ULSCH">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="X_0005B9_qci1MaxHARQ-Tx" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Mobility">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ConnMode" minOccurs="0"/>
+				<xs:element ref="IdleMode" minOccurs="0"/>
+				<xs:element name="X_0005B9_csfbMeasWaitTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_csfbPrefRat" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_iRatPsRedirection" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ConnMode">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EUTRA" minOccurs="0"/>
+				<xs:element ref="IRAT" minOccurs="0"/>
+				<xs:element name="X_0005B9_HOBlackListEnabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_InterFreqHandOffEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IntraFreqHandOffEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_RSRPThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_RSRQThreshold" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EUTRA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="A1ThresholdRSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="A1ThresholdRSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="A2ThresholdRSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="A2ThresholdRSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="A3Offset" type="xs:string" minOccurs="0"/>
+				<xs:element name="A5Threshold1RSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="A5Threshold1RSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="A5Threshold2RSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="A5Threshold2RSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="FilterCoefficientRSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="FilterCoefficientRSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="Hysteresis" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReportAmount" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReportInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReportOnLeave" type="xs:string" minOccurs="0"/>
+				<xs:element name="ReportQuantity" type="xs:string" minOccurs="0"/>
+				<xs:element name="TimeToTrigger" type="xs:string" minOccurs="0"/>
+				<xs:element name="TriggerQuantity" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="A3Offset" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IRAT">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="B1ThresholdUTRAEcN0" type="xs:string" minOccurs="0"/>
+				<xs:element name="B1ThresholdUTRARSCP" type="xs:string" minOccurs="0"/>
+				<xs:element name="B2Threshold1RSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="B2Threshold1RSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="B2Threshold2UTRAEcN0" type="xs:string" minOccurs="0"/>
+				<xs:element name="B2Threshold2UTRARSCP" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IdleMode">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="Common" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NCellChangeHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="NCellChangeMedium" type="xs:string" minOccurs="0"/>
+				<xs:element name="QHystSFHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="QHystSFMedium" type="xs:string" minOccurs="0"/>
+				<xs:element name="Qhyst" type="xs:string" minOccurs="0"/>
+				<xs:element name="THystNormal" type="xs:string" minOccurs="0"/>
+				<xs:element name="Tevaluation" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IRAT" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="CDMA2000" minOccurs="0"/>
+				<xs:element ref="GERAN" minOccurs="0"/>
+				<xs:element ref="UTRA" minOccurs="0"/>
+				<xs:element name="X_0005B9_CSFBMODE" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_CSFBRATTYPE" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EmergencyExcessFactor" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_cSFBDUALReceiveENABLE" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="InterFreq" minOccurs="0"/>
+				<xs:element ref="IntraFreq" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="CDMA2000">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="CDMA2000Band" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="SearchWindowSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionCDMA2000" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionCDMA2000SFHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionCDMA2000SFMedium" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_CellParam" minOccurs="0"/>
+				<xs:element ref="X_0005B9_Mobility_SIB8_Parameters" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-CDMA2000Band">
+			<xs:selector xpath="CDMA2000Band" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="CDMA2000Band">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="BandClass" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReselectionPriority" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXLow" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Index" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_CellParam">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ReferenceCellID" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_Mobility_SIB8_Parameters">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Auth" type="xs:string" minOccurs="0"/>
+				<xs:element name="ForeignNidReg" type="xs:string" minOccurs="0"/>
+				<xs:element name="ForeignSidReg" type="xs:string" minOccurs="0"/>
+				<xs:element name="HomeReg" type="xs:string" minOccurs="0"/>
+				<xs:element name="IMSI1112" type="xs:string" minOccurs="0"/>
+				<xs:element name="ImsiTSupported" type="xs:string" minOccurs="0"/>
+				<xs:element name="MCC" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxNumAltSO" type="xs:string" minOccurs="0"/>
+				<xs:element name="MultipleNid" type="xs:string" minOccurs="0"/>
+				<xs:element name="MultipleSid" type="xs:string" minOccurs="0"/>
+				<xs:element name="Nid" type="xs:string" minOccurs="0"/>
+				<xs:element name="PacketZoneId" type="xs:string" minOccurs="0"/>
+				<xs:element name="ParameReg" type="xs:string" minOccurs="0"/>
+				<xs:element name="PowerDownReg" type="xs:string" minOccurs="0"/>
+				<xs:element name="PowerUpReg" type="xs:string" minOccurs="0"/>
+				<xs:element name="PrefMSIDType" type="xs:string" minOccurs="0"/>
+				<xs:element name="RegPrd" type="xs:string" minOccurs="0"/>
+				<xs:element name="RegZone" type="xs:string" minOccurs="0"/>
+				<xs:element name="Sid" type="xs:string" minOccurs="0"/>
+				<xs:element name="TotalZone" type="xs:string" minOccurs="0"/>
+				<xs:element name="ZoneTimer" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GERAN">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="GERANFreqGroup" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="t-ReselectionGERAN" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-GERANFreqGroup">
+			<xs:selector xpath="GERANFreqGroup" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="GERANFreqGroup">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="BCCHARFCN" type="xs:string" minOccurs="0"/>
+				<xs:element name="BandIndicator" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReselectionPriority" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMin" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXLow" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Index" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UTRA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="TReselectionUTRA" type="xs:string" minOccurs="0"/>
+				<xs:element ref="UTRANFDDFreq" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="X_0005B9_threshXHighQr9SIB6" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_threshXLowQr9SIB6" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-UTRANFDDFreq">
+			<xs:selector xpath="UTRANFDDFreq" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="UTRANFDDFreq">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReselectionPriority" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PMaxUTRA" type="xs:string" minOccurs="0"/>
+				<xs:element name="QQualMin" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMin" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXLow" type="xs:string" minOccurs="0"/>
+				<xs:element name="UTRACarrierARFCN" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Index" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InterFreq">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Carrier" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Carrier">
+			<xs:selector xpath="Carrier" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Carrier">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReselectionPriority" type="xs:string" minOccurs="0"/>
+				<xs:element name="EUTRACarrierARFCN" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="Pmax" type="xs:string" minOccurs="0"/>
+				<xs:element name="QOffsetFreq" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMinSIB5" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionEUTRA" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionEUTRASFHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionEUTRASFMedium" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshXLow" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MultiBandInfoList" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ThreshXHighQr9SIB5" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ThreshXLowQr9SIB5" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_qQualMinSIB5" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="IntraFreq">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CellReselectionPriority" type="xs:string" minOccurs="0"/>
+				<xs:element name="Pmax" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMinOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMinSIB1" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMinSIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="SIntraSearch" type="xs:string" minOccurs="0"/>
+				<xs:element name="SNonIntraSearch" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionEUTRA" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionEUTRASFHigh" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReselectionEUTRASFMedium" type="xs:string" minOccurs="0"/>
+				<xs:element name="ThreshServingLow" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="QRxLevMinSIB1" type="xs:string" minOccurs="0"/>
+				<xs:element name="QRxLevMinSIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="qQualMinRSRQSIB1" type="xs:string" minOccurs="0"/>
+				<xs:element name="qQualMinRSRQSIB3" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="X_0005B9_IntraFreqReselectionSIB1" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_allowedMeasurementBandwidthSIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_neighCellConfigSIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_pMaxSIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_presenceAntennaPort1SIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_qQualMinOffsetr9SIB1" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_qQualMinSIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_qQualMinr9SIB1" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_sIntraSearch_Pr9SIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_sIntraSearch_Qr9SIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_snonIntraSearch_Pr9SIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_snonIntraSearch_Qr9SIB3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_thresholdServingLowQSIB3" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="NeighborList">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InterRATCell" minOccurs="0"/>
+				<xs:element ref="LTECell" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-LTECell">
+			<xs:selector xpath="LTECell" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="InterRATCell">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="CDMA2000" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ARFCN" type="xs:string" minOccurs="0"/>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="BandClass" type="xs:string" minOccurs="0"/>
+				<xs:element name="CID" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="MustInclude" type="xs:string" minOccurs="0"/>
+				<xs:element name="PNOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="Type" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_FpcFchInitSetptRc3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Index" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MinProtocolRevLevel" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_PilotInc" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ProtocolRevLevel" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-CDMA2000">
+			<xs:selector xpath="CDMA2000" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="LTECell">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="Blacklisted" type="xs:string" minOccurs="0"/>
+				<xs:element name="CID" type="xs:string" minOccurs="0"/>
+				<xs:element name="CIO" type="xs:string" minOccurs="0"/>
+				<xs:element name="EUTRACarrierARFCN" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="MustInclude" type="xs:string" minOccurs="0"/>
+				<xs:element name="PLMNID" type="xs:string" minOccurs="0"/>
+				<xs:element name="PhyCellID" type="xs:string" minOccurs="0"/>
+				<xs:element name="Qoffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="RSTxPower" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_CSGIdentity" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_CSGIndication" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_FreqBandIndicatorPriority" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_LBPartner" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_LTECellNeighborListIndex" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MFBICapable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MultiBandInfoList" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_TAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_X2LinkEnable" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="NeighborListInUse">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="InterRATCell" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="CDMA2000" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NLInUseCDMA2000Index" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+				<xs:element ref="GSM" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="UMTS" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LTECell" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NeighborListInUseCellIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-CDMA20001">
+			<xs:selector xpath="CDMA2000" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-GSM">
+			<xs:selector xpath="GSM" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-UMTS">
+			<xs:selector xpath="UMTS" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-LTECell1">
+			<xs:selector xpath="LTECell" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="GSM">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NLInUseGSMIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UMTS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NLInUseUMTSIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PDSCH">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Pa" type="xs:string" minOccurs="0"/>
+				<xs:element name="Pb" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PRACH">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ConfigurationIndex" type="xs:string" minOccurs="0"/>
+				<xs:element name="FreqOffset" type="xs:string" minOccurs="0"/>
+				<xs:element name="RootSequenceIndex" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ConfigIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="ZeroCorrelationZoneConfig" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PUCCH">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CQIPUCCHResourceIndex" type="xs:string" minOccurs="0"/>
+				<xs:element name="DeltaPUCCHShift" type="xs:string" minOccurs="0"/>
+				<xs:element name="DynamicSRsupport" type="xs:string" minOccurs="0"/>
+				<xs:element name="N1PUCCHAN" type="xs:string" minOccurs="0"/>
+				<xs:element name="NRBCQI" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DummyDci0Allocation" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DummyDci0Thr" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PUSCH">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ULRS" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ULRS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SequenceHoppingEnabled" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SRS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AckNackSRSSimultaneousTransmission" type="xs:string" minOccurs="0"/>
+				<xs:element name="SRSBandwidthConfig" type="xs:string" minOccurs="0"/>
+				<xs:element name="SRSEnabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="SRSMaxUpPTS" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ULPowerControl">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alpha" type="xs:string" minOccurs="0"/>
+				<xs:element name="P0NominalPUCCH" type="xs:string" minOccurs="0"/>
+				<xs:element name="P0NominalPUSCH" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RLC">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DRB" minOccurs="0"/>
+				<xs:element ref="SRB1" minOccurs="0"/>
+				<xs:element ref="SRB2" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DRB">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MaxRetxThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="TPollRetransmit" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SRB1">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="DefaultConfiguration" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxRetxThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="PollByte" type="xs:string" minOccurs="0"/>
+				<xs:element name="PollPDU" type="xs:string" minOccurs="0"/>
+				<xs:element name="TPollRetransmit" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReordering" type="xs:string" minOccurs="0"/>
+				<xs:element name="TStatusProhibit" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SRB2">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="DefaultConfiguration" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxRetxThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="PollByte" type="xs:string" minOccurs="0"/>
+				<xs:element name="PollPDU" type="xs:string" minOccurs="0"/>
+				<xs:element name="TPollRetransmit" type="xs:string" minOccurs="0"/>
+				<xs:element name="TReordering" type="xs:string" minOccurs="0"/>
+				<xs:element name="TStatusProhibit" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RRCTimers">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="N310" type="xs:string" minOccurs="0"/>
+				<xs:element name="N311" type="xs:string" minOccurs="0"/>
+				<xs:element name="T300" type="xs:string" minOccurs="0"/>
+				<xs:element name="T301" type="xs:string" minOccurs="0"/>
+				<xs:element name="T302" type="xs:string" minOccurs="0"/>
+				<xs:element name="T304EUTRA" type="xs:string" minOccurs="0"/>
+				<xs:element name="T304IRAT" type="xs:string" minOccurs="0"/>
+				<xs:element name="T310" type="xs:string" minOccurs="0"/>
+				<xs:element name="T311" type="xs:string" minOccurs="0"/>
+				<xs:element name="T320" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="T300" type="xs:string" minOccurs="0"/>
+				<xs:element name="T301" type="xs:string" minOccurs="0"/>
+				<xs:element name="T304EUTRA" type="xs:string" minOccurs="0"/>
+				<xs:element name="T310" type="xs:string" minOccurs="0"/>
+				<xs:element name="T311" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="X_0005B9_RLFWaitForReestTimer" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="S1AP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="TRelocOverall" type="xs:string" minOccurs="0"/>
+				<xs:element name="TRelocPrep" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="TRelocOverall" type="xs:string" minOccurs="0"/>
+				<xs:element name="TRelocPrep" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="X_0005B9_eNBName" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="S1U">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="GTPUEchoInterval" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_X2AP_CE">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="TRelocOverall" type="xs:string" minOccurs="0"/>
+				<xs:element name="TRelocPrep" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_CE">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="eDRXAllowed" type="xs:string" minOccurs="0"/>
+				<xs:element name="numSib1BrRep" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_CarrierAggregation">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CaLoadBalance" type="xs:string" minOccurs="0"/>
+				<xs:element name="CaUeThr" type="xs:string" minOccurs="0"/>
+				<xs:element name="DlQloadLowCount" type="xs:string" minOccurs="0"/>
+				<xs:element name="DlQloadLowThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="McsScc" type="xs:string" minOccurs="0"/>
+				<xs:element name="PccCaThr" type="xs:string" minOccurs="0"/>
+				<xs:element name="QloadCaLimitInstances" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccA2ThreshRSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccA2ThreshRSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccA4ThreshRSRP" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccA4ThreshRSRQ" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccColocatedPairTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccCqiLowCount" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccCqiLowThesh" type="xs:string" minOccurs="0"/>
+				<xs:element name="SccCqiStaleTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_RrcConnection">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NRrcCC" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_RrcConnectionRejection">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="deprioritisationTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="deprioritisationType" type="xs:string" minOccurs="0"/>
+				<xs:element name="waitTime" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FAPControl">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AdminState" type="xs:string" minOccurs="0"/>
+				<xs:element ref="Gateway" minOccurs="0"/>
+				<xs:element name="PMConfig" type="xs:string" minOccurs="0"/>
+	<xs:element name="X_0005B9_CE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="DefaultPagingCycle" type="xs:string" minOccurs="0"/>
+				<xs:element name="siRepetitionPattern" type="xs:string" minOccurs="0"/>
+				<xs:element name="siValidityTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="siWindowLength" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="X_0005B9_CatM1Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_DefaultPagingCycle" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EmergencyErabARP" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_Enable4X4MIMO" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EnableDL256QAM" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EnableDlReuse" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EnableUL64QAM" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EnableUlReuse" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IdleLoadBalance" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_InactivityTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MCPTTEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MFBISupport" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_MultiBandInfoList" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ReuseFactorDl" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_ReuseFactorUl" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_SelfConfig" minOccurs="0"/>
+				<xs:element name="X_0005B9_UnequalTxPower" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_X2Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_downlinkCaEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_explicitlyReleaseAfter" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_maxSPSDL" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_maxSPSUL" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_maxSirThr" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_minSirThr" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_numConfiguredSPSProcess" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_numRpInMaxQsv" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_spsMcsOverride" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element name="SelfConfigEvents" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Gateway">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="S1ConnectionMode" type="xs:string" minOccurs="0"/>
+				<xs:element name="S1SigLinkPort" type="xs:string" minOccurs="0"/>
+				<xs:element name="S1SigLinkServerList" type="xs:string" minOccurs="0"/>
+				<xs:element name="SecGWServer1" type="xs:string" minOccurs="0"/>
+				<xs:element name="SecGWServer2" type="xs:string" minOccurs="0"/>
+				<xs:element name="SecGWServer3" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_EnableDUALTunnel" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_S1apGaurdPeriod" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_SecGW2Server1" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_SecGW2Server2" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_SecGW2Server3" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_SelfConfig">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ANRSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="AssignSameTAC" type="xs:string" minOccurs="0"/>
+				<xs:element name="AutoTxPowerEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="CellReselectionSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="ClearDiscoveredNeighbors" type="xs:string" minOccurs="0"/>
+				<xs:element name="CrntiHist" type="xs:string" minOccurs="0"/>
+				<xs:element name="EARFCNDLSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="InterFreqMeasSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="InterRATMeasSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="IntraFreqMeasSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="NeighborListSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PciColDetectThr" type="xs:string" minOccurs="0"/>
+				<xs:element name="PciCollisionDetectFlag" type="xs:string" minOccurs="0"/>
+				<xs:element name="PhyCellIDSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PmaxSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PreambleRACHTxPwrSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PropotionalRrcSplit" type="xs:string" minOccurs="0"/>
+				<xs:element name="RSTxPowerSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="RootSequenceIndexSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="RsiCollisionDetectFlag" type="xs:string" minOccurs="0"/>
+				<xs:element name="TACPolicy" type="xs:string" minOccurs="0"/>
+				<xs:element name="TACSelfConfigEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="X2TriggeredPciReconfigAllowed" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="REM">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Cell" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="EUTRACarrierARFCNDLList" type="xs:string" minOccurs="0"/>
+				<xs:element name="InServiceHandling" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="REMBandList" type="xs:string" minOccurs="0"/>
+				<xs:element name="REMPLMNList" type="xs:string" minOccurs="0"/>
+				<xs:element name="ScanOnBoot" type="xs:string" minOccurs="0"/>
+				<xs:element name="ScanPeriodically" type="xs:string" minOccurs="0"/>
+				<xs:element name="ScanTimeout" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UMTS" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="GSM" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ARFCNList" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+				<xs:element ref="WCDMA" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Cell">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="RemLteCellIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="WCDMA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="UARFCNDLList" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Transport">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SCTP" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SCTP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="HBInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxAssociationRetransmits" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxInitRetransmits" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxPathRetransmits" type="xs:string" minOccurs="0"/>
+				<xs:element name="RTOInitial" type="xs:string" minOccurs="0"/>
+				<xs:element name="RTOMax" type="xs:string" minOccurs="0"/>
+				<xs:element name="RTOMin" type="xs:string" minOccurs="0"/>
+				<xs:element name="SCTPMTUSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="SackFrequency" type="xs:string" minOccurs="0"/>
+				<xs:element name="ValCookieLife" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_AutoConfig">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AvgMcsOnDlThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="AvgMcsOnUlThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="ConnectionDropRateThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="EarfcnProgressiveEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="EpochCountThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="ErabEstablishmentFailureThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="FiftyThPercentileMcsDlThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="FiftyThPercentileMcsUlThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="HoSuccessThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="PciProgressiveEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="PeriodicTime" type="xs:string" minOccurs="0"/>
+				<xs:element name="RachToConnectionThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="RsiProgressiveEnable" type="xs:string" minOccurs="0"/>
+				<xs:element name="RsrpPciThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="RssiThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="TenThPercentileMcsDlThresh" type="xs:string" minOccurs="0"/>
+				<xs:element name="TenThPercentileMcsUlThresh" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_AutoTxPower">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AutoPowerConfigTimer" type="xs:string" minOccurs="0"/>
+				<xs:element name="DisablePowerDuration" type="xs:string" minOccurs="0"/>
+				<xs:element name="HOCountThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="LeakageRateThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="ProcessRLFonRrcConnEst" type="xs:string" minOccurs="0"/>
+				<xs:element name="RLFRateThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="RRCConnectionThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="RSRPThreshold" type="xs:string" minOccurs="0"/>
+				<xs:element name="STmsiAge" type="xs:string" minOccurs="0"/>
+				<xs:element name="Tcritical" type="xs:string" minOccurs="0"/>
+				<xs:element name="ToggleCountThreshold" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_ExpressREM">
+		<xs:complexType>
+			<xs:sequence>
+	<xs:element name="LTE" minOccurs="0">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enabled" type="xs:string" minOccurs="0"/>
+				<xs:element name="NumCarriers" type="xs:string" minOccurs="0"/>
+				<xs:element name="PCIListLength" type="xs:string" minOccurs="0"/>
+				<xs:element name="Periodicity" type="xs:string" minOccurs="0"/>
+				<xs:element name="TimeOut" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_LTE">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ANREpochPeriod" type="xs:string" minOccurs="0"/>
+				<xs:element name="CrntiStartRange" type="xs:string" minOccurs="0"/>
+				<xs:element name="EARFCNDLInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="EARFCNULInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="PMReportFormat" type="xs:string" minOccurs="0"/>
+				<xs:element name="PMaxInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="PhyCellIDInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="PreambleRACHTxPwrInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="RSTxPowerInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="RootSequenceIndexInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="TACInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="TACList" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="VoiceService">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="X_0005B9_VoIP" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_VoIP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="EmergencyPolicy" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Time">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="LocalTimeZone" type="xs:string" minOccurs="0"/>
+				<xs:element name="NTPServer1" type="xs:string" minOccurs="0"/>
+				<xs:element name="NTPServer2" type="xs:string" minOccurs="0"/>
+				<xs:element name="NTPServer3" type="xs:string" minOccurs="0"/>
+				<xs:element name="NTPServer4" type="xs:string" minOccurs="0"/>
+				<xs:element name="NTPServer5" type="xs:string" minOccurs="0"/>
+				<xs:element ref="X_0005B9_PTP" minOccurs="0"/>
+				<xs:element name="X_0005B9_TimeSource" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_PTP">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AssymetricDelay" type="xs:string" minOccurs="0"/>
+				<xs:element name="DomainNumber" type="xs:string" minOccurs="0"/>
+				<xs:element name="MultiCastIPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="Server" type="xs:string" minOccurs="0"/>
+				<xs:element name="ServerInUse" type="xs:string" minOccurs="0"/>
+				<xs:element name="TCID" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="UserInterface">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="X_0005B9_Enable" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_FHMgmt">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="TrapReceiver" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="TrapReceiver">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AuthKey" type="xs:string" minOccurs="0"/>
+				<xs:element name="AuthProtocol" type="xs:string" minOccurs="0"/>
+				<xs:element name="DMSIPAddressPort" type="xs:string" minOccurs="0"/>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="IPAddress" type="xs:string" minOccurs="0"/>
+				<xs:element name="PrivacyKey" type="xs:string" minOccurs="0"/>
+				<xs:element name="PrivacyProtocol" type="xs:string" minOccurs="0"/>
+				<xs:element name="ProcessingRate" type="xs:string" minOccurs="0"/>
+				<xs:element name="SwitchEngineID" type="xs:string" minOccurs="0"/>
+				<xs:element name="UserName" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_IPsec2">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ExcludeCP" type="xs:string" minOccurs="0"/>
+	<xs:element name="Filter" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AllInterfaces" type="xs:string" minOccurs="0"/>
+				<xs:element name="Interface" type="xs:string" minOccurs="0"/>
+				<xs:element name="Order" type="xs:string" minOccurs="0"/>
+				<xs:element name="Profile" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+	<xs:element name="IKEv2SA" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+	<xs:element name="ChildSA" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+	<xs:element name="Profile" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AHAllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AntiReplayWindowSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildSATimeLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildSATrafficLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="DSCPMarkPolicy" type="xs:string" minOccurs="0"/>
+				<xs:element name="DoNotFragment" type="xs:string" minOccurs="0"/>
+				<xs:element name="ESPAllowedEncryptionAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="ESPAllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedDiffieHellmanGroupTransforms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedEncryptionAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedPseudoRandomFunctions" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AuthenticationMethod" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2DeadPeerDetectionTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2NATTKeepaliveTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2SATimeLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxChildSAs" type="xs:string" minOccurs="0"/>
+				<xs:element name="Protocol" type="xs:string" minOccurs="0"/>
+				<xs:element name="RemoteEndpoints" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IKEv2RekeyMargin" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Filter1">
+			<xs:selector xpath="Filter" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-IKEv2SA1">
+			<xs:selector xpath="IKEv2SA" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-ChildSA1">
+			<xs:selector xpath="ChildSA" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-Profile1">
+			<xs:selector xpath="Profile" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="X_0005B9_IPsecCA">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Enable" type="xs:string" minOccurs="0"/>
+				<xs:element name="ExcludeCP" type="xs:string" minOccurs="0"/>
+	<xs:element name="Filter" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AllInterfaces" type="xs:string" minOccurs="0"/>
+				<xs:element name="Interface" type="xs:string" minOccurs="0"/>
+				<xs:element name="Order" type="xs:string" minOccurs="0"/>
+				<xs:element name="Profile" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+	<xs:element name="IKEv2SA" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+	<xs:element name="ChildSA" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+	<xs:element name="Profile" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AHAllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="Alias" type="xs:string" minOccurs="0"/>
+				<xs:element name="AntiReplayWindowSize" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildSATimeLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="ChildSATrafficLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="DSCPMarkPolicy" type="xs:string" minOccurs="0"/>
+				<xs:element name="DoNotFragment" type="xs:string" minOccurs="0"/>
+				<xs:element name="ESPAllowedEncryptionAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="ESPAllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedDiffieHellmanGroupTransforms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedEncryptionAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedIntegrityAlgorithms" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AllowedPseudoRandomFunctions" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2AuthenticationMethod" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2DeadPeerDetectionTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2NATTKeepaliveTimeout" type="xs:string" minOccurs="0"/>
+				<xs:element name="IKEv2SATimeLimit" type="xs:string" minOccurs="0"/>
+				<xs:element name="MaxChildSAs" type="xs:string" minOccurs="0"/>
+				<xs:element name="Protocol" type="xs:string" minOccurs="0"/>
+				<xs:element name="RemoteEndpoints" type="xs:string" minOccurs="0"/>
+				<xs:element name="X_0005B9_IKEv2RekeyMargin" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+			</xs:complexType>
+	</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Filter12">
+			<xs:selector xpath="Filter" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-IKEv2SA12">
+			<xs:selector xpath="IKEv2SA" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-ChildSA12">
+			<xs:selector xpath="ChildSA" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+		<xs:unique name="uniqueId-Profile12">
+			<xs:selector xpath="Profile" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="X_0005B9_License">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Licenses" minOccurs="0" maxOccurs="unbounded"/>
+
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:unique name="uniqueId-Licenses">
+			<xs:selector xpath="Licenses" />
+			<xs:field xpath="@index" />
+		</xs:unique>
+	</xs:element>
+	<xs:element name="Licenses">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="LicenseKeyIndex" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+			<xs:attribute name="index" type="dmsIndex" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_MIGRATION">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Migrate" type="xs:string" minOccurs="0"/>
+				<xs:element name="Rollback" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="X_0005B9_SoftwareManagement">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ApplyWindowDuration" type="xs:string" minOccurs="0"/>
+				<xs:element name="ApplyWindowInterval" type="xs:string" minOccurs="0"/>
+				<xs:element name="ApplyWindowStart" type="xs:string" minOccurs="0"/>
+				<xs:element name="UpgradeState" type="xs:string" minOccurs="0"/>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name="dmsIndex">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:pattern value="\d+"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

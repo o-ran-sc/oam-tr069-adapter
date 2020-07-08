@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     /*
+ * ============LICENSE_START========================================================================
+ * ONAP : tr-069-adapter
+ * =================================================================================================
+ * Copyright (C) 2020 CommScope Inc Intellectual Property.
+ * =================================================================================================
+ * This tr-069-adapter software file is distributed by CommScope Inc
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ===============LICENSE_END=======================================================================
+*/
+-->
+<configDataFile>
+  <fileHeader fileFormatVersion="32.594 V14.0.0" vendorName="Commscope"/>
+  <configData>
+    <managedElement swVersion="4.3.00.038" localDn="0005B9423910" hwVersion="750742.00.04" ProductClass="LTE_Enterprise_C-RANSC_Cntrl" OUI="0005B9"/>
+    <Device>
+      <Services>
+        <FAPService index="1">
+          <AccessMgmt>
+            <LTE>
+              <AccessMode>Open Access</AccessMode>
+            </LTE>
+          </AccessMgmt>
+          <CellConfig>
+            <LTE>
+              <EPC>
+                <PLMNList index="1">
+                  <Alias>cpe-121</Alias>
+                  <Enable>1</Enable>
+                  <IsPrimary>1</IsPrimary>
+                  <PLMNID>302650</PLMNID>
+                </PLMNList>
+                <TAC>1</TAC>
+              </EPC>
+              <RAN>
+                <Common>
+                  <CellIdentity>12602</CellIdentity>
+                  <X_0005B9_CellMode>HeNB</X_0005B9_CellMode>
+                </Common>
+                <PHY>
+                  <PRACH>
+                    <RootSequenceIndex>10,12,13</RootSequenceIndex>
+                  </PRACH>
+                </PHY>
+                <RF>
+                  <DLBandwidth>100</DLBandwidth>
+                  <EARFCNDL>3200</EARFCNDL>
+                  <EARFCNUL>21200</EARFCNUL>
+                  <PhyCellID>262</PhyCellID>
+                  <ULBandwidth>100</ULBandwidth>
+                </RF>
+              </RAN>
+            </LTE>
+          </CellConfig>
+          <FAPControl>
+            <LTE>
+              <AdminState>1</AdminState>
+              <Gateway>
+                <S1ConnectionMode>ALL</S1ConnectionMode>
+                <S1SigLinkPort>36412</S1SigLinkPort>
+                <S1SigLinkServerList>10.207.192.34</S1SigLinkServerList>
+                <SecGWServer1>10.222.222.192</SecGWServer1>
+              </Gateway>
+              <X_0005B9_SelfConfig>
+                <ClearDiscoveredNeighbors>0</ClearDiscoveredNeighbors>
+              </X_0005B9_SelfConfig>
+            </LTE>
+          </FAPControl>
+          <X_0005B9_LTE>
+            <TACList>1</TACList>
+          </X_0005B9_LTE>
+        </FAPService>
+        <X_0005B9_numSectorsPerBC>1</X_0005B9_numSectorsPerBC>
+      </Services>
+      <Time>
+        <LocalTimeZone>IST+5:30</LocalTimeZone>
+      </Time>
+    </Device>
+  </configData>
+  <fileFooter dateTime="2019-07-16T17:32:35+05:30"/>
+</configDataFile>
+
+

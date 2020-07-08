@@ -1,0 +1,210 @@
+# ============LICENSE_START========================================================================
+# ONAP : tr-069-adapter
+# =================================================================================================
+# Copyright (C) 2020 CommScope Inc Intellectual Property.
+# =================================================================================================
+# This tr-069-adapter software file is distributed by CommScope Inc under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except in compliance with the License. You
+# may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific language governing permissions and
+# limitations under the License.
+# ===============LICENSE_END=======================================================================
+
+# Note:
+# In order to support the deployment in IPv6 Docker-compose enviroment, uncomment the lines in the 
+# network section and update the subnet and Gateway.
+#
+
+version: '2.4'
+services:
+  tr069adapter-mariadb:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-mariadb:latest"
+    container_name: tr069adapter-mariadb
+    restart: always
+    ports:
+    - "3306:3306"
+    networks:
+      - csadapter_nw
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+  tr069adapter-acs-factorydb:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-acs-factorydb:latest"
+    container_name: tr069adapter-acs-factorydb
+    restart: always
+    depends_on:
+     - tr069adapter-mariadb
+    ports:
+    - "8089:8089"
+    networks:
+      - csadapter_nw
+    environment:
+      FACTORY_PORT: 8089
+
+  tr069adapter-acs:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-acs:latest"
+    container_name: tr069adapter-acs
+    restart: always
+    depends_on:
+     - tr069adapter-mariadb
+    ports:
+    - "9977:9977"
+    networks:
+      - csadapter_nw
+    environment:
+      ACS_REST_PORT: 9977
+      ACS_ADDITIONAL_REST_PORT: 9975
+      ACS_SSL_ENABLED: 'false'
+      CERT_FILE: /logs
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_SERVICE: tr069adapter-mariadb
+      DB_NAME: dmsdb
+      MAPPER_REST_PORT: 9999
+      FACTORY_REST_PORT: 8089
+      FACTORY_REST_HOST: tr069adapter-acs-factorydb
+      MAPPER_REST_HOST: tr069adapter-netconfig-mapper
+
+  tr069adapter-netconfig-mapper:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-netconfig-mapper:latest"
+    container_name: tr069adapter-netconfig-mapper
+    restart: always
+    depends_on:
+     - tr069adapter-mariadb
+    ports:
+    - "9999:9999"
+    networks:
+      - csadapter_nw
+    environment:
+      SBI_REST_HOST: tr069adapter-acs
+      SBI_REST_PORT: 9977
+      CONFIG_DB_REST_HOST: tr069adapter-acs-initialpnpdb
+      CONFIG_DB_REST_PORT: 9000
+      MAPPER_REST_PORT: 9999
+      REQUEST_TIMEOUT: 300
+      PRE_CONFIGURE_ON_PNP: 'true'
+      NBI_REST_HOST: tr069adapter-netconf-server
+      NBI_REST_PORT: 8181
+      VES_REST_HOST: tr069adapter-ves-notifier
+      VES_REST_PORT: 8383
+      NBI_NETCONF_PORT: 17830
+      NETCONF_SERVER_PORT: 17830
+      NETCONF_SERVER_IP: tr069adapter-netconf-server
+
+  tr069adapter-netconf-server:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-netconf-server:latest"
+    container_name: tr069adapter-netconf-server
+    restart: always
+    depends_on:
+     - tr069adapter-mariadb
+    ports:
+    - "8181:8181"
+    - "17830:17830"
+    networks:
+      - csadapter_nw
+    environment:
+      NETCONF_REST_PORT: 8181
+      MAPPER_REST_PORT: 9999
+      NETCONFSRV_PORT: 17830
+      DeviceId: ${DeviceId}
+      netConfServerIP: ${netconfServerIP}
+      MAPPER_REST_HOST: tr069adapter-netconfig-mapper
+      VES_PORT: 8383
+      VES_REST_HOST: tr069adapter-ves-notifier
+      VES_REST_PORT: 8383
+ 
+  tr069adapter-ves-notifier:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-ves-notifier:latest"
+    container_name: tr069adapter-ves-notifier
+    restart: always
+    depends_on:
+     - tr069adapter-mariadb
+    ports:
+    - "8383:8383"
+    networks:
+      - csadapter_nw
+    environment:
+      VES_REST_PORT: 8383
+      faultvesCollectorHost: ${netconfServerIP}
+      faultvesCollectorPort: 2222
+      pnfregvesCollectorHost: ${netconfServerIP}
+      pnfregvesCollectorPort: 3333
+      MAPPER_REST_HOST: tr069adapter-netconfig-mapper
+      MAPPER_REST_PORT: 9999
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_SERVICE: tr069adapter-mariadb
+      DB_NAME: dmsdb
+      CONFIG_MAP_ENABLE: 'false'
+
+  tr069adapter-acs-initialpnpdb:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-acs-initialpnpdb:latest"
+    container_name: tr069adapter-acs-initialpnpdb
+    restart: always
+    depends_on:
+     - tr069adapter-mariadb
+    ports:
+    - "9000:9000"
+    networks:
+      - csadapter_nw
+    environment:
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_SERVICE: tr069adapter-mariadb
+      DB_NAME: dmsdb
+      INITIALPNP_PORT: 9000
+
+  tr069adapter-nginx:
+    image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-nginx:latest"
+    container_name: tr069adapter-nginx
+    restart: always
+    ports:
+    - "1111:1111"
+    - "2222:2222"
+    - "3333:3333"
+    volumes:
+    - ./ssl:/etc/nginx/ssl/
+    environment:
+      faultvesCollectorDNSServer: ${faultvesCollectorDNSServer}
+      faultvesCollectorHost: ${faultvesCollectorHost}
+      faultvesCollectorPort: ${faultvesCollectorPort}
+      faultvesCollectorComm: ${faultvesCollectorComm}
+      faultvesCollectorSSLCert: ${tr069adapterSSLCert}
+      faultvesCollectorSSLKey: ${tr069adapterSSLKey}
+      faultvesCollectorTrustVerify: ${faultvesCollectorTrustVerify}
+      faultvesCollectorTrustCRT: ${faultvesCollectorTrustCRT}
+      pnfregvesCollectorDNSServer: ${pnfregvesCollectorDNSServer}
+      pnfregvesCollectorHost: ${pnfregvesCollectorHost}
+      pnfregvesCollectorPort: ${pnfregvesCollectorPort}
+      pnfregvesCollectorComm: ${pnfregvesCollectorComm}
+      pnfregvesCollectorSSLCert: ${tr069adapterSSLCert}
+      pnfregvesCollectorSSLKey: ${tr069adapterSSLKey}
+      pnfregvesCollectorTrustVerify: ${pnfregvesCollectorTrustVerify}
+      pnfregvesCollectorTrustCRT: ${pnfregvesCollectorTrustCRT}
+      netconfServerIP: ${netconfServerIP}
+      tr069adapterComm: ${tr069adapterComm}
+      tr069adapterSSLCert: ${tr069adapterSSLCert}
+      tr069adapterSSLKey: ${tr069adapterSSLKey}
+      tr069adapterSSLClientAuth: ${tr069adapterSSLClientAuth}
+      tr069adapterSSLClientTrustCRT: ${tr069adapterSSLClientTrustCRT}
+      tr069adapterCertPassPhrase: ${tr069adapterCertPassPhrase}
+      pnfregvesCollectorBasicAuthUserPassEncrypt: ${pnfregvesCollectorBasicAuthUserPassEncrypt}
+      faultvesCollectorBasicAuthUserPassEncrypt: ${faultvesCollectorBasicAuthUserPassEncrypt}
+    networks:
+      - csadapter_nw
+    command: /bin/bash -c "/opt/CSAdapter/configNginx.sh"
+
+networks:
+  csadapter_nw:
+    name: csadapter_nw
+    driver: bridge
+#    enable_ipv6: true
+#    ipam:
+#      driver: default
+#      config:
+#      - subnet: 2001:db9:1::/64
+#        gateway: 2001:db9:1::1

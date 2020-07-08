@@ -44,7 +44,7 @@
       </repository>
    </repositories>
    <properties>
-      <docker.image.name>tr069adapter-acs</docker.image.name>
+      <docker.image.name>o-ran-sc/tr069adapter-acs</docker.image.name>
    </properties>
    <dependencies>
       <dependency>

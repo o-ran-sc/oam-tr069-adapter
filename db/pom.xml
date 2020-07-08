@@ -32,7 +32,7 @@
    <name>maria-db</name>
    <url>http://maven.apache.org</url>
    <properties>
-      <docker.image.name>tr069adapter-mariadb</docker.image.name>
+      <docker.image.name>o-ran-sc/tr069adapter-mariadb</docker.image.name>
    </properties>
    <build>
       <plugins>
