@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-/*
+     /*
  * ============LICENSE_START========================================================================
  * O-RAN-SC : tr-069-adapter
  * =================================================================================================
@@ -27,12 +27,15 @@
       <version>1.0.0</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.commscope.tr069adapter.db</groupId>
-   <artifactId>maria-db</artifactId>
-   <name>maria-db</name>
+   <groupId>org.commscope.tr069adapter.nginx</groupId>
+   <artifactId>nginx</artifactId>
+   <packaging>jar</packaging>
+   <name>nginx</name>
    <url>http://maven.apache.org</url>
    <properties>
-      <docker.image.name>o-ran-sc/tr069adapter-mariadb</docker.image.name>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      <docker.image.name>o-ran-sc/tr069adapter-nginx</docker.image.name>
    </properties>
    <build>
       <plugins>
@@ -47,7 +50,7 @@
                   <phase>package</phase>
                   <goals>
                      <goal>build</goal>
-					 <goal>save</goal>
+                     <goal>save</goal>
                   </goals>
                   <configuration>
                      <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
@@ -96,4 +99,8 @@
          </plugin>
       </plugins>
    </build>
+   <issueManagement>
+      <system>JIRA</system>
+      <url>https://jira.o-ran-sc.org/</url>
+   </issueManagement>
 </project>

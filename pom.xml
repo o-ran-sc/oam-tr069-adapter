@@ -2,7 +2,7 @@
 <!--
 /*
  * ============LICENSE_START========================================================================
- * ONAP : tr-069-adapter
+ * O-RAN-SC : tr-069-adapter
  * =================================================================================================
  * Copyright (C) 2020 CommScope Inc Intellectual Property.
  * =================================================================================================
@@ -58,6 +58,7 @@
    <modules>
       <module>common</module>
       <module>db</module>
+      <module>nginx</module>
       <module>factory</module>
       <module>acs</module>
       <module>mapper</module>
