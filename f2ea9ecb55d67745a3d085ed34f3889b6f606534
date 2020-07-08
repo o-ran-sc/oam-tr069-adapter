@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab04324_c6cb215e",
+        "filename": "docker-compose/tr069-adapter/tr069adapter-install.env",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-07-08T13:33:11Z",
+      "side": 1,
+      "message": "committing IP addresses like this to open source is not a best practice, is this truly  required?",
+      "range": {
+        "startLine": 45,
+        "startChar": 22,
+        "endLine": 45,
+        "endChar": 34
+      },
+      "revId": "f2ea9ecb55d67745a3d085ed34f3889b6f606534",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a178d2b_ee9a31e7",
+        "filename": "docker-compose/tr069-adapter/tr069adapter-install.env",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-07-08T13:33:11Z",
+      "side": 1,
+      "message": "see above",
+      "range": {
+        "startLine": 92,
+        "startChar": 16,
+        "endLine": 92,
+        "endChar": 28
+      },
+      "revId": "f2ea9ecb55d67745a3d085ed34f3889b6f606534",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "932d953d_99ee169e",
+        "filename": "nginx/Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-07-08T13:33:11Z",
+      "side": 1,
+      "message": "ORAN?",
+      "range": {
+        "startLine": 2,
+        "startChar": 2,
+        "endLine": 2,
+        "endChar": 6
+      },
+      "revId": "f2ea9ecb55d67745a3d085ed34f3889b6f606534",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a609cd5b_6402e468",
+        "filename": "nginx/config/configNginx.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-07-08T13:33:11Z",
+      "side": 1,
+      "message": "oran?",
+      "range": {
+        "startLine": 3,
+        "startChar": 2,
+        "endLine": 3,
+        "endChar": 6
+      },
+      "revId": "f2ea9ecb55d67745a3d085ed34f3889b6f606534",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd6ce88c_37e69d53",
+        "filename": "nginx/config/nginx.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-07-08T13:33:11Z",
+      "side": 1,
+      "message": "this is ORAN, not ONAP",
+      "range": {
+        "startLine": 2,
+        "startChar": 2,
+        "endLine": 2,
+        "endChar": 6
+      },
+      "revId": "f2ea9ecb55d67745a3d085ed34f3889b6f606534",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5126cd7_289ae14b",
+        "filename": "nginx/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-07-08T13:33:11Z",
+      "side": 1,
+      "message": "ORAN?",
+      "range": {
+        "startLine": 5,
+        "startChar": 3,
+        "endLine": 5,
+        "endChar": 7
+      },
+      "revId": "f2ea9ecb55d67745a3d085ed34f3889b6f606534",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
