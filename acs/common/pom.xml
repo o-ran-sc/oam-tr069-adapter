@@ -24,11 +24,11 @@
    <groupId>org.commscope.tr069adapter.acs.common</groupId>
    <artifactId>acs-common</artifactId>
    <name>ACS common utility</name>
-    <parent>
-    	<groupId>org.commscope.tr069adapter.acs</groupId>
-    	<artifactId>acs</artifactId>
-    	<version>1.0.0</version>
-    </parent>
+	<parent>
+		<groupId>org.commscope.tr069adapter.acs</groupId>
+		<artifactId>acs</artifactId>
+		<version>1.0.0</version>
+	</parent>
    <dependencies>
       <dependency>
          <groupId>org.springframework.boot</groupId>

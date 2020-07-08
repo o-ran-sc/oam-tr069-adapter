@@ -34,6 +34,10 @@ ENV VES_REST_HOST=tr069adapter-ves-notifier
 ENV VES_REST_PORT=8383
 ENV netConfServerPort=17830
 ENV netConfServerIP=localhost
+ENV DB_SERVICE=tr069adapter-mariadb
+ENV DB_NAME=dmsdb
+ENV DB_USERNAME=root
+ENV DB_PASSWORD=root
 
 WORKDIR /opt/CSAdapter/
 

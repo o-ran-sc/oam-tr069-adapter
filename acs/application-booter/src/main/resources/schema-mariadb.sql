@@ -1,40 +1,40 @@
 -- ACS Module related tables - START
 
 CREATE TABLE IF NOT EXISTS tr069_device 
-  (
-  ID int null,
-  DEVICE_ID varchar(30) not null,
-  USER_NAME varchar(256),
-  PASSWORD varchar(256),
-  SW_VERSION varchar(20),
-  HW_VERSION varchar(20),
-  CONNECTION_REQUEST_URL varchar(1024),
-  LAST_UPDATED_TIME Timestamp
+	(
+	ID int null,
+	DEVICE_ID varchar(30) not null,
+	USER_NAME varchar(256),
+	PASSWORD varchar(256),
+	SW_VERSION varchar(20),
+	HW_VERSION varchar(20),
+	CONNECTION_REQUEST_URL varchar(1024),
+	LAST_UPDATED_TIME Timestamp
 );
 
 
 CREATE TABLE IF NOT EXISTS tr069_nbi_request 
-  (
-  ID int null, 
-  DEVICE_ID varchar(30) not null, 
-  OPERATION_ID bigint unsigned not null,
-  OPERATION_CODE int null,
-  ATTRIBUTE_JSON1 varchar(4000),
-  ATTRIBUTE_JSON2 varchar(4000),
-  ATTRIBUTE_JSON3 varchar(4000),
-  REQUEST_TIME_OUT int,
-  CREATE_TIME DATETIME(6),
-  IS_PROCESSED int DEFAULT 0
+	(
+	ID int null, 
+	DEVICE_ID varchar(30) not null, 
+	OPERATION_ID bigint unsigned not null,
+	OPERATION_CODE int null,
+	ATTRIBUTE_JSON1 varchar(4000),
+	ATTRIBUTE_JSON2 varchar(4000),
+	ATTRIBUTE_JSON3 varchar(4000),
+	REQUEST_TIME_OUT int,
+	CREATE_TIME DATETIME(6),
+	IS_PROCESSED int DEFAULT 0
 );
 
-
+	
 CREATE TABLE IF NOT EXISTS tr069_session 
-  (
-  DEVICE_ID varchar(30) not null,
-  SESSION_ID varchar(64) not null,
-  STATE int,
-  CURRENT_OPERATION_ID bigint unsigned,
-  SESSION_START_TIME TIMESTAMP
+	(
+	DEVICE_ID varchar(30) not null,
+	SESSION_ID varchar(64) not null,
+	STATE int,
+	CURRENT_OPERATION_ID bigint unsigned,
+	SESSION_START_TIME TIMESTAMP
 );
 
 CREATE SEQUENCE IF NOT EXISTS hibernate_sequence MINVALUE 1 MAXVALUE 4611686018427387903 CYCLE CACHE 10;

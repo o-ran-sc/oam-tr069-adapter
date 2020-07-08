@@ -28,16 +28,23 @@ import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069InformType;
 import org.commscope.tr069adapter.acs.common.inform.BootInform;
 import org.commscope.tr069adapter.acs.common.inform.BootstrapInform;
+import org.commscope.tr069adapter.acs.common.inform.ConnectionRequestInform;
 import org.commscope.tr069adapter.acs.common.inform.PeriodicInform;
+import org.commscope.tr069adapter.acs.common.inform.TransferCompleteInform;
 import org.commscope.tr069adapter.acs.common.inform.ValueChangeInform;
 import org.commscope.tr069adapter.mapper.MOMetaData;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.acs.ACSNotificationHandler;
+import org.commscope.tr069adapter.mapper.dao.DeviceOperationsDAO;
+import org.commscope.tr069adapter.mapper.entity.DeviceOperationDetails;
+import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.NetconfServerManagementError;
 import org.commscope.tr069adapter.mapper.netconf.NetConfNotificationSender;
 import org.commscope.tr069adapter.mapper.netconf.NetConfServerManager;
 import org.commscope.tr069adapter.mapper.sync.SynchronizedRequestHandler;
+import org.commscope.tr069adapter.mapper.util.FirwareUpgradeErrorCode;
+import org.commscope.tr069adapter.mapper.util.FirwareUpgradeStatus;
 import org.commscope.tr069adapter.mapper.util.MOMetaDataUtil;
 import org.commscope.tr069adapter.mapper.ves.VESNotificationSender;
 import org.slf4j.Logger;
@@ -49,6 +56,7 @@ import org.springframework.stereotype.Component;
 public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(ACSNotificationHandlerImpl.class);
+  private static final String SOFT_MGMT_NS_URI = "urn:o-ran:software-management:1.0";
 
   @Autowired
   SynchronizedRequestHandler syncHandler;
@@ -71,6 +79,9 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
   @Autowired
   NetConfServerManager netconfManager;
 
+  @Autowired
+  DeviceOperationsDAO deviceOperDAO;
+
   @Override
   public void handleOperationResponse(DeviceRPCResponse opResult) {
     opResult.getOperationResponse().setParameterDTOs(
@@ -85,6 +96,18 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
     if (notification instanceof BootstrapInform) {
       logger.info("BootStrap notification received");
       BootstrapInform bootstrapNotification = (BootstrapInform) notification;
+
+      DeviceOperationDetails deviceDetails =
+          deviceOperDAO.findByDeviceId(notification.getDeviceDetails().getDeviceId());
+      if (deviceDetails == null) {
+        deviceDetails = new DeviceOperationDetails();
+        deviceDetails.setDeviceId(notification.getDeviceDetails().getDeviceId());
+        deviceDetails.setSwVersion(notification.getDeviceDetails().getSoftwareVersion());
+        deviceOperDAO.save(deviceDetails);
+      }
+
+      checkForActivateNotification(notification);
+
       // send request to create the netconf server instance for the bootstrap device
       // id
       NetConfServerDetails serverInfo = createNtConfServer(bootstrapNotification);
@@ -103,6 +126,7 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
       notiSender.sendNotification(bsInform);
     } else if (notification instanceof BootInform) {
       logger.info("Boot notification received");
+      checkForActivateNotification(notification);
       BootInform bootNotification = (BootInform) notification;
       BootInform bInform = getDeviceBootNotification(bootNotification, TR069InformType.BOOT);
       if (bootNotification.getValueChangeNotification() != null) {
@@ -117,9 +141,21 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
       vesnotiSender.sendNotification(pINotificaiton, null);
       notiSender.sendNotification(pINotificaiton);
       logger.info("VC notification received");
+    } else if (notification instanceof ConnectionRequestInform) {
+      ConnectionRequestInform crNotificaiton = (ConnectionRequestInform) notification;
+      vesnotiSender.sendNotification(crNotificaiton, null);
+      logger.info("ConnectionRequestInform notification received");
     } else if (notification instanceof ValueChangeInform) {
       ValueChangeInform valueChgNotificaiton = (ValueChangeInform) notification;
       processVCNotification(valueChgNotificaiton, isAlarmVC);
+    } else if (notification instanceof TransferCompleteInform) {
+      TransferCompleteInform tfNotificaiton = (TransferCompleteInform) notification;
+      if (tfNotificaiton.getCommandKey() != null && tfNotificaiton.getCommandKey()
+          .equalsIgnoreCase(tfNotificaiton.getDeviceDetails().getDeviceId())) {
+        logger.debug("TransferCompleteInform is recevied at mapper");
+        processTransferCompleteInform(tfNotificaiton);
+        logger.debug("TransferCompleteInform processing completed at mapper");
+      }
     }
 
     pnpPreProvisioningHandler.onDeviceNotification(notification);
@@ -262,5 +298,107 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
       }
     }
     return isIPv6;
+  }
+
+  private void processTransferCompleteInform(TransferCompleteInform notification) {
+
+    try {
+      ArrayList<ParameterDTO> paramList = new ArrayList<ParameterDTO>();
+      DeviceOperationDetails fwDetails =
+          deviceOperDAO.findByDeviceId(notification.getDeviceDetails().getDeviceId());
+      if (fwDetails == null || fwDetails.getFileName() == null) {
+        logger.debug(
+            "TransferCompleteInform recevied for invaild device, there is no entry exist in the database");
+        return;
+      }
+      if (fwDetails.getDownLoadStatus() == FirwareUpgradeStatus.DOWNLOAD_INTIATED.getStatus()) {
+        paramList.add(new ParameterDTO("download-event.file-name", fwDetails.getFileName()));
+
+        String status = FirwareUpgradeErrorCode.getErrorCodeMapping(notification.getFaultCode());
+        paramList.add(new ParameterDTO("download-event.status", status));
+        if (notification.getFaultCode() != 0) {
+          fwDetails.setDownLoadStatus(FirwareUpgradeStatus.DOWNLOAD_FAILED.getStatus());
+          paramList
+              .add(new ParameterDTO("download-event.error-message", notification.getFaultString()));
+        } else {
+          fwDetails.setDownLoadStatus(FirwareUpgradeStatus.DOWNLOAD_COMPLETED.getStatus());
+          logger.debug("downloading file completed on the device successfully.");
+        }
+        deviceOperDAO.save(fwDetails);
+
+        logger.debug("sending download-event notification to netconfserver");
+        NetConfNotificationDTO netConfNotifDTO =
+            new NetConfNotificationDTO(notification.getDeviceDetails().getDeviceId(), null, true);
+        netConfNotifDTO.setParameters(paramList);
+        netConfNotifDTO.setUri(SOFT_MGMT_NS_URI);
+
+        if (notiSender.sendCustomNotification(netConfNotifDTO).getStatusCode().is2xxSuccessful()) {
+          logger.debug("sending download-event notification to netconfserver sucess");
+        } else {
+          logger.error("sending download-event notification to netconfserver failed");
+        }
+      } else {
+        logger.debug(
+            "TransferCompleteInform recevied after boot is received; already software is activated");
+      }
+    } catch (Exception e) {
+      logger.debug("Exception occured while processing TransferCompleteInform " + e.toString());
+    }
+  }
+
+  private void checkForActivateNotification(DeviceInform notification) {
+
+    try {
+      ArrayList<ParameterDTO> paramList = new ArrayList<ParameterDTO>();
+      DeviceOperationDetails devDetails =
+          deviceOperDAO.findByDeviceId(notification.getDeviceDetails().getDeviceId());
+
+      if (devDetails == null
+          || devDetails.getDownLoadStatus() == FirwareUpgradeStatus.NOT_STARTED.getStatus()) {
+        logger.debug("firmware upgrade is not in progress");
+        return;
+      }
+
+      if (!notification.getDeviceDetails().getSoftwareVersion()
+          .equalsIgnoreCase(devDetails.getSwVersion())
+          && devDetails.getDownLoadStatus() == FirwareUpgradeStatus.DOWNLOAD_INTIATED.getStatus()) {
+        logger.debug("received the boot/bootstrap before the transfer complete recevied");
+        TransferCompleteInform inform = new TransferCompleteInform();
+        inform.setDeviceDetails(notification.getDeviceDetails());
+        inform.setFaultCode(0);
+        processTransferCompleteInform(inform);
+      }
+
+      devDetails = deviceOperDAO.findByDeviceId(notification.getDeviceDetails().getDeviceId());
+      if (devDetails.getDownLoadStatus() == FirwareUpgradeStatus.DOWNLOAD_COMPLETED.getStatus()) {
+        paramList.add(new ParameterDTO("activation-event.slot-name", "Active-Partion"));
+        // check for software change
+        if (notification.getDeviceDetails().getSoftwareVersion()
+            .equalsIgnoreCase(devDetails.getSwVersion())) {
+          paramList.add(new ParameterDTO("activation-event.status", "APPLICATION_ERROR"));
+          devDetails.setDownLoadStatus(FirwareUpgradeStatus.ACTIVATION_ERROR.getStatus());
+        } else {
+          devDetails.setSwVersion(notification.getDeviceDetails().getSoftwareVersion());
+          devDetails.setDownLoadStatus(FirwareUpgradeStatus.ACTIVATION_COMPLETED.getStatus());
+          paramList.add(new ParameterDTO("activation-event.status", "COMPLETED"));
+        }
+        deviceOperDAO.save(devDetails);
+
+        logger.debug("sending activation-event notification to netconfserver");
+        NetConfNotificationDTO netConfNotifDTO =
+            new NetConfNotificationDTO(notification.getDeviceDetails().getDeviceId(), null, true);
+        netConfNotifDTO.setParameters(paramList);
+        netConfNotifDTO.setUri(SOFT_MGMT_NS_URI);
+
+        if (notiSender.sendCustomNotification(netConfNotifDTO).getStatusCode().is2xxSuccessful()) {
+          logger.debug("sending activation-event notification to netconfserver sucess");
+        } else {
+          logger.error("sending activation-event notification to netconfserver failed");
+        }
+      }
+    } catch (Exception e) {
+      logger.debug(
+          "Exception occured while processing ProcessFirmWareActivateNotification " + e.toString());
+    }
   }
 }

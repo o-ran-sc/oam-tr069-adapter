@@ -33,4 +33,7 @@ public interface NetConfRequestHandler {
   public NetConfResponse handleDelConfigRequest(NetConfRequest request);
 
   public boolean handelRegisterEvent(NetConfServerDetails request);
+
+  public NetConfResponse handleSWDownloadRequest(NetConfRequest request);
+
 }

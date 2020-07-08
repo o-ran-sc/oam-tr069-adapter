@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeviceRPCRequest implements Serializable, Cloneable {
+public class DeviceRPCRequest implements Serializable {
 
   private static final long serialVersionUID = -7300390764969298783L;
 
@@ -33,7 +33,25 @@ public class DeviceRPCRequest implements Serializable, Cloneable {
   private OperationDetails opDetails;
 
   private OperationOptions options;
-  private Map<String, Object> context = new HashMap<>();
+  private transient Map<String, Object> context = new HashMap<>();
+
+  public DeviceRPCRequest(DeviceDetails deviceDetails, Long operationId, OperationDetails opDetails,
+      OperationOptions options, Map<String, Object> context) {
+    super();
+    this.deviceDetails = deviceDetails;
+    this.operationId = operationId;
+    this.opDetails = opDetails;
+    this.options = options;
+    this.context = context;
+  }
+
+  public DeviceRPCRequest(DeviceRPCRequest deviceRPCRequest) {
+    deviceDetails = deviceRPCRequest.deviceDetails;
+    operationId = deviceRPCRequest.operationId;
+    opDetails = deviceRPCRequest.opDetails;
+    options = deviceRPCRequest.options;
+    context = deviceRPCRequest.context;
+  }
 
   public DeviceRPCRequest() {
 
@@ -82,11 +100,6 @@ public class DeviceRPCRequest implements Serializable, Cloneable {
 
   public void addContextParam(String name, Object value) {
     this.context.put(name, value);
-  }
-
-  @Override
-  public Object clone() throws CloneNotSupportedException {
-    return super.clone();
   }
 
   @Override

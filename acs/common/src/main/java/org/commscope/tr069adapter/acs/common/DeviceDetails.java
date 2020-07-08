@@ -35,6 +35,10 @@ public class DeviceDetails implements Serializable {
 
   protected String productClass;
 
+  // Device version details
+  protected String softwareVersion;
+  protected String hardwareVersion;
+
   public String getDeviceId() {
     return deviceId;
   }
@@ -65,6 +69,22 @@ public class DeviceDetails implements Serializable {
 
   public void setProductClass(String productClass) {
     this.productClass = productClass;
+  }
+
+  public String getSoftwareVersion() {
+    return softwareVersion;
+  }
+
+  public void setSoftwareVersion(String softwareVersion) {
+    this.softwareVersion = softwareVersion;
+  }
+
+  public String getHardwareVersion() {
+    return hardwareVersion;
+  }
+
+  public void setHardwareVersion(String hardwareVersion) {
+    this.hardwareVersion = hardwareVersion;
   }
 
 }

@@ -49,7 +49,7 @@ public class NetconfToTr069MapperUtilTest {
     OperationResponse opr = new OperationResponse();
     opr.setParameterDTOs(getGeneralParams());
     opResult.setOperationResponse(opr);
-    NetConfResponse netConfRes = mapUtil.getNetconfResponse(opResult);
+    NetConfResponse netConfRes = mapUtil.getNetconfResponse(opResult, false);
     Assert.assertNotNull(netConfRes);
     Assert.assertEquals("0", netConfRes.getErrorCode().getFaultCode());
     Assert.assertEquals("Success", netConfRes.getErrorCode().getErrorMessage());
@@ -64,7 +64,7 @@ public class NetconfToTr069MapperUtilTest {
     OperationResponse opr = new OperationResponse();
     opr.setParameterDTOs(getGeneralParams());
     opResult.setOperationResponse(opr);
-    NetConfResponse netConfRes = mapUtil.getNetconfResponse(opResult);
+    NetConfResponse netConfRes = mapUtil.getNetconfResponse(opResult, false);
     Assert.assertNotNull(netConfRes);
     Assert.assertEquals("9001", netConfRes.getErrorCode().getFaultCode());
     Assert.assertEquals("Request denied", netConfRes.getErrorCode().getErrorMessage());
@@ -77,7 +77,7 @@ public class NetconfToTr069MapperUtilTest {
     opResult.setDeviceDetails(new DeviceDetails());
     OperationResponse opr = new OperationResponse();
     opResult.setOperationResponse(opr);
-    NetConfResponse netConfRes = mapUtil.getNetconfResponse(opResult);
+    NetConfResponse netConfRes = mapUtil.getNetconfResponse(opResult, false);
     Assert.assertNotNull(netConfRes);
     Assert.assertEquals("0", netConfRes.getErrorCode().getFaultCode());
     Assert.assertEquals("Success", netConfRes.getErrorCode().getErrorMessage());

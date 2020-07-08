@@ -36,6 +36,7 @@ import org.commscope.tr069adapter.vesagent.model.Event;
 import org.commscope.tr069adapter.vesagent.model.EventMessage;
 import org.commscope.tr069adapter.vesagent.model.PnfRegEventAdditionalFeilds;
 import org.commscope.tr069adapter.vesagent.model.PnfRegEventFields;
+import org.commscope.tr069adapter.vesagent.util.EventUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,30 +110,8 @@ public class PnfRegMappingHandler {
     eventHeader.setEventName("pnfReg_" + notification.getDeviceDetails().getProductClass() + "-"
         + config.getVendorName());
     eventHeader.setEventType(config.getPnfRegEventType());
-    eventHeader.setLastEpochMicrosec(System.currentTimeMillis());
-
     eventHeader.setPriority("High");
-    eventHeader.setSequence(0);
-
-    if (eNodeBName == null) {
-      eventHeader.setReportingEntityName(notification.getDeviceDetails().getDeviceId());
-      eventHeader.setReportingEntityId(notification.getDeviceDetails().getDeviceId());
-      eventHeader.setSourceId(notification.getDeviceDetails().getDeviceId());
-      eventHeader.setSourceName(notification.getDeviceDetails().getDeviceId());
-    } else {
-      eventHeader.setReportingEntityName(eNodeBName);
-      eventHeader.setSourceName(eNodeBName);
-
-      eventHeader.setReportingEntityId(notification.getDeviceDetails().getDeviceId());
-      eventHeader.setSourceId(notification.getDeviceDetails().getDeviceId());
-    }
-
-    eventHeader.setStartEpochMicrosec(System.currentTimeMillis());
-    eventHeader.setVersion(config.getEventVersion());
-    eventHeader.setNfNamingCode("");
-    eventHeader.setNfcNamingCode("");
-    eventHeader.setNfVendorName(config.getVendorName());
-    eventHeader.setVesEventListenerVersion(config.getVesVersion());
+    EventUtil.populateEventHeaderFields(eventHeader, notification, eNodeBName, config);
     regEvent.setCommonEventHeader(eventHeader);
 
     PnfRegEventFields pnfRegistrationFields =

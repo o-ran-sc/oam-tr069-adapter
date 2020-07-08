@@ -130,13 +130,13 @@
                   <phase>package</phase>
                   <goals>
                      <goal>build</goal>
-    				 <goal>save</goal>
+					 <goal>save</goal>
                   </goals>
                   <configuration>
                      <pullRegistry>${env.CONTAINER_PULL_REGISTRY}</pullRegistry>
                      <images>
                         <image>
-                           <name>${docker.image.name}</name>
+                           <name>${docker.image.name}:${build.version}</name>
                            <build>
                               <cleanup>try</cleanup>
                               <contextDir>${basedir}</contextDir>

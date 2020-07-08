@@ -55,12 +55,17 @@ public class DeviceRPCRequestHandler {
         logger.debug("Received a TR069 operation request from Mapper with operation ID: {} ",
             mapperDeviceOperationRequest.getOperationId());
         tr069RequestProcessEngine.processDeviceRPCRequest(mapperDeviceOperationRequest);
+        logger.debug("Processed a TR069 operation request from Mapper with operation ID: {} ",
+            mapperDeviceOperationRequest.getOperationId());
+
       }
     } catch (TR069EventProcessingException ex) {
       logger.error(ex.getMessage());
     } finally {
       MDC.remove(CLIENT_STR);
     }
+    logger.debug("Processed JMS message from Mapper for TR069 Device RPC operation");
+
   }
 
 }

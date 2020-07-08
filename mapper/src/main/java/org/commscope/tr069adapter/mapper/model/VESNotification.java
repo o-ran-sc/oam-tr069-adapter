@@ -23,10 +23,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 
 import org.commscope.tr069adapter.acs.common.DeviceInform;
+import org.commscope.tr069adapter.acs.common.OperationDetails;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class VESNotification implements Serializable {
   private DeviceInform devnotification;
+  private OperationDetails operationDetails;
   private NetConfServerDetails netconfDetails;
   private String eNodeBName;
 
@@ -36,6 +38,14 @@ public class VESNotification implements Serializable {
 
   public void setDevnotification(DeviceInform devnotification) {
     this.devnotification = devnotification;
+  }
+
+  public OperationDetails getOperationDetails() {
+    return operationDetails;
+  }
+
+  public void setOperationDetails(OperationDetails operationDetails) {
+    this.operationDetails = operationDetails;
   }
 
   public NetConfServerDetails getNetconfDetails() {

@@ -18,9 +18,19 @@
 
 package org.commscope.tr069adapter.netconf.rpc;
 
+import java.io.StringReader;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.commscope.tr069adapter.mapper.model.ErrorCodeDetails;
+import org.commscope.tr069adapter.mapper.model.NetConfResponse;
 import org.commscope.tr069adapter.netconf.boot.NetConfServiceBooter;
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
 import org.opendaylight.netconf.api.DocumentedException;
+import org.opendaylight.netconf.api.DocumentedException.ErrorSeverity;
+import org.opendaylight.netconf.api.DocumentedException.ErrorTag;
+import org.opendaylight.netconf.api.DocumentedException.ErrorType;
 import org.opendaylight.netconf.api.xml.XmlElement;
 import org.opendaylight.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.netconf.mapping.api.HandlingPriority;
@@ -29,6 +39,7 @@ import org.opendaylight.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 public class SoftwareDownloadOperation implements NetconfOperation {
   private static final Logger logger = LoggerFactory.getLogger(SoftwareDownloadOperation.class);
@@ -52,18 +63,48 @@ public class SoftwareDownloadOperation implements NetconfOperation {
   public Document handle(Document requestMessage,
       NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
 
-    logger.debug("sw-download rpc recevied in netconf server");
+    logger.debug("soft-ware download rpc is received in netconfserver");
+
     final XmlElement requestElement = XmlElement.fromDomDocument(requestMessage);
+    final String msgId = requestElement.getAttribute(XmlNetconfConstants.MESSAGE_ID);
 
     String requestXml = XmlUtility.convertDocumentToString(requestElement);
-    logger.debug("sw-download rpc recevied requestXml = {}", requestXml);
+    logger.debug("soft-ware download rpc requestXml=" + requestXml);
+
     NetConfServerProperties config =
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/softwareDowload";
-    XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    NetConfResponse restResponse = XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
 
-    return null;
+    Document document = null;
+
+    ErrorCodeDetails errorCode = restResponse.getErrorCode();
+    if (errorCode != null && errorCode.getFaultCode() != null
+        && !errorCode.getFaultCode().equalsIgnoreCase("0")) {
+      logger.error("Error recevied : " + errorCode);
+      throw new DocumentedException(errorCode.getErrorMessage(),
+          ErrorType.from(errorCode.getErrorType()), ErrorTag.from(errorCode.getErrorTag()),
+          ErrorSeverity.from(errorCode.getErrorSeverity()));
+    } else if (restResponse != null && restResponse.getNetconfResponseXml() != null) {
+      logger.debug("soft-ware download rpc response received from mapper "
+          + restResponse.getNetconfResponseXml());
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder;
+      try {
+        builder = factory.newDocumentBuilder();
+        document =
+            builder.parse(new InputSource(new StringReader(restResponse.getNetconfResponseXml())));
+        document.getDocumentElement().setAttribute("xmlns:ns1", getOperationNamespace());
+        document.getDocumentElement().setAttribute("xmlns",
+            XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+        document.getDocumentElement().setAttribute(XmlNetconfConstants.MESSAGE_ID, msgId);
+      } catch (Exception e) {
+        logger.error("while contruscting the response; ", e.toString());
+      }
+    }
+
+    return document;
   }
 
   protected HandlingPriority canHandle(final String operationName,
@@ -106,5 +147,13 @@ public class SoftwareDownloadOperation implements NetconfOperation {
       throws DocumentedException {
     return XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
         XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+  }
+
+  protected String getOperationNamespace() {
+    return "urn:o-ran:software-management:1.0";
+  }
+
+  protected String getOperationName() {
+    return "software-download";
   }
 }

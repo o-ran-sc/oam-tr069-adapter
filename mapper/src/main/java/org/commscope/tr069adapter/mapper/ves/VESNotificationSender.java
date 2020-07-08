@@ -19,6 +19,8 @@
 package org.commscope.tr069adapter.mapper.ves;
 
 import org.commscope.tr069adapter.acs.common.DeviceInform;
+import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
+import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.acs.impl.PnPPreProvisioningHandler;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
@@ -64,6 +66,19 @@ public class VESNotificationSender {
 
     return restTemplate.postForObject(uri, vesNotifi, VESNotificationResponse.class);
   }
+
+  public DeviceRPCResponse sendEditConfigNotification(DeviceRPCRequest deviceRPCRequest) {
+    final String uri = config.getVerConfigUri() + "/editConfig";
+    LOG.debug("Posting edit config request to ves agent {}", uri);
+    return restTemplate.postForObject(uri, deviceRPCRequest, DeviceRPCResponse.class);
+  }
+
+  public DeviceRPCResponse sendGetConfigNotification(DeviceRPCRequest deviceRPCRequest) {
+    final String uri = config.getVerConfigUri() + "/getConfig";
+    LOG.debug("Posting get config request to ves agent {}", uri);
+    return restTemplate.postForObject(uri, deviceRPCRequest, DeviceRPCResponse.class);
+  }
+
 
   private String getUri() {
     return config.getVesUri();

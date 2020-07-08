@@ -23,6 +23,7 @@ import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_OP_RE
 
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
+import org.commscope.tr069adapter.acs.common.dto.CustomOperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069InformType;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.slf4j.Logger;
@@ -68,11 +69,19 @@ public class TR069EventNotificationService {
     String deviceId = deviceRPCResponse.getDeviceDetails().getDeviceId();
     try {
       MDC.put(CLIENT_STR, deviceId);
-      TR069OperationCode operCode =
-          (TR069OperationCode) deviceRPCResponse.getOperationResponse().getOperationCode();
-      String opCodeName = operCode.name();
-      logger.debug("Device RPC Response received for operation: '{}' with operation ID: {}",
-          opCodeName, deviceRPCResponse.getOperationId());
+      if (deviceRPCResponse.getOperationResponse()
+          .getOperationCode() instanceof TR069OperationCode) {
+        TR069OperationCode operCode =
+            (TR069OperationCode) deviceRPCResponse.getOperationResponse().getOperationCode();
+        logger.debug("Device RPC Response received for operation: '" + operCode.name()
+            + "' with operation ID:" + deviceRPCResponse.getOperationId());
+      } else if (deviceRPCResponse.getOperationResponse()
+          .getOperationCode() instanceof CustomOperationCode) {
+        CustomOperationCode operCode =
+            (CustomOperationCode) deviceRPCResponse.getOperationResponse().getOperationCode();
+        logger.debug("Device RPC Response received for operation: '" + operCode.getJndiName()
+            + "' with operation ID:" + deviceRPCResponse.getOperationId());
+      }
       jmsTemplate.convertAndSend(NBI_OP_RESULT_Q, deviceRPCResponse);
       logger.debug("Successfully posted the operation result event to DM to forward to NBI");
     } catch (Exception e) {

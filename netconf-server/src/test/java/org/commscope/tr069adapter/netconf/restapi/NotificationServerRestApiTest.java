@@ -21,12 +21,8 @@ package org.commscope.tr069adapter.netconf.restapi;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.commscope.tr069adapter.acs.common.DeviceDetails;
-import org.commscope.tr069adapter.acs.common.DeviceInform;
-import org.commscope.tr069adapter.acs.common.InformType;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
-import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
-import org.commscope.tr069adapter.acs.common.dto.TR069InformType;
+import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
 import org.commscope.tr069adapter.netconf.boot.NetConfServiceBooter;
 import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.Test;
@@ -50,19 +46,15 @@ public class NotificationServerRestApiTest {
   @Test
   public void createNetconfServer() {
 
-    DeviceInform notification = new DeviceInform();
 
-    DeviceDetails deviceDetails = new TR069DeviceDetails();
-    notification.setDeviceDetails(deviceDetails);
-    List<InformType> notificationTypeList = new ArrayList<>();
-    InformType itype = TR069InformType.BOOTSTRAP;
-    notificationTypeList.add(itype);
-    notification.setInformTypeList(notificationTypeList);
+    NetConfNotificationDTO netConNotifDTO =
+        new NetConfNotificationDTO("00005B9432910", null, false);
+
     List<ParameterDTO> parameters = new ArrayList<>();
     ParameterDTO param1 = new ParameterDTO("Device.Info", "info-details");
     parameters.add(param1);
-    notification.setParameters(parameters);
-    service.processNotification(notification);
+    netConNotifDTO.setParameters(parameters);
+    service.processNotification(netConNotifDTO);
 
   }
 }

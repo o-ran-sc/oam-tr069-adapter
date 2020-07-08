@@ -48,6 +48,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
+import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
@@ -137,33 +138,36 @@ public class ACSServiceBooter {
   }
   // End
 
-
   @Bean
-  public JmsListenerContainerFactory<?> tr069NBIRequestCF(ConnectionFactory connectionFactory,
+  public JmsListenerContainerFactory<MessageListenerContainer> tr069NBIRequestCF(
+      ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-    configurer.configure(factory, connectionFactory);
-    return factory;
+    return handleJMSCommonConfiguration(connectionFactory, configurer);
   }
 
   @Bean
-  public JmsListenerContainerFactory<?> tr069DeviceResponseCF(ConnectionFactory connectionFactory,
+  public JmsListenerContainerFactory<MessageListenerContainer> tr069DeviceResponseCF(
+      ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-    configurer.configure(factory, connectionFactory);
-    return factory;
+    return handleJMSCommonConfiguration(connectionFactory, configurer);
   }
 
   @Bean
-  public JmsListenerContainerFactory<?> nbiNotificationCF(ConnectionFactory connectionFactory,
+  public JmsListenerContainerFactory<MessageListenerContainer> nbiNotificationCF(
+      ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-    configurer.configure(factory, connectionFactory);
-    return factory;
+    return handleJMSCommonConfiguration(connectionFactory, configurer);
   }
 
   @Bean
-  public JmsListenerContainerFactory<?> nbiOpResultCF(ConnectionFactory connectionFactory,
+  public JmsListenerContainerFactory<MessageListenerContainer> nbiOpResultCF(
+      ConnectionFactory connectionFactory,
+      DefaultJmsListenerContainerFactoryConfigurer configurer) {
+    return handleJMSCommonConfiguration(connectionFactory, configurer);
+  }
+
+  public JmsListenerContainerFactory handleJMSCommonConfiguration(
+      ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
     DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
     configurer.configure(factory, connectionFactory);

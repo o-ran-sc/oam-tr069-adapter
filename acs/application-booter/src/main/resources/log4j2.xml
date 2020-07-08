@@ -86,11 +86,11 @@
     <Loggers>
     	<Logger name="org.commscope.tr069adapter" level="debug" additivity="false">
     		<appender-ref ref="console"/>
-    		<appender-ref ref="applicationLog"/>
-    	</Logger>
-    	
-    	<Logger name="org.springframework" level="error" additivity="false">
-    		<appender-ref ref="console"/>
+			<appender-ref ref="applicationLog"/>
+		</Logger>
+		
+		<Logger name="org.springframework" level="error" additivity="false">
+			<appender-ref ref="console"/>
             <AppenderRef ref="springLog" />
         </Logger>
         

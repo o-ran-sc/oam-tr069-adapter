@@ -18,10 +18,9 @@
 
 package org.commscope.tr069adapter.netconf.server;
 
-import java.util.List;
-
 import org.commscope.tr069adapter.netconf.entity.NetConfServerDetailsEntity;
 import org.commscope.tr069adapter.netconf.error.RetryFailedException;
+import org.commscope.tr069adapter.netconf.server.helper.ServerPortAllocationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,32 +37,33 @@ public class RestartNetconfServerHandler {
   @Autowired
   NetConfServerManagerImpl manager;
 
+  @Autowired
+  ServerPortAllocationHelper serverPortAllocator;
+
   @Retryable(value = {RetryFailedException.class}, maxAttempts = 100,
       backoff = @Backoff(delay = 15000))
-  public void restart(List<NetConfServerDetailsEntity> serverDetailsList)
-      throws RetryFailedException {
+  public void restart(NetConfServerDetailsEntity entity) throws RetryFailedException {
+    boolean isSucess = false;
     try {
       // restart netconf servers
-      manager.restartServersOnStartup(serverDetailsList);
+      serverPortAllocator.checkAndReserveServerPort(entity.getListenPort());
+      isSucess = manager.restartServersOnStartup(entity);
     } catch (Exception e) {
       logger.error("Retry to netconf servers has  is failed. {}", e.toString());
       throw new RetryFailedException(e);
     }
-
-    if (!serverDetailsList.isEmpty()) {
-      logger.error("Failed to start some of netconf servers. Retrying starting servers : {}",
-          serverDetailsList);
+    if (!isSucess) {
       throw new RetryFailedException(
-          "Failed to start some of netconf servers. server list : " + serverDetailsList);
+          "Failed to start some of netconf servers. server list : " + entity);
     }
     logger.debug("Successfully started all failed netconf servers.");
   }
 
   @Recover
-  public void recover(List<NetConfServerDetailsEntity> serverDetailsList) {
+  public void recover(NetConfServerDetailsEntity entity) {
     logger.debug("Retrying starting failed netconf servers.");
     try {
-      restart(serverDetailsList);
+      restart(entity);
     } catch (RetryFailedException e) {
       logger.error("Failed to start failed netconf servers. {}", e.toString());
     }
