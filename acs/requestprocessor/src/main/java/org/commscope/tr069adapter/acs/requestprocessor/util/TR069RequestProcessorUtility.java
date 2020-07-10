@@ -48,6 +48,8 @@ public class TR069RequestProcessorUtility {
   protected static final int BLOCK_SIZE = 3999;
   protected static final int MAX_SIZE = 11998;
   public static final int DEVICE_REACHABLE_STATUS_CODE = 100;
+  public static final String ADMIN_STATE = "FAPControl.LTE.AdminState";
+  public static final String ADMIN_STATUS = "FAPControl.LTE.AdminStatus";
 
 
   private TR069RequestProcessorUtility() {

@@ -18,9 +18,9 @@
 
 package org.commscope.tr069adapter.vesagent.util;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
@@ -181,6 +181,16 @@ public class VesAgentUtils {
 
   public static String getDeviceOperationKey(String deviceId, OperationCode opCode) {
     return deviceId + "-" + opCode;
+  }
+
+  public static long getStartEpochTime() {
+    Calendar calendar = Calendar.getInstance();
+
+    long minuteEquivalentWithoutSec = calendar.getTimeInMillis();
+    minuteEquivalentWithoutSec = (minuteEquivalentWithoutSec / 60000);
+    minuteEquivalentWithoutSec = minuteEquivalentWithoutSec * 60 * 1000;
+
+    return minuteEquivalentWithoutSec;
   }
 
 }

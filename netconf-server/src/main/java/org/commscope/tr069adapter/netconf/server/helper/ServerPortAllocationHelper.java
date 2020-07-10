@@ -75,8 +75,8 @@ public class ServerPortAllocationHelper {
     }
     LOG.debug("Successfully populated available ports list.");
   }
-
-  public String reserveServerPort() throws ServerPortAllocationException {
+  
+  public synchronized String reserveServerPort() throws ServerPortAllocationException {
 
     if (availablePorts.isEmpty()) {
       LOG.debug(
@@ -89,6 +89,7 @@ public class ServerPortAllocationHelper {
     LOG.debug("Trying to reserve port : {}", port);
     if (isServerPortInUse(port)) {
       LOG.debug("Port {} is already in use.", port);
+      availablePorts.poll();
       return reserveServerPort(); // retry if current port is not available
     }
 

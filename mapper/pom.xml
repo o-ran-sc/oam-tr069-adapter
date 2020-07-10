@@ -43,7 +43,7 @@
       </repository>
    </repositories>
    <properties>
-      <docker.image.name>tr069adapter-netconfig-mapper</docker.image.name>
+      <docker.image.name>o-ran-sc/tr069adapter-netconfig-mapper</docker.image.name>
    </properties>
    <dependencies>
       <dependency>
@@ -130,6 +130,22 @@
                      <includes>
                         <include>org/commscope/tr069adapter/mapper/model/*</include>
                      </includes>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>mapper-jar</id>
+                  <goals>
+                     <goal>jar</goal>
+                  </goals>
+                  <configuration>
+                     <finalName>mapper-jar</finalName>
+                     <classifier>lib</classifier>
                   </configuration>
                </execution>
             </executions>

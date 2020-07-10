@@ -43,6 +43,7 @@ public class MapperConfigProperties {
   private String alarmMORegex;
 
   private String verConfigUri;
+  private String vendorName;
 
   public String getRequesTimeout() {
     return requesTimeout;
@@ -130,6 +131,14 @@ public class MapperConfigProperties {
 
   public void setVerConfigUri(String verConfigUri) {
     this.verConfigUri = verConfigUri;
+  }
+
+  public String getVendorName() {
+    return vendorName;
+  }
+
+  public void setVendorName(String vendorName) {
+    this.vendorName = vendorName;
   }
 
 }

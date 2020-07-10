@@ -45,6 +45,7 @@ import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationDetails;
+import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.model.ErrorCodeDetails;
 import org.commscope.tr069adapter.mapper.model.NetConfResponse;
 import org.slf4j.Logger;
@@ -62,6 +63,9 @@ public class NetconfToTr069MapperUtil {
 
   @Autowired
   MOMetaDataUtil metaDataUtil;
+  
+  @Autowired
+  MapperConfigProperties config;
 
   private static final Logger logger = LoggerFactory.getLogger(NetconfToTr069MapperUtil.class);
   private static final String INDEX_STR = "index";
@@ -230,7 +234,7 @@ public class NetconfToTr069MapperUtil {
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.access", "READ_ONLY"));
     paramDTOList
         .add(new ParameterDTO("software-inventory.software-slot.product-code", productClass));
-    paramDTOList.add(new ParameterDTO("software-inventory.software-slot.vendor-code", "CS"));
+    paramDTOList.add(new ParameterDTO("software-inventory.software-slot.vendor-code", config.getVendorName()));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.build-id", buildId));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.build-version",
         buildVersion.toString()));

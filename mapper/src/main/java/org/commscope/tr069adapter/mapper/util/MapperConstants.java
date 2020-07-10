@@ -33,4 +33,11 @@ public class MapperConstants {
   public static final String DEVICE_REACHABLE_MSG = "Device is reachable";
   public static final String DEFAULT_OP_TIMEOUT_MSG = "Operation Timed out";
   public static final String RPC_SUCCESS = "0";
+  public static final String RPC_FAILED = "1";
+
+  public static final int RPC_SUCCESS_CODE = 0;
+  public static final int RPC_FAILED_CODE = 1;
+
+  public static final String ADMIN_STATE = "FAPControl.LTE.AdminState";
+  public static final String ADMIN_STATUS = "FAPControl.LTE.AdminStatus";
 }
