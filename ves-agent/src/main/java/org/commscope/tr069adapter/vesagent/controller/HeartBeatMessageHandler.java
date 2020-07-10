@@ -221,7 +221,7 @@ public class HeartBeatMessageHandler {
       eventHeader.setSourceId(deviceDataEntity.getDeviceId());
     }
 
-    eventHeader.setStartEpochMicrosec(System.currentTimeMillis() * 1000);
+    eventHeader.setStartEpochMicrosec(deviceDataEntity.getStartEpochMicrosec());
     eventHeader.setVersion(config.getEventVersion());
     eventHeader.setNfNamingCode("");
     eventHeader.setNfcNamingCode("");

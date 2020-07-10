@@ -38,6 +38,7 @@ ENV DB_SERVICE=tr069adapter-mariadb
 ENV DB_NAME=dmsdb
 ENV DB_USERNAME=root
 ENV DB_PASSWORD=root
+ENV VENDOR_NAME=CS
 
 WORKDIR /opt/CSAdapter/
 
