@@ -21,14 +21,16 @@ package org.commscope.tr069adapter.mapper.netconf.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationOptions;
+import org.commscope.tr069adapter.acs.common.OperationResponse;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import org.commscope.tr069adapter.acs.common.dto.CustomOperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationDetails;
+import org.commscope.tr069adapter.acs.common.response.SetParameterValueResponse;
 import org.commscope.tr069adapter.mapper.MOMetaData;
 import org.commscope.tr069adapter.mapper.dao.DeviceOperationsDAO;
 import org.commscope.tr069adapter.mapper.entity.DeviceOperationDetails;
@@ -71,7 +73,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
   MOMetaDataUtil metaDataUtil;
 
   @Autowired
-  private ErrorCodeUtil errorCodeUtil;
+  ErrorCodeUtil errorCodeUtil;
 
   @Autowired
   VESNotificationSender vesnotiSender;
@@ -145,7 +147,18 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     DeviceRPCResponse deviceRPCResponseDevice = null;
     if (null != allParamList && !allParamList.isEmpty()) {
       deviceRPCRequest.getOpDetails().setParmeters(allParamList);
-      deviceRPCResponseDevice = syncHandler.performDeviceOperation(deviceRPCRequest);
+      if (isAdminStateOverriden(allParamList)) {
+        deviceRPCRequest.getOpDetails().setOpCode(CustomOperationCode.CONFIGURE_MULTIPLE_OBJECTS);
+        TR069OperationDetails tr069OperationDetails =
+            (TR069OperationDetails) deviceRPCRequest.getOpDetails();
+        tr069OperationDetails.setModifyParamList(allParamList);
+        tr069OperationDetails.setSetParamList(null);
+
+        deviceRPCResponseDevice = syncHandler.performDeviceOperation(deviceRPCRequest);
+        convertResposeToSPVResponse(deviceRPCResponseDevice);
+      } else {
+        deviceRPCResponseDevice = syncHandler.performDeviceOperation(deviceRPCRequest);
+      }
 
       if (null == deviceRPCResponseDevice) {
         return getTimeOutResponse();
@@ -417,7 +430,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return response;
   }
 
-  private DeviceRPCResponse mergeGetConfigDeviceRPCResponse(DeviceRPCResponse opResultVes,
+  protected DeviceRPCResponse mergeGetConfigDeviceRPCResponse(DeviceRPCResponse opResultVes,
       DeviceRPCResponse opResultDevice) {
     if (null == opResultVes) {
       return opResultDevice;
@@ -440,7 +453,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return opResultDevice;
   }
 
-  private DeviceRPCResponse mergeSetConfigDeviceRPCResponse(DeviceRPCResponse opResultVes,
+  protected DeviceRPCResponse mergeSetConfigDeviceRPCResponse(DeviceRPCResponse opResultVes,
       DeviceRPCResponse opResultDevice) {
     if (null == opResultVes) {
       return opResultDevice;
@@ -453,7 +466,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return opResultDevice;
   }
 
-  private boolean isVesNotificationRequest(ParameterDTO param) {
+  protected boolean isVesNotificationRequest(ParameterDTO param) {
     if (null == param.getParamName() || param.getParamName().isEmpty()) {
       return false;
     }
@@ -468,7 +481,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return false;
   }
 
-  private void handleBooleanParameters(List<ParameterDTO> parameterDTOs) {
+  protected void handleBooleanParameters(List<ParameterDTO> parameterDTOs) {
 
     for (ParameterDTO param : parameterDTOs) {
       MOMetaData metaData = metaDataUtil.getMetaDataByTR69Name(param.getParamName());
@@ -482,7 +495,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     }
   }
 
-  private void handleBooleanParametersReverse(List<ParameterDTO> parameterDTOs) {
+  protected void handleBooleanParametersReverse(List<ParameterDTO> parameterDTOs) {
 
     for (ParameterDTO param : parameterDTOs) {
       MOMetaData metaData = metaDataUtil.getMetaDataByTR69Name(param.getParamName());
@@ -496,7 +509,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     }
   }
 
-  private NetConfResponse getEmptyResponse() {
+  protected NetConfResponse getEmptyResponse() {
     NetConfResponse response = new NetConfResponse();
     ErrorCodeDetails errorCodeMetaData = errorCodeUtil.getErrorCodeMetaData("0");
     ErrorCodeDetails errorCode = new ErrorCodeDetails();
@@ -509,7 +522,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return response;
   }
 
-  private NetConfResponse getTimeOutResponse() {
+  protected NetConfResponse getTimeOutResponse() {
     // prepare timeout error response
     NetConfResponse timeOutErrorResponse = new NetConfResponse();
     ErrorCodeDetails errorCode = new ErrorCodeDetails();
@@ -525,7 +538,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return timeOutErrorResponse;
   }
 
-  private NetConfResponse getErrorResponse(String errCode, String errorMsg) {
+  protected NetConfResponse getErrorResponse(String errCode, String errorMsg) {
     NetConfResponse errorResponse = new NetConfResponse();
     ErrorCodeDetails errorCode = new ErrorCodeDetails();
     ErrorCodeDetails errorCodeMetaData = errorCodeUtil.getErrorCodeMetaData("8006");
@@ -541,12 +554,12 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return errorResponse;
   }
 
-  private NetConfResponse getOperationAbortedResponse(String errorMessage) {
+  protected NetConfResponse getOperationAbortedResponse(String errorMessage) {
     // prepare timeout error response
     NetConfResponse timeOutErrorResponse = new NetConfResponse();
     ErrorCodeDetails errorCode = new ErrorCodeDetails();
     ErrorCodeDetails errorCodeMetaData = errorCodeUtil.getErrorCodeMetaData("8006");
-    if (errorCode != null) {
+    if (errorCodeMetaData != null) {
       errorCode.setFaultCode("8002");
       errorCode.setErrorMessage(errorCodeMetaData.getErrorMessage());
       errorCode.setErrorType(errorCodeMetaData.getErrorType());
@@ -573,7 +586,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return result;
   }
 
-  private List<ParameterDTO> filteredGetParameters(List<ParameterDTO> parameters) {
+  protected List<ParameterDTO> filteredGetParameters(List<ParameterDTO> parameters) {
 
     return metaDataUtil.getSupportedChildParameters(parameters);
   }
@@ -592,7 +605,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return result;
   }
 
-  private static String getDownloadFileURI(String filepath) {
+  protected static String getDownloadFileURI(String filepath) {
 
     if (filepath.contains("@") && filepath.contains("//")) {
       String[] str = filepath.split("@");
@@ -605,7 +618,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return null;
   }
 
-  private static String getDownloadUserName(String filepath) {
+  protected static String getDownloadUserName(String filepath) {
 
     if (filepath.contains("@") && filepath.contains("//")) {
       String[] str = filepath.split("@");
@@ -614,5 +627,32 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
         return strForUserName[1];
     }
     return null;
+  }
+
+  protected boolean isAdminStateOverriden(List<ParameterDTO> paramList) {
+    for (ParameterDTO paramDTO : paramList) {
+      if (paramDTO.getParamName().contains(MapperConstants.ADMIN_STATE)
+          || paramDTO.getParamName().contains(MapperConstants.ADMIN_STATUS)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected void convertResposeToSPVResponse(DeviceRPCResponse deviceRPCResponse) {
+    if (null == deviceRPCResponse) {
+      return;
+    }
+
+    OperationResponse operationResponse = new SetParameterValueResponse();
+    operationResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+
+    if (null == deviceRPCResponse.getFaultKey()) {
+      operationResponse.setStatus(MapperConstants.RPC_SUCCESS_CODE);
+    } else {
+      operationResponse.setStatus(MapperConstants.RPC_FAILED_CODE);
+    }
+
+    deviceRPCResponse.setOperationResponse(operationResponse);
   }
 }

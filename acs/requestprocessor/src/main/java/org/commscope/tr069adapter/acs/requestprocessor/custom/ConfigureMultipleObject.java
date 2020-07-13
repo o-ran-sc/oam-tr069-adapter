@@ -20,12 +20,10 @@ package org.commscope.tr069adapter.acs.requestprocessor.custom;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NUMBER_REGEX;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.SUCCESS;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationDetails;
@@ -252,6 +250,20 @@ public class ConfigureMultipleObject implements CustomOperation {
       } else if (opResponse instanceof SetParameterValueResponse) {
         logger.debug("Received Set parameter value response");
         isPendingOperationExists = false;
+        for (ParameterDTO setParam : tr069modifyParamList) {
+          if (Boolean.TRUE.equals(setParam.isInitiated())
+              && Boolean.FALSE.equals(setParam.isProcessed())) {
+            setParam.setInitiated(Boolean.FALSE);
+            setParam.setProcessed(Boolean.TRUE);
+          } else if (Boolean.FALSE.equals(setParam.isInitiated())
+              && Boolean.FALSE.equals(setParam.isProcessed())) {
+            isPendingOperationExists = true;
+            nextOperation = OperationOrder.SET_PARAMETER_VALUE;
+          }
+        }
+
+        updateParamChangedFlagInDb(deviceDetails.getDeviceId(), nbiDeviceOperationRequest);
+        logger.debug("Next operation to be executed is : {}", nextOperation);
       }
     }
 
@@ -323,7 +335,39 @@ public class ConfigureMultipleObject implements CustomOperation {
               clonedOpRequest.setOpDetails(null);
               OperationDetails opDetails = new OperationDetails();
               opDetails.setOpCode(TR069OperationCode.SET_PARAMETER_VALUES);
-              opDetails.setParmeters(tr069modifyParamList);
+              List<ParameterDTO> unprocessedParamList = new ArrayList<>();
+              ParameterDTO adminStateParam = null;
+              for (ParameterDTO paramDTO : tr069modifyParamList) {
+                if (!paramDTO.isProcessed()) {
+                  if (isAdminStateExists(paramDTO)) {
+                    adminStateParam = paramDTO;
+                  } else {
+                    unprocessedParamList.add(paramDTO);
+                  }
+                }
+              }
+
+              if (null != adminStateParam && isAdminStateFalse(adminStateParam.getParamValue())) {
+                List<ParameterDTO> adminStateParamList = new ArrayList<>();
+                adminStateParam.setInitiated(Boolean.TRUE);
+                adminStateParamList.add(adminStateParam);
+                opDetails.setParmeters(adminStateParamList);
+                updateParamChangedFlagInDb(deviceDetails.getDeviceId(), nbiDeviceOperationRequest);
+              } else if (!unprocessedParamList.isEmpty()) {
+                setInititedFlagTrue(unprocessedParamList);
+                opDetails.setParmeters(unprocessedParamList);
+                updateParamChangedFlagInDb(deviceDetails.getDeviceId(), nbiDeviceOperationRequest);
+              } else if (null != adminStateParam
+                  && isAdminStateTrue(adminStateParam.getParamValue())) {
+                List<ParameterDTO> paramList = new ArrayList<>();
+                adminStateParam.setInitiated(Boolean.TRUE);
+                paramList.add(adminStateParam);
+                opDetails.setParmeters(paramList);
+                updateParamChangedFlagInDb(deviceDetails.getDeviceId(), nbiDeviceOperationRequest);
+              } else {
+                isPendingOperationExists = false;
+              }
+
               clonedOpRequest.setOpDetails(opDetails);
               operRequest = clonedOpRequest;
             } else {
@@ -383,6 +427,7 @@ public class ConfigureMultipleObject implements CustomOperation {
     return customOperationData;
   }
 
+
   enum OperationOrder {
 
     SET_PARAMETER_VALUE(null), ADD_OBJECT(SET_PARAMETER_VALUE), DELETE_OBJECT(ADD_OBJECT);
@@ -419,6 +464,39 @@ public class ConfigureMultipleObject implements CustomOperation {
     parameterDTO.setProcessed(paramDTO.isProcessed());
 
     return parameterDTO;
+  }
+
+  private boolean isAdminStateExists(ParameterDTO paramDTO) {
+    return (paramDTO.getParamName().contains(TR069RequestProcessorUtility.ADMIN_STATE)
+        || paramDTO.getParamName().contains(TR069RequestProcessorUtility.ADMIN_STATUS));
+  }
+
+  private void updateParamChangedFlagInDb(String deviceId,
+      DeviceRPCRequest nbiDeviceOperationRequest) throws TR069EventProcessingException {
+    List<TR069DeviceRPCRequestEntity> entityList = deviceRPCRequestRepositoryHelper
+        .findByDeviceIdAndOperationId(deviceId, nbiDeviceOperationRequest.getOperationId());
+    List<TR069DeviceRPCRequestEntity> tr069DeviceRPCRequestEntityList =
+        TR069RequestProcessorUtility.convertToEntity(nbiDeviceOperationRequest);
+    for (int i = 0; i < entityList.size(); i++) {
+      tr069DeviceRPCRequestEntityList.get(i).setId(entityList.get(i).getId());
+    }
+    deviceRPCRequestRepositoryHelper.saveAll(tr069DeviceRPCRequestEntityList);
+  }
+
+  private void setInititedFlagTrue(List<ParameterDTO> unprocessedParamList) {
+    for (ParameterDTO paramDTO : unprocessedParamList) {
+      paramDTO.setInitiated(Boolean.TRUE);
+    }
+  }
+
+  private boolean isAdminStateFalse(String adminState) {
+    return (null != adminState && (adminState.equalsIgnoreCase(Boolean.FALSE.toString())
+        || adminState.equalsIgnoreCase("0")));
+  }
+
+  private boolean isAdminStateTrue(String adminState) {
+    return (null != adminState && (adminState.equalsIgnoreCase(Boolean.TRUE.toString())
+        || adminState.equalsIgnoreCase("1")));
   }
 
 }

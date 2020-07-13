@@ -32,13 +32,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-/**
- * 
- * @version 1.0
- * @since May 21, 2020
- * @author Prashant Kumar
- */
-
 @Entity
 @Table(name = "VES_DEVICE_DATA",
     uniqueConstraints = @UniqueConstraint(columnNames = {"DEVICE_ID", "ATTR_GROUP"}))
@@ -132,6 +125,17 @@ public class DeviceDataEntity {
 
   public void setLastUpdateTime(Date lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
+  }
+  
+  @Transient
+  private Long startEpochMicrosec;
+
+  public Long getStartEpochMicrosec() {
+    return startEpochMicrosec;
+  }
+
+  public void setStartEpochMicrosec(Long startEpochMicrosec) {
+    this.startEpochMicrosec = startEpochMicrosec;
   }
 
   @Transient

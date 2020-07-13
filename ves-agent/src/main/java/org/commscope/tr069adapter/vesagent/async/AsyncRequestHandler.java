@@ -123,6 +123,7 @@ public class AsyncRequestHandler {
 
   @Async
   public void initiateDeviceReachabilityCheck(DeviceDataEntity deviceDataEntity) {
+    deviceDataEntity.setStartEpochMicrosec(VesAgentUtils.getStartEpochTime()*1000);
     DeviceDetails deviceDetails = new DeviceDetails();
     deviceDetails.setDeviceId(deviceDataEntity.getDeviceId());
     deviceDetails.setOui(deviceDataEntity.getOui());

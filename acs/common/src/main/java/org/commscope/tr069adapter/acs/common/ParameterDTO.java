@@ -19,7 +19,6 @@
 package org.commscope.tr069adapter.acs.common;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import java.io.Serializable;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
@@ -31,6 +30,7 @@ public class ParameterDTO implements Serializable {
   private String paramValue;
   private String dataType;
   private boolean isProcessed;
+  private boolean isInitiated = Boolean.FALSE;
 
   public ParameterDTO() {
 
@@ -79,6 +79,14 @@ public class ParameterDTO implements Serializable {
 
   public void setProcessed(boolean isProcessed) {
     this.isProcessed = isProcessed;
+  }
+
+  public boolean isInitiated() {
+    return isInitiated;
+  }
+
+  public void setInitiated(boolean isInitiated) {
+    this.isInitiated = isInitiated;
   }
 
   @Override
