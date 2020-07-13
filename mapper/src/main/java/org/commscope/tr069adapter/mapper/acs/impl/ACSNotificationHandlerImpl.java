@@ -376,6 +376,7 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
         if (notification.getDeviceDetails().getSoftwareVersion()
             .equalsIgnoreCase(devDetails.getSwVersion())) {
           paramList.add(new ParameterDTO("activation-event.status", "APPLICATION_ERROR"));
+          paramList.add(new ParameterDTO("activation-event.error-message", "Same Software Version is reported after upgrade"));
           devDetails.setDownLoadStatus(FirwareUpgradeStatus.ACTIVATION_ERROR.getStatus());
         } else {
           devDetails.setSwVersion(notification.getDeviceDetails().getSoftwareVersion());
