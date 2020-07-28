@@ -28,7 +28,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.annotation.EnableRetry;
 
 @SpringBootApplication
-@ComponentScan({"org.commscope.tr069adapter.netconf", "org.opendaylight.netconf.test"})
+@ComponentScan({"org.commscope.tr069adapter.netconf", "org.opendaylight.netconf.test", "org.commscope.tr069adapter.common"})
 @EnableJpaRepositories("org.commscope.tr069adapter.netconf.dao")
 @EntityScan("org.commscope.tr069adapter.netconf.entity")
 @EnableRetry

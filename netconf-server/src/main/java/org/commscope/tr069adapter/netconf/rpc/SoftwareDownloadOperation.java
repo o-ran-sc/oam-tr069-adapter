@@ -46,9 +46,13 @@ public class SoftwareDownloadOperation implements NetconfOperation {
   public static final String SOFT_MGMT_NAMESPACE = "urn:o-ran:software-management:1.0";
 
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
-  public SoftwareDownloadOperation(String deviceID) {
+  public SoftwareDownloadOperation(String deviceID, String swVersion, String hwVersion) {
     this.deviceID = deviceID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   @Override
@@ -75,7 +79,8 @@ public class SoftwareDownloadOperation implements NetconfOperation {
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/softwareDowload";
-    NetConfResponse restResponse = XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    NetConfResponse restResponse =
+        XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
 
     Document document = null;
 

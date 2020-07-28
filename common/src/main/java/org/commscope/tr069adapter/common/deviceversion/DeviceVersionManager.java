@@ -16,41 +16,20 @@
  * ===============LICENSE_END=======================================================================
  */
 
-package org.commscope.tr069adapter.mapper.model;
+package org.commscope.tr069adapter.common.deviceversion;
 
-import java.io.Serializable;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.List;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-public class NetConfNotificationDTO implements Serializable {
+public interface DeviceVersionManager {
 
-  private static final long serialVersionUID = 4928942484595767042L;
-  private String notificaiton;
-  private String deviceID;
+  public String getNetconfYangSchemaPath(String swVersion, String hwVersion);
 
-  public NetConfNotificationDTO() {
-    super();
-  }
+  public String getBaseNetconfYangSchemaPath();
 
-  public NetConfNotificationDTO(String deviceID, String notificaiton) {
-    super();
-    this.deviceID = deviceID;
-    this.notificaiton = notificaiton;
-  }
-
-  public String getDeviceID() {
-    return deviceID;
-  }
-
-  public void setDeviceID(String deviceID) {
-    this.deviceID = deviceID;
-  }
-
-  public String getNotificaiton() {
-    return notificaiton;
-  }
-
-  public void setNotificaiton(String notificaiton) {
-    this.notificaiton = notificaiton;
-  }
+  public String getAssociatedProfileId(String swVersion, String hwVersion);
+  
+  public ProfileDefinition getProfileDefinition(String swVersion, String hwVersion);
+  
+  public List<ProfileDefinition> getSupportedProfileDefinitions();
+  
 }

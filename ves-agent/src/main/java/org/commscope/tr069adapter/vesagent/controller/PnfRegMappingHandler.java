@@ -158,7 +158,7 @@ public class PnfRegMappingHandler {
       eventHeader.setSourceId(netconfServerDetails.getDeviceId());
     }
 
-    eventHeader.setStartEpochMicrosec(System.currentTimeMillis());
+    eventHeader.setStartEpochMicrosec(System.currentTimeMillis()*1000);
     eventHeader.setVersion(config.getEventVersion());
     eventHeader.setNfNamingCode("");
     eventHeader.setNfcNamingCode("");
@@ -179,6 +179,7 @@ public class PnfRegMappingHandler {
     pnfRegistrationFields.setPnfRegistrationFieldsVersion(config.getPnfFeildVersion());
     pnfRegistrationFields.setMacAddress(netconfServerDetails.getDeviceId());
     pnfRegistrationFields.setVendorName(config.getVendorName());
+    pnfRegistrationFields.setSoftwareVersion(netconfServerDetails.getSwVersion());
     PnfRegEventAdditionalFeilds additionalFields = new PnfRegEventAdditionalFeilds();
 
     pnfRegistrationFields.setOamV4IpAddress(netconfServerDetails.getListenAddress());

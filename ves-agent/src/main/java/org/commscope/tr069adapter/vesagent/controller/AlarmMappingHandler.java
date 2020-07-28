@@ -121,7 +121,7 @@ public class AlarmMappingHandler {
       EventUtil.populateEnodeBName(eventHeader, notification, eNodeBName);
 
       eventHeader.setSequence(1);
-      eventHeader.setStartEpochMicrosec(System.currentTimeMillis());
+      eventHeader.setStartEpochMicrosec(System.currentTimeMillis()*1000);
       eventHeader.setVersion(config.getEventVersion());
       if (eNodeBName != null && eNodeBName.length() > 3)
         eventHeader.setNfNamingCode(eNodeBName.substring(0, 3));

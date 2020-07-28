@@ -46,6 +46,12 @@ public class NetConfServerDetailsEntity implements Serializable {
   @Column(name = "PORT", length = 10)
   private String listenPort;
 
+  @Column(name = "SW_VERSION", length = 64)
+  private String swVersion;
+
+  @Column(name = "HW_VERSION", length = 64)
+  private String hwVersion;
+
   public Long getId() {
     return id;
   }
@@ -78,4 +84,19 @@ public class NetConfServerDetailsEntity implements Serializable {
     this.enodeBName = enodeBName;
   }
 
+  public String getSwVersion() {
+    return swVersion;
+  }
+
+  public void setSwVersion(String swVersion) {
+    this.swVersion = swVersion;
+  }
+
+  public String getHwVersion() {
+    return hwVersion;
+  }
+
+  public void setHwVersion(String hwVersion) {
+    this.hwVersion = hwVersion;
+  }
 }

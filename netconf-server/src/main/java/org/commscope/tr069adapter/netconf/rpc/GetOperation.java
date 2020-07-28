@@ -44,12 +44,16 @@ public class GetOperation extends AbstractLastNetconfOperation {
 
   private final DataList storage;
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
   public GetOperation(final String netconfSessionIdForReporting, final DataList storage,
-      String deviceID) {
+      String deviceID, String swVersion, String hwVersion) {
     super(netconfSessionIdForReporting);
     this.deviceID = deviceID;
     this.storage = storage;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   @Override
@@ -68,7 +72,8 @@ public class GetOperation extends AbstractLastNetconfOperation {
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/get";
-    NetConfResponse restResponse = XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    NetConfResponse restResponse =
+        XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
 
     if (restResponse != null) {
       ErrorCodeDetails errorCode = restResponse.getErrorCode();

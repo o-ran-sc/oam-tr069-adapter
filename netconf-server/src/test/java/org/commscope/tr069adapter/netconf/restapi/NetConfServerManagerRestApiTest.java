@@ -66,9 +66,10 @@ public class NetConfServerManagerRestApiTest {
     entity.setId(1l);
     entity.setListenPort("17830");
 
-    MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-        .post("/netConfServerManagerService/createServer").param("deviceId", "0005B9AB1")
-        .param("enodeBName", "0005B9AB1").accept(MediaType.APPLICATION_JSON);
+    MockHttpServletRequestBuilder requestBuilder =
+        MockMvcRequestBuilders.post("/netConfServerManagerService/createServer")
+            .param("deviceId", "0005B9AB1").param("enodeBName", "0005B9AB1")
+            .param("swVersion", "4.4.3").param("hwVersion", "*").accept(MediaType.APPLICATION_JSON);
     MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
     MockHttpServletResponse response = result.getResponse();

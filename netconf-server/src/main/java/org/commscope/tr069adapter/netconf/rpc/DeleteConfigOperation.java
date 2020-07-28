@@ -45,12 +45,16 @@ public class DeleteConfigOperation extends AbstractLastNetconfOperation {
   private static final String REMOVE_EDIT_CONFIG = "remove";
   private final DataList storage;
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
   public DeleteConfigOperation(final String netconfSessionIdForReporting, final DataList storage,
-      String deviceID) {
+      String deviceID, String swVersion, String hwVersion) {
     super(netconfSessionIdForReporting);
     this.storage = storage;
     this.deviceID = deviceID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   @Override
@@ -71,7 +75,8 @@ public class DeleteConfigOperation extends AbstractLastNetconfOperation {
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/delConfig";
-    NetConfResponse restResponse = XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    NetConfResponse restResponse =
+        XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
 
     if (restResponse != null) {
       ErrorCodeDetails errorCode = restResponse.getErrorCode();

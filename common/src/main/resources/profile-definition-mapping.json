@@ -1,0 +1,11 @@
+{
+  "profileDefinition":[
+    {
+      "profile-id":"base",
+      "software-version":"*",
+      "hardware-version":"*",
+      "netconf-schema-dir-path":"base",
+      "csdm-mapping-dir-path":"base"
+    }
+  ]
+}

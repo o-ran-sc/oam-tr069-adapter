@@ -18,9 +18,13 @@
 
 package org.commscope.tr069adapter.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 
 public class ConfigDataTestsUtils {
+
+  private ConfigDataTestsUtils() {}
 
   public static final String SERVER_URI = "http://localhost:9000/";
   public static final String macId = "testMacId";
@@ -47,13 +51,17 @@ public class ConfigDataTestsUtils {
   // }
 
 
-  public static ConfigFileContent getConfigFileContent() {
-    ConfigFileContent configFileContent = new ConfigFileContent();
+  public static List<ConfigFileContent> getConfigFileContent() {
+    List<ConfigFileContent> data = new ArrayList<>();
 
-    configFileContent.setFileContent(getFileContent());
-    configFileContent.setMacId(macId);
+    for (int i = 0; i < 5; i++) {
+      ConfigFileContent configFileContent = new ConfigFileContent();
+      configFileContent.setFileContent(getFileContent());
+      configFileContent.setMacId(macId);
+      configFileContent.setSwVersion("4." + i);
+    }
 
-    return configFileContent;
+    return data;
   }
 
 

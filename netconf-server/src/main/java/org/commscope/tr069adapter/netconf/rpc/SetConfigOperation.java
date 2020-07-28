@@ -42,10 +42,15 @@ public class SetConfigOperation extends AbstractLastNetconfOperation {
   private static final String OPERATION = "operation";
   private static final String REMOVE_EDIT_CONFIG = "remove";
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
-  public SetConfigOperation(final String netconfSessionIdForReporting, String deviceID) {
+  public SetConfigOperation(final String netconfSessionIdForReporting, String deviceID,
+      String swVersion, String hwVersion) {
     super(netconfSessionIdForReporting);
     this.deviceID = deviceID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   @Override
@@ -64,7 +69,8 @@ public class SetConfigOperation extends AbstractLastNetconfOperation {
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/" + delOrEditUrl;
-    NetConfResponse restResponse = XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    NetConfResponse restResponse =
+        XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
 
     if (restResponse != null) {
       ErrorCodeDetails errorCode = restResponse.getErrorCode();

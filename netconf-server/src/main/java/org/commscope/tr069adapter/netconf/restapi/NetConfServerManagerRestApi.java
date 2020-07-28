@@ -42,14 +42,28 @@ public class NetConfServerManagerRestApi {
 
   @PostMapping("/createServer")
   public NetConfServerDetails createNetConfServerInstance(@RequestParam String deviceId,
-      @RequestParam String enodeBName) {
+      @RequestParam String enodeBName, @RequestParam String swVersion,
+      @RequestParam String hwVersion) {
     LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}", deviceId,
         enodeBName);
-    NetConfServerDetails serverDetails = manager.createServer(deviceId, enodeBName);
+    NetConfServerDetails serverDetails =
+        manager.createServer(deviceId, enodeBName, swVersion, hwVersion);
     LOG.info("Successfully processed NetConf Server wit server details : {}", serverDetails);
     return serverDetails;
   }
 
+  @PostMapping("/restartServer")
+  public NetConfServerDetails resatrtNetConfServerInstance(@RequestParam String deviceId,
+      @RequestParam String enodeBName, @RequestParam String swVersion,
+      @RequestParam String hwVersion) {
+    LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}", deviceId,
+        enodeBName);
+    NetConfServerDetails serverDetails =
+        manager.restartServer(deviceId, enodeBName, swVersion, hwVersion);
+    LOG.info("Successfully processed NetConf Server wit server details : {}", serverDetails);
+    return serverDetails;
+  }
+  
   @GetMapping("/listServers")
   public List<NetConfServerDetails> listNetConfServersInfo() {
     LOG.info("Received request to list all NetConf Servers information");

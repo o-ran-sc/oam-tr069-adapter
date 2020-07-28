@@ -234,6 +234,8 @@ public class NetConfRequestReceiverTest {
     NetConfRequest req = new NetConfRequest();
     req.setDeviceId("0005B9A1");
     req.setRequestXml(requestXml);
+    req.setSwVersion("4.3.0.0");
+    req.setHwVersion("*");
     return req;
   }
 

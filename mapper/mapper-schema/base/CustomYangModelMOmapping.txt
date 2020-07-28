@@ -1,0 +1,8 @@
+TRMONAME,YANGMONAME,MOTYPE,TRDATATYPE,YANGNAMESPACE
+heartbeat.,heartbeat,ScalarObject,object,urn:o-ran:heartbeat-management:1.0
+heartbeat.heartbeatPeriod,heartbeat.heartbeatPeriod,Scalar-ReadWrite,unsignedInt
+heartbeat.countDownTimer,heartbeat.countDownTimer,Scalar-ReadWrite,unsignedInt
+BOOTSTRAP,bootstrap,ScalarObject,object,urn:onf:otcc:wireless:yang:tr069-notification
+BOOT,boot,ScalarObject,object,urn:onf:otcc:wireless:yang:tr069-notification
+PERIODIC,periodic,ScalarObject,object,urn:onf:otcc:wireless:yang:tr069-notification
+VALUECHANGE,valuechange,ScalarObject,object,urn:onf:otcc:wireless:yang:tr069-notification

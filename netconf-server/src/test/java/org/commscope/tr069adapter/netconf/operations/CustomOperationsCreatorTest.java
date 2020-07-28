@@ -42,7 +42,7 @@ class CustomOperationsCreatorTest {
   }
 
   CustomOperationsCreator getCustomOperationsCreator() {
-    CustomOperationsCreator coc = new CustomOperationsCreator("0005B9AB1");
+    CustomOperationsCreator coc = new CustomOperationsCreator("0005B9AB1", "4.3.0", "*");
     return coc;
   }
 

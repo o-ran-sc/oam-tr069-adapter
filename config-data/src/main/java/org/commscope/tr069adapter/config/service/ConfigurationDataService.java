@@ -19,8 +19,10 @@
 package org.commscope.tr069adapter.config.service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
-
+import java.util.TreeMap;
 import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.constants.Utility;
 import org.commscope.tr069adapter.config.exceptions.InvalidConfigurationServiceException;
@@ -56,14 +58,29 @@ public class ConfigurationDataService {
     return configDataRepository.findById(macId);
   }
 
-  public Optional<ConfigurationData> getConfigurationData(String macId)
-      throws InvalidConfigurationServiceException {
+  public Optional<ConfigurationData> getConfigurationData(String macId, String swVersion,
+      String hwVersion) throws InvalidConfigurationServiceException {
     ConfigurationData configurationData = null;
-    Optional<ConfigFileContent> configFileContent = configDataRepository.findById(macId);
-
-    if (configFileContent.isPresent()) {
+    List<ConfigFileContent> configFileContentList = configDataRepository.findByMacId(macId);
+    TreeMap<DeviceVersion, ConfigurationData> configDataMap = new TreeMap<>();
+    if (!configFileContentList.isEmpty()) {
       logger.debug("Parsing configuration file for device {}", macId);
-      configurationData = configurationXMLDataParser.parseFile(configFileContent.get());
+      for (ConfigFileContent configFileContent : configFileContentList) {
+        ConfigurationData cfgData = configurationXMLDataParser.parseFile(configFileContent);
+        DeviceVersion dVersion =
+            new DeviceVersion(cfgData.getSoftwareVersion(), cfgData.getHardwareVersion());
+        configDataMap.put(dVersion, cfgData);
+      }
+      DeviceVersion inputVersion = new DeviceVersion(swVersion, hwVersion);
+      Entry<DeviceVersion, ConfigurationData> floorEntry = configDataMap.floorEntry(inputVersion);
+
+      if (null == floorEntry) {
+        logger.error("Configuration file is not available for device {}", macId);
+        return Optional.ofNullable(configurationData);
+      }
+
+      DeviceVersion floor = floorEntry.getKey();
+      configurationData = configDataMap.get(floor);
       logger.debug("Parsing of device configuration file is completed");
     } else {
       logger.error("Configuration file is not available for device {}", macId);
@@ -102,10 +119,120 @@ public class ConfigurationDataService {
 
     configurationXMLDataParser.validateFile(configFileContent);
 
+    ConfigurationData configurationData = configurationXMLDataParser.parseFile(configFileContent);
+    configFileContent.setSwVersion(configurationData.getSoftwareVersion());
+    configFileContent.setHwVersion(configurationData.getHardwareVersion());
+
     logger.debug("Saving configuration file {} content for device of macId {}", fileName,
         Utility.getMacId(fileName));
-    saveConfigFileContent(configFileContent);
+    ConfigFileContent configFileContentEntity =
+        configDataRepository.findByMacIdAndSwVersionAndHwVersion(configFileContent.getMacId(),
+            configFileContent.getSwVersion(), configFileContent.getHwVersion());
+
+    if (configFileContentEntity != null) {
+      configFileContentEntity.setFileContent(configFileContent.getFileContent());
+      saveConfigFileContent(configFileContentEntity);
+    } else {
+      saveConfigFileContent(configFileContent);
+    }
+
     logger.debug("Configuration file content saved successfully");
+  }
+
+  class DeviceVersion implements Comparable<DeviceVersion> {
+    private static final long serialVersionUID = -7251276716604249440L;
+    private int svMajorVersion = 0;
+    private int svMinorVersion = 0;
+    private int svPatchVersion = 0;
+    private boolean isGenericVersion = false;
+
+    public DeviceVersion(String swVersion, String hwVersion) {
+      super();
+      setSwVersion(swVersion);
+      this.hwVersion = hwVersion;
+    }
+
+    public String getSwVersion() {
+      return svMajorVersion + "." + svMinorVersion + "." + svPatchVersion;
+    }
+
+    public void setSwVersion(String swVersion) {
+      // TODO: conversion to integers
+
+      if (swVersion.indexOf(".") > 0) {
+        String[] verArray = swVersion.split("\\.");
+
+
+        for (int i = 0; i < verArray.length; i++) {
+
+          if (verArray[i].equals("*")) {
+            verArray[i] = "0";
+          }
+        }
+        svMajorVersion = Integer.parseInt(verArray[0]);
+        svMinorVersion = Integer.parseInt(verArray[1]);
+        svPatchVersion = Integer.parseInt(verArray[2]);
+
+      } else if (swVersion.indexOf("x") > 0) {
+        swVersion = "*";
+      } else if (swVersion.equals("*")) {
+        isGenericVersion = true;
+      }
+    }
+
+    public String getHwVersion() {
+      return hwVersion;
+    }
+
+    public void setHwVersion(String hwVersion) {
+      this.hwVersion = hwVersion;
+    }
+
+    private String hwVersion;
+
+    public int getSvMajorVersion() {
+      return svMajorVersion;
+    }
+
+    public void setSvMajorVersion(int svMajorVersion) {
+      this.svMajorVersion = svMajorVersion;
+    }
+
+    public int getSvMinorVersion() {
+      return svMinorVersion;
+    }
+
+    public void setSvMinorVersion(int svMinorVersion) {
+      this.svMinorVersion = svMinorVersion;
+    }
+
+    public int getSvPatchVersion() {
+      return svPatchVersion;
+    }
+
+    public void setSvPatchVersion(int svPatchVersion) {
+      this.svPatchVersion = svPatchVersion;
+    }
+
+    public boolean isGenericVersion() {
+      return isGenericVersion;
+    }
+
+    public void setGenericVersion(boolean isGenericVersion) {
+      this.isGenericVersion = isGenericVersion;
+    }
+
+    @Override
+    public int compareTo(DeviceVersion o) {
+
+      if (svMajorVersion != o.svMajorVersion) {
+        return (svMajorVersion - o.svMajorVersion);
+      } else if (svMinorVersion != o.svMinorVersion) {
+        return svMinorVersion - o.svMinorVersion;
+      } else {
+        return svPatchVersion - o.svPatchVersion;
+      }
+    }
   }
 
 }

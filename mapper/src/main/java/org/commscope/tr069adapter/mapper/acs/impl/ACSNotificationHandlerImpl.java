@@ -20,7 +20,6 @@ package org.commscope.tr069adapter.mapper.acs.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.InformType;
@@ -85,7 +84,9 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
   @Override
   public void handleOperationResponse(DeviceRPCResponse opResult) {
     opResult.getOperationResponse().setParameterDTOs(
-        filterUnsupportedParameters(opResult.getOperationResponse().getParameterDTOs()));
+        filterUnsupportedParameters(opResult.getOperationResponse().getParameterDTOs(),
+            opResult.getDeviceDetails().getSoftwareVersion(),
+            opResult.getDeviceDetails().getHardwareVersion()));
     syncHandler.notifyResult(opResult);
   }
 
@@ -162,12 +163,16 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
   }
 
   private NetConfServerDetails createNtConfServer(BootstrapInform bootstrapNotification) {
-    String eNodeBName = pnpPreProvisioningHandler
-        .getEnodeBName(bootstrapNotification.getDeviceDetails().getDeviceId());
+    String eNodeBName = pnpPreProvisioningHandler.getEnodeBName(
+        bootstrapNotification.getDeviceDetails().getDeviceId(),
+        bootstrapNotification.getDeviceDetails().getSoftwareVersion(),
+        bootstrapNotification.getDeviceDetails().getHardwareVersion());
     if (eNodeBName == null)
       eNodeBName = bootstrapNotification.getDeviceDetails().getDeviceId();
-    NetConfServerDetails serverInfo = netconfManager
-        .createNetconfServer(bootstrapNotification.getDeviceDetails().getDeviceId(), eNodeBName);
+    NetConfServerDetails serverInfo =
+        netconfManager.createNetconfServer(bootstrapNotification.getDeviceDetails().getDeviceId(),
+            eNodeBName, bootstrapNotification.getDeviceDetails().getSoftwareVersion(),
+            bootstrapNotification.getDeviceDetails().getHardwareVersion());
     if (serverInfo != null && !NetconfServerManagementError.SUCCESS.equals(serverInfo.getError())) {
       logger.error("Failed to handle bootstrap notification. Server INFO: {}", serverInfo);
       logger.error("Failed to create the netconf server for device ID: {}  Error: {}",
@@ -203,11 +208,13 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
     return false;
   }
 
-  public List<ParameterDTO> filterUnsupportedParameters(List<ParameterDTO> parameters) {
+  public List<ParameterDTO> filterUnsupportedParameters(List<ParameterDTO> parameters,
+      String swVersion, String hwVersion) {
     List<ParameterDTO> result = new ArrayList<>();
     if (null != parameters) {
       for (ParameterDTO param : parameters) {
-        MOMetaData metaData = metaDataUtil.getMetaDataByTR69Name(param.getParamName());
+        MOMetaData metaData =
+            metaDataUtil.getMetaDataByTR69Name(param.getParamName(), swVersion, hwVersion);
         if (null != metaData) {
           result.add(param);
         }
@@ -327,12 +334,9 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
         deviceOperDAO.save(fwDetails);
 
         logger.debug("sending download-event notification to netconfserver");
-        NetConfNotificationDTO netConfNotifDTO =
-            new NetConfNotificationDTO(notification.getDeviceDetails().getDeviceId(), null, true);
-        netConfNotifDTO.setParameters(paramList);
-        netConfNotifDTO.setUri(SOFT_MGMT_NS_URI);
 
-        if (notiSender.sendCustomNotification(netConfNotifDTO).getStatusCode().is2xxSuccessful()) {
+        if (notiSender.sendCustomNotification(notification.getDeviceDetails().getDeviceId(),
+            paramList, SOFT_MGMT_NS_URI).getStatusCode().is2xxSuccessful()) {
           logger.debug("sending download-event notification to netconfserver sucess");
         } else {
           logger.error("sending download-event notification to netconfserver failed");
@@ -376,7 +380,8 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
         if (notification.getDeviceDetails().getSoftwareVersion()
             .equalsIgnoreCase(devDetails.getSwVersion())) {
           paramList.add(new ParameterDTO("activation-event.status", "APPLICATION_ERROR"));
-          paramList.add(new ParameterDTO("activation-event.error-message", "Same Software Version is reported after upgrade"));
+          paramList.add(new ParameterDTO("activation-event.error-message",
+              "Same Software Version is reported after upgrade"));
           devDetails.setDownLoadStatus(FirwareUpgradeStatus.ACTIVATION_ERROR.getStatus());
         } else {
           devDetails.setSwVersion(notification.getDeviceDetails().getSoftwareVersion());
@@ -386,12 +391,9 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
         deviceOperDAO.save(devDetails);
 
         logger.debug("sending activation-event notification to netconfserver");
-        NetConfNotificationDTO netConfNotifDTO =
-            new NetConfNotificationDTO(notification.getDeviceDetails().getDeviceId(), null, true);
-        netConfNotifDTO.setParameters(paramList);
-        netConfNotifDTO.setUri(SOFT_MGMT_NS_URI);
 
-        if (notiSender.sendCustomNotification(netConfNotifDTO).getStatusCode().is2xxSuccessful()) {
+        if (notiSender.sendCustomNotification(notification.getDeviceDetails().getDeviceId(),
+            paramList, SOFT_MGMT_NS_URI).getStatusCode().is2xxSuccessful()) {
           logger.debug("sending activation-event notification to netconfserver sucess");
         } else {
           logger.error("sending activation-event notification to netconfserver failed");
