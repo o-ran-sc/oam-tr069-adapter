@@ -80,20 +80,23 @@ services:
     networks:
       - csadapter_nw
     environment:
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_SERVICE: tr069adapter-mariadb
+      DB_NAME: dmsdb
       SBI_REST_HOST: tr069adapter-acs
       SBI_REST_PORT: 9977
       CONFIG_DB_REST_HOST: tr069adapter-acs-initialpnpdb
       CONFIG_DB_REST_PORT: 9000
       MAPPER_REST_PORT: 9999
-      REQUEST_TIMEOUT: 300
-      PRE_CONFIGURE_ON_PNP: 'true'
+      REQUEST_TIMEOUT: ${requestTimeout}
+      preConfigureOnPNP: ${preConfigOnPNP}
       NBI_REST_HOST: tr069adapter-netconf-server
       NBI_REST_PORT: 8181
       VES_REST_HOST: tr069adapter-ves-notifier
       VES_REST_PORT: 8383
-      NBI_NETCONF_PORT: 17830
-      NETCONF_SERVER_PORT: 17830
-      NETCONF_SERVER_IP: tr069adapter-netconf-server
+      netConfServerIP: ${netconfServerIP}
+      VENDOR_NAME : ORAN
 
   tr069adapter-netconf-server:
     image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-netconf-server:latest"
@@ -104,16 +107,21 @@ services:
     ports:
     - "8181:8181"
     - "17830:17830"
+    - "17831:17831"
+    - "17832:17832"
     networks:
       - csadapter_nw
     environment:
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_SERVICE: tr069adapter-mariadb
+      DB_NAME: dmsdb    
       NETCONF_REST_PORT: 8181
       MAPPER_REST_PORT: 9999
-      NETCONFSRV_PORT: 17830
-      DeviceId: ${DeviceId}
+      NETCONFSRVS_START_PORT: 17830
+      NUM_SERVERS: 3
       netConfServerIP: ${netconfServerIP}
       MAPPER_REST_HOST: tr069adapter-netconfig-mapper
-      VES_PORT: 8383
       VES_REST_HOST: tr069adapter-ves-notifier
       VES_REST_PORT: 8383
  
@@ -128,6 +136,10 @@ services:
     networks:
       - csadapter_nw
     environment:
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_SERVICE: tr069adapter-mariadb
+      DB_NAME: dmsdb    
       VES_REST_PORT: 8383
       faultvesCollectorHost: ${netconfServerIP}
       faultvesCollectorPort: 2222

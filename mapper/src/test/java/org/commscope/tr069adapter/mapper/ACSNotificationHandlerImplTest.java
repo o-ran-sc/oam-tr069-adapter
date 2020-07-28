@@ -67,7 +67,7 @@ public class ACSNotificationHandlerImplTest {
     notification.setParameters(params);
     NetConfServerDetails serverInfo = new NetConfServerDetails();
     serverInfo.setError(NetconfServerManagementError.SUCCESS);
-    Mockito.when(netConfServerManager.createNetconfServer(Mockito.anyString(), Mockito.anyString()))
+    Mockito.when(netConfServerManager.createNetconfServer(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(serverInfo);
     /*
      * String URI = "http://tr069adapter-netconf-server:8181/netConfServerManagerService";

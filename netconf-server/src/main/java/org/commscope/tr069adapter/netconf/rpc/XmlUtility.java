@@ -89,7 +89,7 @@ public class XmlUtility {
   }
 
   public static NetConfResponse invokeMapperCall(String requestUrl, String requestXml,
-      String deviceID) {
+      String deviceID, String swVersion, String hwVersion) {
     URI uri = null;
     try {
       uri = new URI(requestUrl);
@@ -99,7 +99,7 @@ public class XmlUtility {
 
     RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
-    NetConfRequest req = new NetConfRequest(requestXml, deviceID);
+    NetConfRequest req = new NetConfRequest(requestXml, deviceID, swVersion, hwVersion);
 
     HttpEntity<NetConfRequest> entity = new HttpEntity<>(req, headers);
     NetConfResponse restResponse = null;

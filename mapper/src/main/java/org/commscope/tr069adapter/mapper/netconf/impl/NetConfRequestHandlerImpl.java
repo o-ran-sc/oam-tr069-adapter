@@ -38,6 +38,7 @@ import org.commscope.tr069adapter.mapper.model.ErrorCodeDetails;
 import org.commscope.tr069adapter.mapper.model.NetConfRequest;
 import org.commscope.tr069adapter.mapper.model.NetConfResponse;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
+import org.commscope.tr069adapter.mapper.model.VESNotificationResponse;
 import org.commscope.tr069adapter.mapper.netconf.NetConfRequestHandler;
 import org.commscope.tr069adapter.mapper.sync.SynchronizedRequestHandler;
 import org.commscope.tr069adapter.mapper.util.ErrorCodeUtil;
@@ -50,6 +51,7 @@ import org.commscope.tr069adapter.mapper.ves.VESNotificationSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
@@ -115,14 +117,16 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       return getEmptyResponse();
     } else if (deviceRPCRequest.getOpDetails() != null) {
       deviceRPCRequest.getOpDetails()
-          .setParmeters(filteredSetParameters(deviceRPCRequest.getOpDetails().getParmeters()));
+          .setParmeters(filteredSetParameters(deviceRPCRequest.getOpDetails().getParmeters(),
+              netConfRequest.getSwVersion(), netConfRequest.getHwVersion()));
       if (deviceRPCRequest.getOpDetails().getParmeters().isEmpty()) {
         LOG.debug("There are no supported device parameters found for edit-config.");
         return getEmptyResponse();
       }
     }
 
-    handleBooleanParametersReverse(deviceRPCRequest.getOpDetails().getParmeters());
+    handleBooleanParametersReverse(deviceRPCRequest.getOpDetails().getParmeters(),
+        netConfRequest.getSwVersion(), netConfRequest.getHwVersion());
     LOG.debug("Prepared NBI request for edit-config {}", deviceRPCRequest);
 
     DeviceRPCResponse deviceRPCResponseVes = null;
@@ -170,7 +174,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     if (null == deviceRPCResponse) {
       return getTimeOutResponse();
     }
-    response = mapperUtil.getNetconfResponse(deviceRPCResponse, false);
+    response = mapperUtil.getNetconfResponse(deviceRPCResponse, netConfRequest.getSwVersion(),
+        netConfRequest.getHwVersion(), false);
     return response;
   }
 
@@ -200,7 +205,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       return getEmptyResponse();
     } else if (request.getOpDetails() != null) {
       request.getOpDetails()
-          .setParmeters(filteredSetParameters(request.getOpDetails().getParmeters()));
+          .setParmeters(filteredSetParameters(request.getOpDetails().getParmeters(),
+              netConfRequest.getSwVersion(), netConfRequest.getHwVersion()));
       if (request.getOpDetails().getParmeters().isEmpty()) {
         LOG.debug("There are no supported device parameters found for delete-config.");
         return getEmptyResponse();
@@ -213,7 +219,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     if (null == opResult) {
       return getTimeOutResponse();
     }
-    response = mapperUtil.getNetconfResponse(opResult, false);
+    response = mapperUtil.getNetconfResponse(opResult, netConfRequest.getSwVersion(),
+        netConfRequest.getHwVersion(), false);
     return response;
   }
 
@@ -231,7 +238,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     } else if (request.getOpDetails() != null) {
 
       request.getOpDetails()
-          .setParmeters(filteredGetParameters(request.getOpDetails().getParmeters()));
+          .setParmeters(filteredGetParameters(request.getOpDetails().getParmeters(),
+              netConfRequest.getSwVersion(), netConfRequest.getHwVersion()));
 
       if (request.getOpDetails().getParmeters().isEmpty()) {
         LOG.debug("There are no supported device parameters found for get.");
@@ -245,7 +253,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     if (null == opResult) {
       return getTimeOutResponse();
     }
-    response = mapperUtil.getNetconfResponse(opResult, false);
+    response = mapperUtil.getNetconfResponse(opResult, netConfRequest.getSwVersion(),
+        netConfRequest.getHwVersion(), false);
     return response;
   }
 
@@ -270,7 +279,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       return getEmptyResponse();
     } else if (request.getOpDetails() != null) {
       request.getOpDetails()
-          .setParmeters(filteredGetParameters(request.getOpDetails().getParmeters()));
+          .setParmeters(filteredGetParameters(request.getOpDetails().getParmeters(),
+              netConfRequest.getSwVersion(), netConfRequest.getHwVersion()));
 
       if (request.getOpDetails().getParmeters().isEmpty()) {
         LOG.debug("There are no supported device parameters found for get-config.");
@@ -318,19 +328,23 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
         + opResult.getFaultString() + ", Parameters :"
         + opResult.getOperationResponse().getParameterDTOs());
     if (null != opResult.getOperationResponse().getParameterDTOs())
-      handleBooleanParameters(opResult.getOperationResponse().getParameterDTOs());
+      handleBooleanParameters(opResult.getOperationResponse().getParameterDTOs(),
+          netConfRequest.getSwVersion(), netConfRequest.getHwVersion());
 
     if (isSoftwareInventory) {
-      response = mapperUtil.getNetconfResponseForSoftwareInventory(opResult);
+      response = mapperUtil.getNetconfResponseForSoftwareInventory(opResult,
+          netConfRequest.getSwVersion(), netConfRequest.getHwVersion());
     } else {
-      response = mapperUtil.getNetconfResponse(opResult, false);
+      response = mapperUtil.getNetconfResponse(opResult, netConfRequest.getSwVersion(),
+          netConfRequest.getHwVersion(), false);
     }
 
     if (opResult.getFaultKey() != null && opResult.getFaultKey().equalsIgnoreCase("9005")) {
       // check for tabular
       LOG.debug("Tabualr Entry not exist in the device; we need to add it now");
-      MOMetaData data = metaDataUtil
-          .getMetaDataByTR69Name(request.getOpDetails().getParmeters().get(0).getParamName());
+      MOMetaData data = metaDataUtil.getMetaDataByTR69Name(
+          request.getOpDetails().getParmeters().get(0).getParamName(),
+          netConfRequest.getSwVersion(), netConfRequest.getHwVersion());
       if (data.isTabluarObj()) {
         return getEmptyResponse();
       }
@@ -418,7 +432,8 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:notification-timeout", "1200"));
 
       opResult.getOperationResponse().setParameterDTOs(responseParamDTOList);
-      response = mapperUtil.getNetconfResponse(opResult, true);
+      response = mapperUtil.getNetconfResponse(opResult, request.getSwVersion(),
+          request.getHwVersion(), true);
 
       LOG.debug("update the status for fw details " + fwDetails.toString());
     } else {
@@ -481,10 +496,12 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return false;
   }
 
-  protected void handleBooleanParameters(List<ParameterDTO> parameterDTOs) {
+  protected void handleBooleanParameters(List<ParameterDTO> parameterDTOs, String swVersion,
+      String hwVersion) {
 
     for (ParameterDTO param : parameterDTOs) {
-      MOMetaData metaData = metaDataUtil.getMetaDataByTR69Name(param.getParamName());
+      MOMetaData metaData =
+          metaDataUtil.getMetaDataByTR69Name(param.getParamName(), swVersion, hwVersion);
       if (null != metaData && BOOLEAN_DATA_TYPE.equalsIgnoreCase(metaData.getDataType())) {
         if (BOOLEAN_TRUE_VALUE.equalsIgnoreCase(param.getParamValue().trim())) {
           param.setParamValue(Boolean.TRUE.toString());
@@ -495,10 +512,12 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     }
   }
 
-  protected void handleBooleanParametersReverse(List<ParameterDTO> parameterDTOs) {
+  protected void handleBooleanParametersReverse(List<ParameterDTO> parameterDTOs, String swVersion,
+      String hwVersion) {
 
     for (ParameterDTO param : parameterDTOs) {
-      MOMetaData metaData = metaDataUtil.getMetaDataByTR69Name(param.getParamName());
+      MOMetaData metaData =
+          metaDataUtil.getMetaDataByTR69Name(param.getParamName(), swVersion, hwVersion);
       if (null != metaData && BOOLEAN_DATA_TYPE.equalsIgnoreCase(metaData.getDataType())) {
         if (Boolean.TRUE.toString().equalsIgnoreCase(param.getParamValue().trim())) {
           param.setParamValue(BOOLEAN_TRUE_VALUE);
@@ -571,10 +590,12 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return timeOutErrorResponse;
   }
 
-  public List<ParameterDTO> filteredSetParameters(List<ParameterDTO> parameters) {
+  public List<ParameterDTO> filteredSetParameters(List<ParameterDTO> parameters, String swVersion,
+      String hwVersion) {
     List<ParameterDTO> result = new ArrayList<>();
     for (ParameterDTO param : parameters) {
-      MOMetaData metaData = metaDataUtil.getMetaDataByNetConfName(param.getParamName());
+      MOMetaData metaData =
+          metaDataUtil.getMetaDataByNetConfName(param.getParamName(), swVersion, hwVersion);
       if (null != metaData && !metaData.isReadOnly()) {
         String tr069MoName =
             MOMetaDataUtil.getTR69MOByReplacingIndexes(param.getParamName(), metaData.getMoName());
@@ -586,23 +607,28 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     return result;
   }
 
-  protected List<ParameterDTO> filteredGetParameters(List<ParameterDTO> parameters) {
-
-    return metaDataUtil.getSupportedChildParameters(parameters);
+  protected List<ParameterDTO> filteredGetParameters(List<ParameterDTO> parameters,
+      String swVersion, String hwVersion) {
+    return metaDataUtil.getSupportedChildParameters(parameters, swVersion, hwVersion);
   }
 
   @Override
   public boolean handelRegisterEvent(NetConfServerDetails request) {
     LOG.debug("processing the handelRegisterEvent started");
-    boolean result = false;
     try {
-      vesnotiSender.sendNotification(null, request);
+      VESNotificationResponse vesRsponse = vesnotiSender.sendNotification(null, request);
+      if (HttpStatus.valueOf(vesRsponse.getStatusCode()).is2xxSuccessful()) {
+        LOG.debug("processing the handelRegisterEvent completed");
+        return true;
+      } else {
+        LOG.error("processing the handelRegisterEvent error code recevived: {}",
+            vesRsponse.getStatusCode());
+        return false;
+      }
     } catch (Exception e) {
       LOG.error("processing the handelRegisterEvent exception occurred");
-      result = false;
+      return false;
     }
-    LOG.debug("processing the handelRegisterEvent completed");
-    return result;
   }
 
   protected static String getDownloadFileURI(String filepath) {

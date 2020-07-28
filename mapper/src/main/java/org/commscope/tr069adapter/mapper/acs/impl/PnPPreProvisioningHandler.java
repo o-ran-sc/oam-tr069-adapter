@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
@@ -41,7 +40,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -87,7 +92,9 @@ public class PnPPreProvisioningHandler {
         deviceId = bootstrapNotification.getDeviceDetails().getDeviceId();
         MDC.put(clientString, deviceId);
         logger.info("Bootstrap notification received");
-        performPreProvisioning(deviceId, false);
+        performPreProvisioning(deviceId,
+            bootstrapNotification.getDeviceDetails().getSoftwareVersion(),
+            bootstrapNotification.getDeviceDetails().getHardwareVersion(), false);
 
       } else if (notification instanceof BootInform) {
         BootInform bootNotification = (BootInform) notification;
@@ -95,7 +102,8 @@ public class PnPPreProvisioningHandler {
         MDC.put(clientString, deviceId);
         logger.info("Boot notification received");
 
-        performPreProvisioning(deviceId, true);
+        performPreProvisioning(deviceId, bootNotification.getDeviceDetails().getSoftwareVersion(),
+            bootNotification.getDeviceDetails().getHardwareVersion(), true);
       }
 
       logger.debug("Successfully completed provisioning of PnP mandatory parameters");
@@ -108,9 +116,10 @@ public class PnPPreProvisioningHandler {
    * @param deviceId
    * @param isBoot
    */
-  private void performPreProvisioning(String deviceId, boolean isBoot) {
+  private void performPreProvisioning(String deviceId, String swVersion, String hwVersion,
+      boolean isBoot) {
     List<DeviceRPCRequest> deviceRPCRequestList =
-        prepareNBIDeviceOperationrequest(deviceId, isBoot);
+        prepareNBIDeviceOperationrequest(deviceId, swVersion, hwVersion, isBoot);
     if (deviceRPCRequestList.isEmpty()) {
       logger.debug("No Operation requests exists to perform pre provision on the device");
       return;
@@ -122,9 +131,8 @@ public class PnPPreProvisioningHandler {
       DeviceRPCResponse deviceRPCResponse = syncHandler.performDeviceOperation(deviceRPCRequest);
       logger.debug("Received Provisioning Operation result");
       if (deviceRPCResponse == null || !StringUtils.isEmpty(deviceRPCResponse.getFaultString())) {
-        logger.error("Device operation failed, Reason: {}",
-            ((deviceRPCResponse == null) ? "Null Operation result"
-                : deviceRPCResponse.getFaultString()));
+        logger.error("Device operation failed, Reason: {}", ((deviceRPCResponse == null)
+            ? "Null Operation result" : deviceRPCResponse.getFaultString()));
         isMandatoryProvFailed = true;
         break;
       }
@@ -156,9 +164,8 @@ public class PnPPreProvisioningHandler {
       }
       DeviceRPCResponse deviceRPCResponse = syncHandler.performDeviceOperation(adminDownOpRequest);
       if (deviceRPCResponse == null || !StringUtils.isEmpty(deviceRPCResponse.getFaultString())) {
-        logger.error("Device operation failed, Reason: {}",
-            ((deviceRPCResponse == null) ? "Null Operation result"
-                : deviceRPCResponse.getFaultString()));
+        logger.error("Device operation failed, Reason: {}", ((deviceRPCResponse == null)
+            ? "Null Operation result" : deviceRPCResponse.getFaultString()));
       }
     }
   }
@@ -168,11 +175,12 @@ public class PnPPreProvisioningHandler {
    * @param isBoot
    * @return
    */
-  private List<DeviceRPCRequest> prepareNBIDeviceOperationrequest(String deviceId, boolean isBoot) {
+  private List<DeviceRPCRequest> prepareNBIDeviceOperationrequest(String deviceId, String swVersion,
+      String hwVersion, boolean isBoot) {
     logger.debug("Preparing the NBI Device Operation Request");
     List<DeviceRPCRequest> deviceRPCRequestList = new ArrayList<>();
 
-    ConfigurationData configData = getDeviceConfigurationData(deviceId);
+    ConfigurationData configData = getDeviceConfigurationData(deviceId, swVersion, hwVersion);
     if (configData == null || configData.getParameterMONameValueMap().isEmpty()) {
       logger.debug("No configuration exists for the device");
       return deviceRPCRequestList;
@@ -185,7 +193,7 @@ public class PnPPreProvisioningHandler {
     while (iter.hasNext()) {
       String paramName = iter.next();
       String paramValue = paramNameValueMap.get(paramName);
-      MOMetaData moMetaData = moMetaDataUtil.getMetaDataByTR69Name(paramName);
+      MOMetaData moMetaData = moMetaDataUtil.getMetaDataByTR69Name(paramName, swVersion, hwVersion);
       if ((isBoot && !paramName.endsWith(ADMIN_STATE)) || moMetaData == null)
         continue;
       ParameterDTO parameterDTO = getParameterDTO(paramName, paramValue, moMetaData);
@@ -246,12 +254,28 @@ public class PnPPreProvisioningHandler {
    * @param deviceId
    * @return
    */
-  private ConfigurationData getDeviceConfigurationData(String deviceId) {
+  private ConfigurationData getDeviceConfigurationData(String deviceId, String swVersion,
+      String hwVersion) {
     String configDBURI = getConfigDBURI();
-    logger.debug("Device Configuration to be fetched from Config DB URI: {}", configDBURI);
+    logger.debug(
+        "Device Configuration to be fetched from Config DB URI: {}, macId {}, swVersion {}, hwVersion {}",
+        configDBURI, deviceId, swVersion, hwVersion);
     ConfigurationData configData = null;
     try {
-      configData = restTemplate.getForObject(configDBURI + deviceId, ConfigurationData.class);
+
+      MultiValueMap<String, String> uriParams = new LinkedMultiValueMap<>();
+      uriParams.add("macId", deviceId);
+      uriParams.add("swVersion", swVersion);
+      uriParams.add("hwVersion", hwVersion);
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+      final HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(uriParams, headers);
+
+      ResponseEntity<ConfigurationData> res =
+          restTemplate.postForEntity(configDBURI, entity, ConfigurationData.class);
+      configData = res.getBody();
+      logger.debug("Successfully retrived config data for device id{} data {}", deviceId,
+          configData);
     } catch (Exception e) {
       logger.error("An exception occurred to get the initial device configuration, Reason: {}",
           e.getMessage());
@@ -286,10 +310,10 @@ public class PnPPreProvisioningHandler {
    * 
    * @return String
    */
-  public String getEnodeBName(String deviceId) {
+  public String getEnodeBName(String deviceId, String swVersion, String hwVersion) {
     String eNodeBName = null;
     if (isPreConfigureOnPnPEnabled()) {
-      ConfigurationData configData = getDeviceConfigurationData(deviceId);
+      ConfigurationData configData = getDeviceConfigurationData(deviceId, swVersion, hwVersion);
       if (configData == null || configData.getParameterMONameValueMap().isEmpty()) {
         logger.debug("No configuration exists for the device");
         return eNodeBName;

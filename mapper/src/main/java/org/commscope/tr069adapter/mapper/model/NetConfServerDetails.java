@@ -27,6 +27,8 @@ public class NetConfServerDetails implements Serializable {
   private String enodeBName;
   private String listenAddress;
   private String listenPort;
+  private String swVersion;
+  private String hwVersion;
 
   private NetconfServerManagementError error;
 
@@ -79,6 +81,22 @@ public class NetConfServerDetails implements Serializable {
 
   public void setEnodeBName(String enodeBName) {
     this.enodeBName = enodeBName;
+  }
+
+  public String getSwVersion() {
+    return swVersion;
+  }
+
+  public void setSwVersion(String swVersion) {
+    this.swVersion = swVersion;
+  }
+
+  public String getHwVersion() {
+    return hwVersion;
+  }
+
+  public void setHwVersion(String hwVersion) {
+    this.hwVersion = hwVersion;
   }
 
   @Override

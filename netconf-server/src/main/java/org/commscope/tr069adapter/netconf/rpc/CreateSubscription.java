@@ -62,14 +62,18 @@ public class CreateSubscription extends AbstractLastNetconfOperation
   private ScheduledExecutorService scheduledExecutorService;
   private static Map<String, NetconfServerSession> netconfServerSessionMap = new HashMap<>();
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
   public CreateSubscription(final String id, final Optional<File> notificationsFile,
-      String deviceID) {
+      String deviceID, String swVersion, String hwVersion) {
 
     super(id);
 
     logger.debug("CreateSubscription RPC is created with macID {}", deviceID);
     this.deviceID = deviceID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
 
     final Optional<Notifications> notifs;
 

@@ -18,18 +18,15 @@
 
 package org.commscope.tr069adapter.config.repository;
 
+import java.util.List;
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-/**
- * 
- * @version 1.0
- * @since September 27, 2019
- * @author Prashant Kumar
- */
-
 @Repository
 public interface ConfigurationDataRepository extends CrudRepository<ConfigFileContent, String> {
+  public List<ConfigFileContent> findByMacId(String macId);
 
+  public ConfigFileContent findByMacIdAndSwVersionAndHwVersion(String macId, String swVersion,
+      String hwVersion);
 }

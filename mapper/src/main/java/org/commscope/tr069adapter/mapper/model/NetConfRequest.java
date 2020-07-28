@@ -28,15 +28,19 @@ public class NetConfRequest implements Serializable {
 
   // operation status
   private String deviceId;
-
+  private String swVersion;
+  private String hwVersion;
+  
   public NetConfRequest() {
     super();
   }
 
-  public NetConfRequest(String requestXml, String deviceId) {
+  public NetConfRequest(String requestXml, String deviceId, String swVersion, String hwVersion) {
     super();
     this.requestXml = requestXml;
     this.deviceId = deviceId;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   public String getRequestXml() {
@@ -53,6 +57,22 @@ public class NetConfRequest implements Serializable {
 
   public void setDeviceId(String deviceId) {
     this.deviceId = deviceId;
+  }
+
+  public String getSwVersion() {
+    return swVersion;
+  }
+
+  public void setSwVersion(String swVersion) {
+    this.swVersion = swVersion;
+  }
+
+  public String getHwVersion() {
+    return hwVersion;
+  }
+
+  public void setHwVersion(String hwVersion) {
+    this.hwVersion = hwVersion;
   }
 
   @Override

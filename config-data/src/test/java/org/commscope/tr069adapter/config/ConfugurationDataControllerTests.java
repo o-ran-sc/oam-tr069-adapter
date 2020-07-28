@@ -21,9 +21,6 @@ package org.commscope.tr069adapter.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import java.util.Optional;
-
 import org.commscope.tr069adapter.config.repository.ConfigurationDataRepository;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -33,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
@@ -97,48 +95,21 @@ public class ConfugurationDataControllerTests {
   }
 
   @Test
-  public void viewFileContentTest() {
-    Mockito.when(configDataRepository.findById(ConfigDataTestsUtils.macId))
-        .thenReturn(Optional.of(ConfigDataTestsUtils.getConfigFileContent()));
-
-    MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-        .get("/getFileContent/" + ConfigDataTestsUtils.macId).accept(MediaType.APPLICATION_JSON);
-
-    MvcResult result = null;
-    String resultString = null;
-    try {
-      result = mockMvc.perform(requestBuilder).andReturn();
-      MockHttpServletResponse response = result.getResponse();
-      resultString = response.getContentAsString();
-    } catch (Exception e) {
-      fail(e.getMessage());
-    }
-
-    String expectedResult =
-        "{\"macId\":\"testMacId\",\"fileContent\":\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\\r\\n<configDataFile>\\r\\n  <fileHeader fileFormatVersion=\\\"32.594 V14.0.0\\\" vendorName=\\\"Commscope\\\"/>\\r\\n  <configData>\\r\\n    <managedElement swVersion=\\\"4.3.00.038\\\" localDn=\\\"0005B95196D0\\\" hwVersion=\\\"750742.00.04\\\" ProductClass=\\\"LTE_Enterprise_C-RANSC_Cntrl\\\" OUI=\\\"0005B9\\\"/>\\r\\n    <Device>\\r\\n      <FAP>\\r\\n        <GPS>\\r\\n          <AGPSServerConfig>\\r\\n            <Enable>1</Enable>\\r\\n            <Password>dmsuser</Password>\\r\\n            <ServerPort>7001</ServerPort>\\r\\n            <ServerURL>NONE</ServerURL>\\r\\n            <Username>dmsuser</Username>\\r\\n          </AGPSServerConfig>\\r\\n          <GPSReset>0</GPSReset>\\r\\n        </GPS>\\r\\n\\t\\t</FAP>\\r\\n    </Device>\\r\\n  </configData>\\r\\n  <fileFooter dateTime=\\\"2019-07-16T17:32:35+05:30\\\"/>\\r\\n</configDataFile>\"}";
-    assertEquals(expectedResult, resultString);
-  }
-
-
-  @Test
   public void viewConfigurationDataTest() {
-    Mockito.when(configDataRepository.findById(ConfigDataTestsUtils.macId))
-        .thenReturn(Optional.of(ConfigDataTestsUtils.getConfigFileContent()));
+    Mockito.when(configDataRepository.findByMacId(ConfigDataTestsUtils.macId))
+        .thenReturn(ConfigDataTestsUtils.getConfigFileContent());
 
-    MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-        .get("/getConfig/" + ConfigDataTestsUtils.macId).accept(MediaType.APPLICATION_JSON);
+    MockHttpServletRequestBuilder requestBuilder =
+        MockMvcRequestBuilders.post("/getConfig").param("macId", "0005B95196D0")
+            .param("swVersion", "4.5").param("hwVersion", "1.1").accept(MediaType.APPLICATION_JSON);
 
     MvcResult result = null;
-    String resultString = null;
     try {
       result = mockMvc.perform(requestBuilder).andReturn();
       MockHttpServletResponse response = result.getResponse();
-      resultString = response.getContentAsString();
+      assertEquals(200, response.getStatus());
     } catch (Exception e) {
       fail(e.getMessage());
     }
-
-    String expectedSubString = "\"localDn\":\"0005B95196D0\"";
-    assertThat(resultString, CoreMatchers.containsString(expectedSubString));
   }
 }

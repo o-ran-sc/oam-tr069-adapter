@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @ComponentScan({"org.commscope.tr069adapter.mapper", "org.commscope.tr069adapter.mapper.acs",
-    "org.commscope.tr069adapter.mapper.ves"})
+    "org.commscope.tr069adapter.mapper.ves", "org.commscope.tr069adapter.common"})
 @EnableJpaRepositories("org.commscope.tr069adapter.mapper.dao")
 @EntityScan("org.commscope.tr069adapter.mapper.entity")
 public class MapperServiceBooter {

@@ -35,9 +35,13 @@ public class SoftwareActivateOperation implements NetconfOperation {
   public static final String SOFT_MGMT_NAMESPACE = "urn:o-ran:software-management:1.0";
 
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
-  public SoftwareActivateOperation(String deviceID) {
+  public SoftwareActivateOperation(String deviceID, String swVersion, String hwVersion) {
     this.deviceID = deviceID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   @Override
@@ -61,7 +65,7 @@ public class SoftwareActivateOperation implements NetconfOperation {
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/softwareActivate";
-    XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
     return null;
   }
 

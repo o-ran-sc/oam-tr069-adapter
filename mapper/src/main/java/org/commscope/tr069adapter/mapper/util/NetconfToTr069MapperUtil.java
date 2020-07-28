@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,7 +36,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationOptions;
@@ -63,7 +61,7 @@ public class NetconfToTr069MapperUtil {
 
   @Autowired
   MOMetaDataUtil metaDataUtil;
-  
+
   @Autowired
   MapperConfigProperties config;
 
@@ -154,7 +152,8 @@ public class NetconfToTr069MapperUtil {
     return deviceRPCRequest;
   }
 
-  public NetConfResponse getNetconfResponse(DeviceRPCResponse opResult, boolean isCustomparameter) {
+  public NetConfResponse getNetconfResponse(DeviceRPCResponse opResult, String swVersion,
+      String hwVersion, boolean isCustomparameter) {
     NetConfResponse netConfResponse = new NetConfResponse();
     ErrorCodeDetails errorCodeDetails = errorCodeUtil.getErrorCodeMetaData(opResult.getFaultKey());
     ErrorCodeDetails errorCode = new ErrorCodeDetails();
@@ -175,12 +174,14 @@ public class NetconfToTr069MapperUtil {
       netConfResponse.setErrorCode(errorCode);
       netConfResponse.setErrorMessage(opResult.getFaultString());
     }
-    netConfResponse.setNetconfResponseXml(getNetconfResponseXML(
-        opResult.getOperationResponse().getParameterDTOs(), isCustomparameter));
+    netConfResponse.setNetconfResponseXml(
+        getNetconfResponseXML(opResult.getOperationResponse().getParameterDTOs(), swVersion,
+            hwVersion, isCustomparameter));
     return netConfResponse;
   }
 
-  public NetConfResponse getNetconfResponseForSoftwareInventory(DeviceRPCResponse opResult) {
+  public NetConfResponse getNetconfResponseForSoftwareInventory(DeviceRPCResponse opResult,
+      String swVersion, String hwVersion) {
 
     NetConfResponse netConfResponse = new NetConfResponse();
     ErrorCodeDetails errorCodeDetails = errorCodeUtil.getErrorCodeMetaData(opResult.getFaultKey());
@@ -234,14 +235,15 @@ public class NetconfToTr069MapperUtil {
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.access", "READ_ONLY"));
     paramDTOList
         .add(new ParameterDTO("software-inventory.software-slot.product-code", productClass));
-    paramDTOList.add(new ParameterDTO("software-inventory.software-slot.vendor-code", config.getVendorName()));
+    paramDTOList.add(
+        new ParameterDTO("software-inventory.software-slot.vendor-code", config.getVendorName()));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.build-id", buildId));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.build-version",
         buildVersion.toString()));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.files.name", "BC_ONE"));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.files.integrity", "OK"));
 
-    String XmlStr = getNetconfResponseXML(paramDTOList, true);
+    String XmlStr = getNetconfResponseXML(paramDTOList, swVersion, hwVersion, true);
 
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder;
@@ -296,7 +298,8 @@ public class NetconfToTr069MapperUtil {
     return netConfResponse;
   }
 
-  private String getNetconfResponseXML(List<ParameterDTO> parameters, boolean isCustomparameter) {
+  private String getNetconfResponseXML(List<ParameterDTO> parameters, String swVersion,
+      String hwVersion, boolean isCustomparameter) {
     if (null == parameters || parameters.isEmpty()) {
 
       return null;
@@ -315,8 +318,8 @@ public class NetconfToTr069MapperUtil {
       Element dataNode = null; // root of all nodes
 
       for (ParameterDTO paramDto : parameters) {
-        String paramName =
-            metaDataUtil.getNetconfNameByTR69NameWithIndexes(paramDto.getParamName());
+        String paramName = metaDataUtil.getNetconfNameByTR69NameWithIndexes(paramDto.getParamName(),
+            swVersion, hwVersion);
         if (paramName == null && isCustomparameter) {
           paramName = paramDto.getParamName();
         }
@@ -354,10 +357,13 @@ public class NetconfToTr069MapperUtil {
 
             // create a tabular parent node if doesn't exit in MAP
             if (null == node) {
-              if (metaDataUtil.getMetaDataByNetConfName(parentNodeKey + ".") != null
-                  && metaDataUtil.getMetaDataByNetConfName(parentNodeKey + ".").getURI() != null) {
-                node = doc.createElementNS(
-                    metaDataUtil.getMetaDataByNetConfName(parentNodeKey + ".").getURI(),
+              if (metaDataUtil.getMetaDataByNetConfName(parentNodeKey + ".", swVersion,
+                  hwVersion) != null
+                  && metaDataUtil
+                      .getMetaDataByNetConfName(parentNodeKey + ".", swVersion, hwVersion)
+                      .getURI() != null) {
+                node = doc.createElementNS(metaDataUtil
+                    .getMetaDataByNetConfName(parentNodeKey + ".", swVersion, hwVersion).getURI(),
                     parentNodeName);
               } else {
                 node = doc.createElement(parentNodeName);
@@ -392,10 +398,12 @@ public class NetconfToTr069MapperUtil {
             // construct intermediate nodes
             Element node = parentNodeMap.get(parentNodeKey);
             if (null == node) {
-              if (metaDataUtil.getMetaDataByNetConfName(parentNodeKey) != null
-                  && metaDataUtil.getMetaDataByNetConfName(parentNodeKey).getURI() != null) {
-                node = doc.createElementNS(
-                    metaDataUtil.getMetaDataByNetConfName(parentNodeKey).getURI(), parentNodeName);
+              if (metaDataUtil.getMetaDataByNetConfName(parentNodeKey, swVersion, hwVersion) != null
+                  && metaDataUtil.getMetaDataByNetConfName(parentNodeKey, swVersion, hwVersion)
+                      .getURI() != null) {
+                node = doc.createElementNS(metaDataUtil
+                    .getMetaDataByNetConfName(parentNodeKey, swVersion, hwVersion).getURI(),
+                    parentNodeName);
                 if (dataNode == null)
                   dataNode = node;
               } else {

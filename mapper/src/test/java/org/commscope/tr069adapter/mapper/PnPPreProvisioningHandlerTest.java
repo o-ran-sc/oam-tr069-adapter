@@ -59,7 +59,7 @@ public class PnPPreProvisioningHandlerTest {
     configData.setParameterMONameValueMap(paramMap);
     Mockito.when(restTemplate.getForObject(Mockito.anyString(), Mockito.any()))
         .thenReturn(configData);
-    String eNodeBName = pnPPreProvisioningHandler.getEnodeBName("00005B9A1");
+    String eNodeBName = pnPPreProvisioningHandler.getEnodeBName("00005B9A1", "4.3.0.0", "*");
     assertNull(eNodeBName);
   }
 

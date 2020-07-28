@@ -18,8 +18,6 @@
 
 package org.commscope.tr069adapter.netconf.server;
 
-import com.google.common.base.Preconditions;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,7 +30,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import org.apache.commons.io.FileUtils;
+import org.commscope.tr069adapter.common.deviceversion.DeviceVersionManager;
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
 import org.commscope.tr069adapter.netconf.operations.CustomOperationsCreator;
 import org.opendaylight.netconf.test.tool.NetconfDeviceSimulator;
@@ -44,6 +43,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import com.google.common.base.Preconditions;
+
 
 @Component
 @Scope("singleton")
@@ -56,15 +57,21 @@ public class NetconfServerStarter {
   @Autowired
   NetConfServerProperties config;
 
-  public boolean startServer(String netConfPort, String macID) {
+  @Autowired
+  DeviceVersionManager versionManager;
+
+  public boolean startServer(String netConfPort, String macID, String swVersion, String hwVersion) {
 
     if (netConfPort == null) {
       LOG.error("Invalid NETCONF port for deviceID: {}, port is null.", macID);
       return false;
     }
 
-    LOG.debug("Starting Netconf server for MACID :{}, on port :{}", macID, netConfPort);
-    boolean result = startServer(netConfPort, config.getSchemaDirPath(), macID);
+    LOG.debug(
+        "Starting Netconf server for MACID :{}, on port :{}, softwareVersion {}, hardwareVersion {}",
+        macID, netConfPort, swVersion, hwVersion);
+    boolean result =
+        startServer(netConfPort, config.getSchemaDirPath(), macID, swVersion, hwVersion);
     LOG.debug("Completed starting Netconf server for MACID :{} , on port :{}, server status={}",
         macID, netConfPort, result);
 
@@ -72,13 +79,26 @@ public class NetconfServerStarter {
   }
 
   @SuppressWarnings({"resource", "deprecation"})
-  private boolean startServer(String portStr, String schemaDirPath, String macID) {
+  private boolean startServer(String portStr, String schemaDirPath, String macID, String swVersion,
+      String hwVersion) {
 
     // creating configuration for the netconf instance
     final Configuration configuration = new ConfigurationBuilder().build();
-    OperationsCreator operationsCreator = new CustomOperationsCreator(macID);
+    OperationsCreator operationsCreator = new CustomOperationsCreator(macID, swVersion, hwVersion);
     configuration.setOperationsCreator(operationsCreator);
     configuration.setGenerateConfigsTimeout((int) TimeUnit.MINUTES.toMillis(30));
+
+    String versionPath = versionManager.getNetconfYangSchemaPath(swVersion, hwVersion);
+    if (versionPath == null && swVersion != null) {
+      LOG.error("Failed to get version path for software version {}, calling base version",
+          swVersion);
+      versionPath = versionManager.getBaseNetconfYangSchemaPath();
+    } else if (swVersion == null) {
+      LOG.error("Software version is null {}", swVersion);
+      return false;
+    }
+    String schemaCommonPath = schemaDirPath + "/common";
+    String schemaVerPath = schemaDirPath + "/" + versionPath;
     if (portStr != null) {
       try {
         int port = Integer.parseInt(portStr);
@@ -90,12 +110,23 @@ public class NetconfServerStarter {
     }
     configuration.setDeviceCount(1);
     configuration.setSsh(Boolean.TRUE);
-    File schemaDir = new File(schemaDirPath);
-    configuration.setSchemasDir(schemaDir);
+    File schemaDir = new File(schemaCommonPath);
     configuration.setCapabilities(Configuration.DEFAULT_BASE_CAPABILITIES_EXI);
     configuration.setIp("0.0.0.0");
 
-    boolean isSchemaLoaded = loadSchemas(schemaDir);
+    File schemaVerDir = new File(schemaVerPath);
+    if (!schemaVerDir.isDirectory()) {
+      LOG.error("No folder path found for given version path {}", schemaVerDir.getAbsolutePath());
+      return false;
+    }
+
+    try {
+      FileUtils.copyDirectory(schemaDir, schemaVerDir);
+    } catch (IOException e) {
+      LOG.error("Failed to copy directory " + e.getMessage());
+    }
+    configuration.setSchemasDir(schemaVerDir);
+    boolean isSchemaLoaded = loadSchemas(schemaVerDir);
     if (!isSchemaLoaded) {
       LOG.debug("Failed to load schema for netconf server instance {}", macID);
       return false;

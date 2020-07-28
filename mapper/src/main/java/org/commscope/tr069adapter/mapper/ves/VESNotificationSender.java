@@ -57,7 +57,9 @@ public class VESNotificationSender {
     VESNotification vesNotifi = new VESNotification();
     if (deviceInform != null) {
       vesNotifi.seteNodeBName(
-          pnpPreProvisioningHandler.getEnodeBName(deviceInform.getDeviceDetails().getDeviceId()));
+          pnpPreProvisioningHandler.getEnodeBName(deviceInform.getDeviceDetails().getDeviceId(),
+              deviceInform.getDeviceDetails().getSoftwareVersion(),
+              deviceInform.getDeviceDetails().getHardwareVersion()));
     } else {
       vesNotifi.seteNodeBName(serverInfo.getEnodeBName());
     }

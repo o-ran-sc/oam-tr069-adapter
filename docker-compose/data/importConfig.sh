@@ -27,6 +27,6 @@ curl -k -F "files=@./testdata/0005B9423910.xml" $PROTO://localhost:1111/importCo
 echo -e "\n"
 
 echo "Validating the Import..."
-curl $PROTO://localhost:1111/getConfig/0005b9423910 -k
+curl -d "macId=0005B9423910&&swVersion=4.3.0&hwVersion=1" $PROTO://localhost:1111/getConfig -k
 echo -e "\n"
 

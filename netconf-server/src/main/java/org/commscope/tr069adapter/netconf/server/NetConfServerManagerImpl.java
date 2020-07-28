@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.commscope.tr069adapter.acs.common.OperationDetails;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
@@ -95,7 +94,8 @@ public class NetConfServerManagerImpl {
     LOG.debug("Restarting netconf servers during startup is completed.");
   }
 
-  public NetConfServerDetails createServer(String deviceId, String enodeBName) {
+  public NetConfServerDetails createServer(String deviceId, String enodeBName, String swVersion,
+      String hwVersion) {
     NetConfServerDetails result = new NetConfServerDetails();
     NetConfServerDetailsEntity entity = null;
     if (deviceId != null) {
@@ -116,6 +116,8 @@ public class NetConfServerManagerImpl {
 
       // update the ENB Name if Changed
       entity.setEnodeBName(enodeBName);
+      entity.setSwVersion(swVersion);
+      entity.setHwVersion(hwVersion);
       netconfDAO.save(entity);
       result = getNetConfServerDetails(deviceId, entity);
       return result;
@@ -133,7 +135,7 @@ public class NetConfServerManagerImpl {
         LOG.debug("Successfully reserved a port for deviceID={} ,port={}", deviceId, port);
 
         // start the server
-        boolean isServerStarted = ncServerStarter.startServer(port, deviceId);
+        boolean isServerStarted = ncServerStarter.startServer(port, deviceId, swVersion, hwVersion);
         boolean isPortInUse = serverPortAllocator.isServerPortInUse(port);
 
         if (!isServerStarted || !isPortInUse) {
@@ -150,6 +152,8 @@ public class NetConfServerManagerImpl {
       entity.setDeviceId(deviceId);
       entity.setListenPort(port);
       entity.setEnodeBName(enodeBName);
+      entity.setSwVersion(swVersion);
+      entity.setHwVersion(hwVersion);
       netconfDAO.save(entity);
 
       result = getNetConfServerDetails(deviceId, entity);
@@ -172,11 +176,27 @@ public class NetConfServerManagerImpl {
     return result;
   }
 
+  public NetConfServerDetails restartServer(String deviceId, String enodeBName, String swVersion,
+      String hwVersion) {
+
+    NetConfServerDetailsEntity entity = null;
+    if (deviceId != null) {
+      entity = netconfDAO.findByDeviceId(deviceId);
+    }
+    if (entity != null) {
+      boolean result = this.ncServerStarter.stopServer(deviceId);
+      restartServersOnStartup(entity);
+    }
+
+    return null;
+  }
+
+
   public boolean restartServersOnStartup(NetConfServerDetailsEntity entity) {
     boolean isSuccess = false;
 
-    boolean isServerStarted =
-        ncServerStarter.startServer(entity.getListenPort(), entity.getDeviceId());
+    boolean isServerStarted = ncServerStarter.startServer(entity.getListenPort(),
+        entity.getDeviceId(), entity.getSwVersion(), entity.getHwVersion());
     if (isServerStarted) {
       LOG.info("Successfully restarted NETCONF server {}  on port {}  upon application startup.",
           entity.getDeviceId(), entity.getListenPort());
@@ -215,6 +235,8 @@ public class NetConfServerManagerImpl {
     result.setDeviceId(deviceId);
     result.setListenPort(entity.getListenPort());
     result.setEnodeBName(entity.getEnodeBName());
+    result.setSwVersion(entity.getSwVersion());
+    result.setHwVersion(entity.getHwVersion());
     String netconfListenAddress = getServiceHost();
     if (netconfListenAddress == null) {
       netconfListenAddress = config.getNetconfServerIP();

@@ -45,7 +45,8 @@ public class NetConfServerManager {
   @Autowired
   RestTemplate restTemplate;
 
-  public NetConfServerDetails createNetconfServer(String deviceID, String enodeBName) {
+  public NetConfServerDetails createNetconfServer(String deviceID, String enodeBName,
+      String swVersion, String hwVersion) {
 
     NetConfServerDetails result = null;
     // handle exception
@@ -55,6 +56,8 @@ public class NetConfServerManager {
       MultiValueMap<String, String> uriParams = new LinkedMultiValueMap<>();
       uriParams.add("deviceId", deviceID);
       uriParams.add("enodeBName", enodeBName);
+      uriParams.add("swVersion", swVersion);
+      uriParams.add("hwVersion", hwVersion);
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
       final HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(uriParams, headers);

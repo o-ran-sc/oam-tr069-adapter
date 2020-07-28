@@ -18,33 +18,24 @@
 
 package org.commscope.tr069adapter.mapper.model;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import java.io.Serializable;
-import java.util.List;
-
-import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class NetConfNotificationDTO implements Serializable {
 
   private static final long serialVersionUID = 4928942484595767042L;
-  private boolean isCustomNotification;
-  private String notificationType;
-  private List<ParameterDTO> parameters;
-  private String uri;
+  private String notificaiton;
   private String deviceID;
 
   public NetConfNotificationDTO() {
     super();
   }
 
-  public NetConfNotificationDTO(String deviceID, String notificationType,
-      boolean isCustomNotification) {
+  public NetConfNotificationDTO(String deviceID, String notificaiton) {
     super();
-    this.isCustomNotification = isCustomNotification;
-    this.notificationType = notificationType;
     this.deviceID = deviceID;
+    this.notificaiton = notificaiton;
   }
 
   public String getDeviceID() {
@@ -55,36 +46,11 @@ public class NetConfNotificationDTO implements Serializable {
     this.deviceID = deviceID;
   }
 
-  public String getNotificationType() {
-    return notificationType;
+  public String getNotificaiton() {
+    return notificaiton;
   }
 
-  public void setNotificationType(String notificationType) {
-    this.notificationType = notificationType;
+  public void setNotificaiton(String notificaiton) {
+    this.notificaiton = notificaiton;
   }
-
-  public List<ParameterDTO> getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(List<ParameterDTO> parameters) {
-    this.parameters = parameters;
-  }
-
-  public String getUri() {
-    return uri;
-  }
-
-  public void setUri(String uri) {
-    this.uri = uri;
-  }
-
-  public boolean isCustomNotification() {
-    return isCustomNotification;
-  }
-
-  public void setCustomNotification(boolean isCustomNotification) {
-    this.isCustomNotification = isCustomNotification;
-  }
-
 }

@@ -44,11 +44,16 @@ public class GetConfigOperation extends AbstractLastNetconfOperation {
   private static final Logger logger = LoggerFactory.getLogger(GetConfigOperation.class);
 
   private String deviceID;
+  private String swVersion;
+  private String hwVersion;
 
   public GetConfigOperation(final String netconfSessionIdForReporting,
-      final Optional<File> initialConfigXMLFile, String deviceID) {
+      final Optional<File> initialConfigXMLFile, String deviceID, String swVersion,
+      String hwVersion) {
     super(netconfSessionIdForReporting);
     this.deviceID = deviceID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
     if (initialConfigXMLFile.isPresent()) {
       logger.info("File is present: {}", initialConfigXMLFile.get().getName());
     }
@@ -65,7 +70,8 @@ public class GetConfigOperation extends AbstractLastNetconfOperation {
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
     final String baseUrl = config.getMapperPath() + "/getConfig";
-    NetConfResponse restResponse = XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID);
+    NetConfResponse restResponse =
+        XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
 
     if (restResponse != null) {
       ErrorCodeDetails errorCode = restResponse.getErrorCode();

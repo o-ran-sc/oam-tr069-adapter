@@ -22,18 +22,15 @@ package org.commscope.tr069adapter.config.controllers;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.constants.ConfigurationServiceConstant;
 import org.commscope.tr069adapter.config.exceptions.InvalidConfigurationServiceException;
-import org.commscope.tr069adapter.config.model.ConfigFileContent;
 import org.commscope.tr069adapter.config.service.ConfigurationDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,17 +48,12 @@ public class ConfugurationDataController {
     return "Application is running";
   }
 
-  @GetMapping("/getFileContent/{id}")
-  public Optional<ConfigFileContent> viewFileContent(@PathVariable("id") String macId) {
-    logger.info("Processing request to view configuration file content for device {}", macId);
-    return configDataService.getConfigFileContent(macId);
-  }
-
-  @GetMapping("/getConfig/{id}")
-  public ConfigurationData viewConfigurationData(@PathVariable("id") String macId)
+  @PostMapping("/getConfig")
+  public ConfigurationData viewConfigurationData(@RequestParam String macId,
+      @RequestParam String swVersion, @RequestParam String hwVersion)
       throws InvalidConfigurationServiceException {
     logger.info("Processing request to get configuration data for device {}", macId);
-    Optional<ConfigurationData> configData = configDataService.getConfigurationData(macId);
+    Optional<ConfigurationData> configData = configDataService.getConfigurationData(macId, swVersion, hwVersion);
     if (configData.isPresent()) {
       return configData.get();
     }

@@ -47,17 +47,24 @@ public final class CustomOperationsCreator implements OperationsCreator {
 
   private String macID = null;
 
+  private String swVersion;
+
+  private String hwVersion;
+
   private OperationService operationService;
 
-  public CustomOperationsCreator(String macID) {
+  public CustomOperationsCreator(String macID, String swVersion, String hwVersion) {
     this.macID = macID;
+    this.swVersion = swVersion;
+    this.hwVersion = hwVersion;
   }
 
   @Override
   public NetconfOperationService getNetconfOperationService(final Set<Capability> caps,
       final SessionIdProvider idProvider, final String netconfSessionIdForReporting) {
     if (null == operationService) {
-      operationService = new OperationService(idProvider.getCurrentSessionId(), macID);
+      operationService =
+          new OperationService(idProvider.getCurrentSessionId(), macID, swVersion, hwVersion);
     }
     return operationService;
   }
@@ -66,29 +73,37 @@ public final class CustomOperationsCreator implements OperationsCreator {
 
     private final long currentSessionId;
     private String macID;
+    private String swVersion;
+    private String hwVersion;
 
-    OperationService(final long currentSessionId, String macID) {
+    OperationService(final long currentSessionId, String macID, String swVersion,
+        String hwVersion) {
       this.currentSessionId = currentSessionId;
       this.macID = macID;
+      this.swVersion = swVersion;
+      this.hwVersion = hwVersion;
     }
 
     @Override
     public Set<NetconfOperation> getNetconfOperations() {
       final DataList storage = new DataList();
-      final GetOperation oGet = new GetOperation(String.valueOf(currentSessionId), storage, macID);
-      final GetConfigOperation oGetConfig =
-          new GetConfigOperation(String.valueOf(currentSessionId), Optional.empty(), macID);
+      final GetOperation oGet =
+          new GetOperation(String.valueOf(currentSessionId), storage, macID, swVersion, hwVersion);
+      final GetConfigOperation oGetConfig = new GetConfigOperation(String.valueOf(currentSessionId),
+          Optional.empty(), macID, swVersion, hwVersion);
       final SetConfigOperation oSetConfig =
-          new SetConfigOperation(String.valueOf(currentSessionId), macID);
-      final DeleteConfigOperation oDelConfig =
-          new DeleteConfigOperation(String.valueOf(currentSessionId), storage, macID);
+          new SetConfigOperation(String.valueOf(currentSessionId), macID, swVersion, hwVersion);
+      final DeleteConfigOperation oDelConfig = new DeleteConfigOperation(
+          String.valueOf(currentSessionId), storage, macID, swVersion, hwVersion);
       final OperationCommit oCommit = new OperationCommit(String.valueOf(currentSessionId));
       final OperationLock oLock = new OperationLock(String.valueOf(currentSessionId));
       final OperationUnLock oUnlock = new OperationUnLock(String.valueOf(currentSessionId));
-      final CreateSubscription sCreateSubs =
-          new CreateSubscription(String.valueOf(currentSessionId), Optional.empty(), macID);
-      SoftwareDownloadOperation swDownloadOperation = new SoftwareDownloadOperation(macID);
-      SoftwareActivateOperation swActivateOperation = new SoftwareActivateOperation(macID);
+      final CreateSubscription sCreateSubs = new CreateSubscription(
+          String.valueOf(currentSessionId), Optional.empty(), macID, swVersion, hwVersion);
+      SoftwareDownloadOperation swDownloadOperation =
+          new SoftwareDownloadOperation(macID, swVersion, hwVersion);
+      SoftwareActivateOperation swActivateOperation =
+          new SoftwareActivateOperation(macID, swVersion, hwVersion);
       return Sets.newHashSet(oGet, oGetConfig, oSetConfig, oDelConfig, oCommit, oLock, oUnlock,
           sCreateSubs, swDownloadOperation, swActivateOperation);
     }
