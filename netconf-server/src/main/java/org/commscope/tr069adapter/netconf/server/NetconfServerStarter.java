@@ -87,18 +87,6 @@ public class NetconfServerStarter {
     OperationsCreator operationsCreator = new CustomOperationsCreator(macID, swVersion, hwVersion);
     configuration.setOperationsCreator(operationsCreator);
     configuration.setGenerateConfigsTimeout((int) TimeUnit.MINUTES.toMillis(30));
-
-    String versionPath = versionManager.getNetconfYangSchemaPath(swVersion, hwVersion);
-    if (versionPath == null && swVersion != null) {
-      LOG.error("Failed to get version path for software version {}, calling base version",
-          swVersion);
-      versionPath = versionManager.getBaseNetconfYangSchemaPath();
-    } else if (swVersion == null) {
-      LOG.error("Software version is null {}", swVersion);
-      return false;
-    }
-    String schemaCommonPath = schemaDirPath + "/common";
-    String schemaVerPath = schemaDirPath + "/" + versionPath;
     if (portStr != null) {
       try {
         int port = Integer.parseInt(portStr);
@@ -110,27 +98,21 @@ public class NetconfServerStarter {
     }
     configuration.setDeviceCount(1);
     configuration.setSsh(Boolean.TRUE);
-    File schemaDir = new File(schemaCommonPath);
     configuration.setCapabilities(Configuration.DEFAULT_BASE_CAPABILITIES_EXI);
     configuration.setIp("0.0.0.0");
-
+    
+    String versionPath = versionManager.getNetconfYangSchemaPath(swVersion, hwVersion);
+    if (versionPath == null && swVersion != null) {
+      LOG.error("Failed to get version path for software version {}, calling base version",
+          swVersion);
+      versionPath = versionManager.getBaseNetconfYangSchemaPath();
+    } else if (swVersion == null) {
+      LOG.error("Software version is null {}", swVersion);
+      return false;
+    }
+    String schemaVerPath = schemaDirPath + File.separator + versionPath;
     File schemaVerDir = new File(schemaVerPath);
-    if (!schemaVerDir.isDirectory()) {
-      LOG.error("No folder path found for given version path {}", schemaVerDir.getAbsolutePath());
-      return false;
-    }
-
-    try {
-      FileUtils.copyDirectory(schemaDir, schemaVerDir);
-    } catch (IOException e) {
-      LOG.error("Failed to copy directory " + e.getMessage());
-    }
     configuration.setSchemasDir(schemaVerDir);
-    boolean isSchemaLoaded = loadSchemas(schemaVerDir);
-    if (!isSchemaLoaded) {
-      LOG.debug("Failed to load schema for netconf server instance {}", macID);
-      return false;
-    }
 
     try (final NetconfDevice netconfDevice = new NetconfDevice(configuration)) {
       final List<Integer> openDevices = netconfDevice.start();
@@ -164,7 +146,7 @@ public class NetconfServerStarter {
     return false;
   }
 
-  private boolean loadSchemas(File schemasDir) {
+  protected boolean loadSchemas(File schemasDir) {
     if (schemasDir != null) {
       if (!schemasDir.exists() || !schemasDir.isDirectory() || !schemasDir.canRead()) {
         LOG.error("Failed to load schema. schema location is not valid.");

@@ -125,6 +125,7 @@ public class NetConfNotificationSender {
     if (null != parameters) {
       for (ParameterDTO param : parameters) {
         if (param.getParamValue() == null || param.getParamValue().trim().length() <= 0) {
+          removeList.add(param);
           continue;
         }
         handleBooleanParameters(param, swVersion, hwVersion);

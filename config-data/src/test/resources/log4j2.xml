@@ -25,7 +25,7 @@
 	<Properties>
 		<Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %m%n</Property>
 		<Property name="APP_LOG_ROOT">./target/test-logs</Property>
-		<Property name="LOG_FILE_NAME">configurationServiceLogs</Property>
+		<Property name="LOG_FILE_NAME">application</Property>
 	</Properties>
 	<Appenders>
 		<Console name="console" target="SYSTEM_OUT" follow="true">

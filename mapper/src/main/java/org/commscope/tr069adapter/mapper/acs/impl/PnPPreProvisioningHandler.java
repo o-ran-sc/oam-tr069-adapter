@@ -130,9 +130,8 @@ public class PnPPreProvisioningHandler {
       logger.info("Performing PROVISION operation");
       DeviceRPCResponse deviceRPCResponse = syncHandler.performDeviceOperation(deviceRPCRequest);
       logger.debug("Received Provisioning Operation result");
-      if (deviceRPCResponse == null || !StringUtils.isEmpty(deviceRPCResponse.getFaultString())) {
-        logger.error("Device operation failed, Reason: {}", ((deviceRPCResponse == null)
-            ? "Null Operation result" : deviceRPCResponse.getFaultString()));
+      if (deviceRPCResponse != null && !StringUtils.isEmpty(deviceRPCResponse.getFaultString())) {
+        logger.error("Device operation failed, Reason: {}", deviceRPCResponse.getFaultString());
         isMandatoryProvFailed = true;
         break;
       }

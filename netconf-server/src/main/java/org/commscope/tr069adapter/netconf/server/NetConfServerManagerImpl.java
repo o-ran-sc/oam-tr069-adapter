@@ -18,6 +18,8 @@
 
 package org.commscope.tr069adapter.netconf.server;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -26,9 +28,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.io.FileUtils;
 import org.commscope.tr069adapter.acs.common.OperationDetails;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
+import org.commscope.tr069adapter.common.deviceversion.DeviceVersionManager;
+import org.commscope.tr069adapter.common.deviceversion.ProfileDefinition;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.NetconfServerManagementError;
 import org.commscope.tr069adapter.mapper.model.VESNotification;
@@ -72,7 +77,47 @@ public class NetConfServerManagerImpl {
   @Autowired
   VESNotificationSender vesNotificationSender;
 
+  @Autowired
+  DeviceVersionManager versionManager;
+
   ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+  public boolean loadSchemas() {
+    LOG.debug("Loading yang schema started");
+    List<ProfileDefinition> profiles = versionManager.getSupportedProfileDefinitions();
+    try {
+      String commonSchemaPath = config.getSchemaDirPath() + "/common";
+
+      for (ProfileDefinition profile : profiles) {
+        String verSpecificSchemaPath =
+            config.getSchemaDirPath() + File.separator + profile.getNetConfSchemaPath();
+        File schemaDir = new File(commonSchemaPath);
+        File schemaVerDir = new File(verSpecificSchemaPath);
+
+        if (!schemaVerDir.isDirectory()) {
+          LOG.error("No folder path found for given version path {}",
+              schemaVerDir.getAbsolutePath());
+          return false;
+        }
+
+        try {
+          FileUtils.copyDirectory(schemaDir, schemaVerDir);
+        } catch (IOException e) {
+          LOG.error("Failed to copy directory " + e.getMessage());
+        }
+        boolean isSchemaLoaded = ncServerStarter.loadSchemas(schemaVerDir);
+        if (!isSchemaLoaded) {
+          LOG.debug("Failed to load schema for profile {}", profile.getProfileId());
+          return false;
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Load schemas failed in netconf server {}", e.getMessage());
+      return false;
+    }
+    LOG.debug("Loading yang schema completed");
+    return true;
+  }
 
   public void restartServers() {
     LOG.debug("Restarting all netconf servers during startup...");
@@ -324,6 +369,8 @@ public class NetConfServerManagerImpl {
       server.setError(NetconfServerManagementError.SUCCESS);
       server.setListenAddress(netconfListenAddress);
       server.setListenPort(entity.getListenPort());
+      server.setSwVersion(entity.getSwVersion());
+      server.setHwVersion(entity.getHwVersion());
       result.add(server);
     }
     return result;
@@ -353,11 +400,11 @@ public class NetConfServerManagerImpl {
     @Override
     public void run() {
       boolean isSuccess = netconfServerManager.restartServersOnStartup(entity);
-      if (isSuccess) {
+      if (!isSuccess) {
         try {
           netconfServerManager.restartServersHandler.restart(entity);
         } catch (RetryFailedException e) {
-          e.printStackTrace();// TODO: logg
+          LOG.debug("");
         }
       }
     }
