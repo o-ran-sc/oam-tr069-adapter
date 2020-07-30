@@ -86,10 +86,12 @@ public class NetConfNotificationSender {
       convertTR069ToNetConfParams(parameters, deviceInform.getDeviceDetails().getSoftwareVersion(),
           deviceInform.getDeviceDetails().getHardwareVersion());
 
+      String nameSpace = metaDataUtil.getMetaDataByTR69Name(deviceInform.getInformType().toString(),
+          deviceInform.getDeviceDetails().getSoftwareVersion(),
+          deviceInform.getDeviceDetails().getHardwareVersion()).getURI();
+
       String notificationXml =
-          getNetconfResponseXML(parameters, deviceInform.getInformType().toString(), null,
-              deviceInform.getDeviceDetails().getSoftwareVersion(),
-              deviceInform.getDeviceDetails().getHardwareVersion());
+          getNetconfResponseXML(parameters, deviceInform.getInformType().toString(), nameSpace);
       NetConfNotificationDTO netConfDTO = new NetConfNotificationDTO(
           deviceInform.getDeviceDetails().getDeviceId(), notificationXml);
 
@@ -108,7 +110,7 @@ public class NetConfNotificationSender {
     final String uri = getUri();
     LOG.debug("Posting custom notification to netconf server " + uri);
     try {
-      String notificationXml = getNetconfResponseXML(parameters, null, nameSpace, null, null);
+      String notificationXml = getNetconfResponseXML(parameters, null, nameSpace);
       NetConfNotificationDTO netConfDTO = new NetConfNotificationDTO(deviceId, notificationXml);
 
       response = restTemplate.postForObject(uri, netConfDTO, ResponseEntity.class);
@@ -158,8 +160,8 @@ public class NetConfNotificationSender {
     return config.getNbiNotificationUri();
   }
 
-  private String getNetconfResponseXML(List<ParameterDTO> parameters, String notificationType,
-      String nameSpace, String swVersion, String hwVersion) {
+  private static String getNetconfResponseXML(List<ParameterDTO> parameters,
+      String notificationType, String nameSpace) {
     if (parameters == null || parameters.isEmpty()) {
       LOG.debug("There are no parameters found in the response.");
       return null;
@@ -262,12 +264,6 @@ public class NetConfNotificationSender {
         element.appendChild(element.getOwnerDocument().importNode(eventTime, true));
 
         if (notificationType != null) {
-          if (nameSpace == null && metaDataUtil.getMetaDataByTR69Name(notificationType, swVersion,
-              hwVersion) != null) {
-            nameSpace =
-                metaDataUtil.getMetaDataByTR69Name(notificationType, swVersion, hwVersion).getURI();
-          }
-
           final Element evtTypeElement = doc.createElementNS(nameSpace, notificationType);
           evtTypeElement.appendChild(dataNode);
           element.appendChild(element.getOwnerDocument().importNode(evtTypeElement, true));
@@ -278,7 +274,7 @@ public class NetConfNotificationSender {
         result = convertDocumentToString(element);
       }
     } catch (ParserConfigurationException pce) {
-      LOG.error("Error occured while preparing the notification");
+      LOG.error("Exception while converting the notification: {}", pce.getMessage());
     }
 
     return result;
@@ -296,8 +292,7 @@ public class NetConfNotificationSender {
     } catch (Exception e) {
       LOG.error("Error while converting Element to String" + e);
     }
-    LOG.debug("Converted XML is : " + strxml);
+    LOG.debug("Converted XML is : {}", strxml);
     return strxml;
   }
-
 }

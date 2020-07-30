@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
@@ -37,8 +36,8 @@ public class SynchronizedRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(SynchronizedRequestHandler.class);
 
-  private static Map<Long, DeviceRPCResponse> opResultMap = new HashMap<>();
-  private static Map<Long, Semaphore> semaphoreMap = new HashMap<>();
+  private static Map<String, DeviceRPCResponse> opResultMap = new HashMap<>();
+  private static Map<String, Semaphore> semaphoreMap = new HashMap<>();
 
   @Autowired
   ACSRequestSender tr069RequestSender;
@@ -47,14 +46,20 @@ public class SynchronizedRequestHandler {
   MapperConfigProperties config;
 
   public DeviceRPCResponse performDeviceOperation(DeviceRPCRequest deviceRPCRequest) {
-    Long opId = tr069RequestSender.sendRequest(deviceRPCRequest);
-    if (null == opId) {
+    Long acsOperationId = tr069RequestSender.sendRequest(deviceRPCRequest);
+
+    if (null == acsOperationId) {
       LOG.error("Request could not be sent. opId is null");
       return null;
     }
+
+    String mapperUniqOperId =
+        deviceRPCRequest.getDeviceDetails().getDeviceId() + "_" + acsOperationId;
+    LOG.debug("Received operation mapperUniqOperId = {}", mapperUniqOperId);
+
     boolean isSuccess = false;
     try {
-      isSuccess = waitForResult(opId);
+      isSuccess = waitForResult(mapperUniqOperId);
     } catch (InterruptedException e) {
       LOG.debug(
           "InterruptedException while waiting for tr069 operation result for operation request {}",
@@ -64,30 +69,35 @@ public class SynchronizedRequestHandler {
     }
     DeviceRPCResponse result = null;
     if (!isSuccess) {
-      LOG.error("Request got timed out.");
+      LOG.error("Request got timed out for operation {}", mapperUniqOperId);
+      semaphoreMap.remove(mapperUniqOperId);
     } else {
-      result = getOperationResult(opId);
-      LOG.debug("Received operation result for opId = {} GET-CONFIG : {}", opId, result);
-
+      result = getOperationResult(mapperUniqOperId);
+      LOG.debug("Received operation result for mapperUniqOperId = {} result : {}", mapperUniqOperId,
+          result);
     }
     return result;
 
   }
 
   public void notifyResult(DeviceRPCResponse opResult) {
-    opResultMap.put(opResult.getOperationId(), opResult);
-    Semaphore mutex = semaphoreMap.remove(opResult.getOperationId());
-    mutex.release();
+    Semaphore mutex = semaphoreMap
+        .remove(opResult.getDeviceDetails().getDeviceId() + "_" + opResult.getOperationId());
+    if (mutex != null) {
+      opResultMap.put(opResult.getDeviceDetails().getDeviceId() + "_" + opResult.getOperationId(),
+          opResult);
+      mutex.release();
+    }
   }
 
-  private DeviceRPCResponse getOperationResult(long opId) {
-    return opResultMap.remove(opId);
+  private DeviceRPCResponse getOperationResult(String mapperUniqOperId) {
+    return opResultMap.remove(mapperUniqOperId);
   }
 
-  private boolean waitForResult(long opId) throws InterruptedException {
-    LOG.debug("Waiting for operation result for opId : {}", opId);
+  private boolean waitForResult(String mapperUniqOperId) throws InterruptedException {
+    LOG.debug("Waiting for operation result for mapperUniqOperId : {}", mapperUniqOperId);
     Semaphore semaphore = new Semaphore(0);
-    semaphoreMap.put(opId, semaphore);
+    semaphoreMap.put(mapperUniqOperId, semaphore);
     LOG.debug("Semaphore MAP size = {}", semaphoreMap.size());
     LOG.debug("opResultMap MAP size = {}", opResultMap.size());
     Integer timeout = 0;
@@ -96,5 +106,4 @@ public class SynchronizedRequestHandler {
     }
     return semaphore.tryAcquire(timeout, TimeUnit.SECONDS);
   }
-
 }

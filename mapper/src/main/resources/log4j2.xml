@@ -44,7 +44,7 @@
             <DefaultRolloverStrategy>
                 <Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
                     <IfFileName glob="application-debug-*.log" />
-                    <IfAccumulatedFileCount exceeds="10" />
+                    <IfAccumulatedFileCount exceeds="100" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>

@@ -41,7 +41,12 @@
                 <SizeBasedTriggeringPolicy size="4MB" />
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
-            <DefaultRolloverStrategy max="100" />
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_ROOT}/debug/" maxDepth="1">
+                    <IfFileName glob="application-debug-*.log" />
+                    <IfAccumulatedFileCount exceeds="100" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
   
   		<RollingFile name="springLog" 
@@ -49,19 +54,29 @@
             filePattern="${APP_LOG_ROOT}/thirdparty/spring-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <Policies>
-                <SizeBasedTriggeringPolicy size="2MB" />
+                <SizeBasedTriggeringPolicy size="4MB" />
             </Policies>
-            <DefaultRolloverStrategy max="100"/>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_ROOT}/thirdparty/" maxDepth="1">
+                    <IfFileName glob="spring-*.log" />
+                    <IfAccumulatedFileCount exceeds="10" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
    
      	<RollingFile name="thirdPartyLog" 
   			fileName="${APP_LOG_ROOT}/thirdparty/third-party-framework.log"
-            filePattern="${APP_LOG_ROOT}/thirdparty/spring-%d{yyyy-MM-dd}-%i.log">
+            filePattern="${APP_LOG_ROOT}/thirdparty/third-party-framework-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <Policies>
-                <SizeBasedTriggeringPolicy size="2MB" />
+                <SizeBasedTriggeringPolicy size="4MB" />
             </Policies>
-            <DefaultRolloverStrategy max="100"/>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${APP_LOG_ROOT}/thirdparty/" maxDepth="1">
+                    <IfFileName glob="third-party-framework*.log" />
+                    <IfAccumulatedFileCount exceeds="10" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
              
     </Appenders>

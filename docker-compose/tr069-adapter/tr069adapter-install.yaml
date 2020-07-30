@@ -96,7 +96,7 @@ services:
       VES_REST_HOST: tr069adapter-ves-notifier
       VES_REST_PORT: 8383
       netConfServerIP: ${netconfServerIP}
-      VENDOR_NAME : ORAN
+      VENDOR_NAME : VC
 
   tr069adapter-netconf-server:
     image: "nexus3.o-ran-sc.org:10004/o-ran-sc/tr069adapter-netconf-server:latest"
