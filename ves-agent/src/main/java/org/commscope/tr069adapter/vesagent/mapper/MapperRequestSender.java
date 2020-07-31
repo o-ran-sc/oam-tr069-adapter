@@ -49,7 +49,7 @@ public class MapperRequestSender {
   // DeviceRPCResponse.class);
   // }
 
-  @Async
+  @Async("threadPoolTaskExecutor2")
   public Future<DeviceRPCResponse> sendRequest(DeviceRPCRequest deviceRPCRequest) {
     LOG.info("Sending device connectivity request to ACS for device {}",
         deviceRPCRequest.getDeviceDetails().getDeviceId());
