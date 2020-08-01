@@ -301,7 +301,7 @@ public class NetconfToTr069MapperUtil {
   private String getNetconfResponseXML(List<ParameterDTO> parameters, String swVersion,
       String hwVersion, boolean isCustomparameter) {
     if (null == parameters || parameters.isEmpty()) {
-
+      // LOG.debug("There are no parameters found in the response.");
       return null;
     }
     Collections.sort(parameters, new SortByParamterName());
@@ -309,8 +309,6 @@ public class NetconfToTr069MapperUtil {
     String result = null;
     try {
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
       Document doc = docBuilder.newDocument();
 
@@ -325,7 +323,6 @@ public class NetconfToTr069MapperUtil {
         }
         String paramValue = paramDto.getParamValue();
         if (paramValue == null || paramValue.trim().isEmpty()) {
-          logger.debug("Values is empty so skipping this parameter.");
           continue;
         }
         StringTokenizer tokenizer = new StringTokenizer(paramName, ".");
@@ -343,17 +340,14 @@ public class NetconfToTr069MapperUtil {
             if (null == dataNode) {
               dataNode = parentNode;
             }
-
+            continue;
           } else if (nodeName.matches(INDEX_REGEX)) { // construct
                                                       // tabular and
                                                       // index nodes
 
             // get parent tabular node from parent MAP
-            StringBuilder bld = new StringBuilder(parentNodeKey);
-            bld.append(".");
-            bld.append(nodeName);
-            parentNodeKey = bld.toString();
-            Element node = parentNodeMap.computeIfPresent(parentNodeKey, (k, v) -> v);
+            parentNodeKey = parentNodeKey + "." + nodeName;
+            Element node = parentNodeMap.get(parentNodeKey);
 
             // create a tabular parent node if doesn't exit in MAP
             if (null == node) {
@@ -389,10 +383,7 @@ public class NetconfToTr069MapperUtil {
                                                             // attribute
                                                             // is
                                                             // found
-            StringBuilder bld = new StringBuilder(parentNodeName);
-            bld.append(".");
-            bld.append(nodeName);
-            parentNodeKey = bld.toString();
+            parentNodeKey = parentNodeKey + "." + nodeName;
             parentNodeName = nodeName;
           } else {
             // construct intermediate nodes
@@ -414,10 +405,7 @@ public class NetconfToTr069MapperUtil {
                 parentNode.appendChild(node);
 
             }
-            StringBuilder bld = new StringBuilder(parentNodeKey);
-            bld.append(".");
-            bld.append(nodeName);
-            parentNodeKey = bld.toString();
+            parentNodeKey = parentNodeKey + "." + nodeName;
             parentNodeName = nodeName;
             parentNode = node;
           }
@@ -425,15 +413,15 @@ public class NetconfToTr069MapperUtil {
         // construct leaf node
         Element leafNode = doc.createElement(parentNodeName);
         leafNode.setTextContent(paramValue);
-        if (null != parentNode)
+        if (parentNode != null)
           parentNode.appendChild(leafNode);
       }
 
       if (null != dataNode) {
-        result = NetconfToTr069MapperUtil.convertDocumentToString(dataNode);
+        result = convertDocumentToString(dataNode);
       }
     } catch (ParserConfigurationException pce) {
-      logger.error("Exception : {}", pce.getMessage());
+      logger.error("Response xml formatting is failed : {} ", pce.toString());
     }
 
     return result;
