@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.commscope.tr069adapter.common.deviceversion.DeviceVersionManager;
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
 import org.commscope.tr069adapter.netconf.operations.CustomOperationsCreator;
@@ -100,7 +99,7 @@ public class NetconfServerStarter {
     configuration.setSsh(Boolean.TRUE);
     configuration.setCapabilities(Configuration.DEFAULT_BASE_CAPABILITIES_EXI);
     configuration.setIp("0.0.0.0");
-    
+
     String versionPath = versionManager.getNetconfYangSchemaPath(swVersion, hwVersion);
     if (versionPath == null && swVersion != null) {
       LOG.error("Failed to get version path for software version {}, calling base version",
@@ -136,6 +135,7 @@ public class NetconfServerStarter {
       NetconfDevice netconf = serversMap.get(macID);
       netconf.setAutoClose(true);
       netconf.close();
+      serversMap.remove(macID);
       LOG.debug("Completed stopping Netconf server for MACID {}", macID);
       return true;
     } catch (Exception e) {
@@ -176,6 +176,14 @@ public class NetconfServerStarter {
       }
     }
     return true;
+  }
+
+  public boolean isNetConfServerRunning(String deviceId) {
+    NetconfDevice nc = serversMap.get(deviceId);
+    if (null != nc)
+      return true;
+    else
+      return false;
   }
 
   private void loadSchemaPattren(String line, File file, Pattern revisionregex) {

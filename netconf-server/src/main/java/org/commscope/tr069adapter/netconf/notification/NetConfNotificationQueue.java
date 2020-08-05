@@ -16,12 +16,11 @@
  * ===============LICENSE_END=======================================================================
  */
 
-package org.commscope.tr069adapter.acs.nbi.impl;
+package org.commscope.tr069adapter.netconf.notification;
 
-import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_NOTIFICATION_CF;
-import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_NOTIFICATION_Q;
-import org.commscope.tr069adapter.acs.common.DeviceInform;
-import org.commscope.tr069adapter.acs.nbi.mapper.service.DeviceEventsMapperNotificationService;
+import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
+import org.commscope.tr069adapter.netconf.error.NetconfNotificationException;
+import org.commscope.tr069adapter.netconf.server.utils.NetConfServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,21 +29,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class DeviceInformForwarder {
+public class NetConfNotificationQueue {
 
-  private static final Logger logger = LoggerFactory.getLogger(DeviceInformForwarder.class);
+  private static final Logger logger = LoggerFactory.getLogger(NetConfNotificationQueue.class);
 
   @Autowired
-  private DeviceEventsMapperNotificationService deviceEventsMapperNotificationService;
+  NetConfSessionUtil netConfSessionUtil;;
 
-  @JmsListener(destination = NBI_NOTIFICATION_Q, containerFactory = NBI_NOTIFICATION_CF)
-  @Transactional(rollbackFor = Exception.class)
-  public void onMessage(DeviceInform notification) {
-    if (null != notification) {
-      logger.debug(
-          "DeviceNotification message is received for deviceId : {} , Notification Type(s): {}",
-          notification.getDeviceDetails().getDeviceId(), notification.getInformTypeList());
-      deviceEventsMapperNotificationService.processDeviceNotification(notification);
+  @JmsListener(destination = NetConfServerConstants.NETCONF_NOTIFICATION_Q,
+      containerFactory = NetConfServerConstants.NETCONF_NOTIFICATION_CF)
+  @Transactional(rollbackFor = NetconfNotificationException.class)
+  public void onMessage(NetConfNotificationDTO netConNotifDTO) throws NetconfNotificationException {
+    if (null != netConNotifDTO) {
+      logger.debug("Netconf notification is received for deviceId : {} ",
+          netConNotifDTO.getDeviceID());
+      netConfSessionUtil.sendNetConfNotification(netConNotifDTO);
       logger.debug("Successfully processed device notification.");
     } else {
       logger.error("Null device response is received!!!");

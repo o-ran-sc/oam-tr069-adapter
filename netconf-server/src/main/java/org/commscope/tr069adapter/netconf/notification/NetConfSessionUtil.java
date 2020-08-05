@@ -18,55 +18,33 @@
 
 package org.commscope.tr069adapter.netconf.notification;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
+import org.commscope.tr069adapter.netconf.error.NetconfNotificationException;
 import org.commscope.tr069adapter.netconf.rpc.CreateSubscription;
 import org.opendaylight.netconf.api.NetconfMessage;
 import org.opendaylight.netconf.api.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 @Component
 public class NetConfSessionUtil {
 
   private static final Logger LOG = LoggerFactory.getLogger(NetConfSessionUtil.class);
 
-  public void sendNetConfNotification(NetConfNotificationDTO netConNotifDTO) {
+  public void sendNetConfNotification(NetConfNotificationDTO netConNotifDTO)
+      throws NetconfNotificationException {
     NetconfMessage netconfMessage = convertToNetConfMessage(netConNotifDTO);
-    LOG.debug("Notification converted to NetConf format" + netconfMessage);
     CreateSubscription.sendNotification(netconfMessage, netConNotifDTO.getDeviceID());
   }
 
-  private NetconfMessage convertToNetConfMessage(NetConfNotificationDTO netConNotifDTO) {
+  private NetconfMessage convertToNetConfMessage(NetConfNotificationDTO netConNotifDTO)
+      throws NetconfNotificationException {
     try {
       return new NetconfMessage(XmlUtil.readXmlToDocument(netConNotifDTO.getNotificaiton()));
-    } catch (SAXException | IOException e) {
-      throw new IllegalArgumentException("Cannot parse notifications", e);
-    }
-  }
-
-  public static String convertDocumentToString(Element element) {
-    String strxml = null;
-    try {
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
-      Transformer transformer = transformerFactory.newTransformer();
-      DOMSource source = new DOMSource(element);
-      StreamResult result = new StreamResult(new StringWriter());
-      transformer.transform(source, result);
-      strxml = result.getWriter().toString();
     } catch (Exception e) {
-      LOG.error("Error while converting Element to String" + e);
+      LOG.error("Error while converting to netcon notification ");
+      throw new NetconfNotificationException("Cannot parse notifications", e);
     }
-    LOG.debug("Converted XML is : " + strxml);
-    return strxml;
   }
-
 }

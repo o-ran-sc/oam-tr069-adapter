@@ -44,22 +44,22 @@ public class NetConfServerManagerRestApi {
   public NetConfServerDetails createNetConfServerInstance(@RequestParam String deviceId,
       @RequestParam String enodeBName, @RequestParam String swVersion,
       @RequestParam String hwVersion) {
-    LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}", deviceId,
-        enodeBName);
+    LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}, swversion: {}", deviceId,
+        enodeBName, swVersion);
     NetConfServerDetails serverDetails =
         manager.createServer(deviceId, enodeBName, swVersion, hwVersion);
     LOG.info("Successfully processed NetConf Server wit server details : {}", serverDetails);
     return serverDetails;
   }
 
-  @PostMapping("/restartServer")
-  public NetConfServerDetails resatrtNetConfServerInstance(@RequestParam String deviceId,
+  @PostMapping("/restartOnVersionChange")
+  public NetConfServerDetails restartOnVersionChange(@RequestParam String deviceId,
       @RequestParam String enodeBName, @RequestParam String swVersion,
       @RequestParam String hwVersion) {
     LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}", deviceId,
         enodeBName);
     NetConfServerDetails serverDetails =
-        manager.restartServer(deviceId, enodeBName, swVersion, hwVersion);
+        manager.restartOnVersionChange(deviceId, enodeBName, swVersion, hwVersion);
     LOG.info("Successfully processed NetConf Server wit server details : {}", serverDetails);
     return serverDetails;
   }

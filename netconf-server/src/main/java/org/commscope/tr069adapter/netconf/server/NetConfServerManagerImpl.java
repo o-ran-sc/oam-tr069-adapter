@@ -112,7 +112,7 @@ public class NetConfServerManagerImpl {
         }
       }
     } catch (Exception e) {
-      LOG.error("Load schemas failed in netconf server {}", e.getMessage());
+      LOG.error("Load schema's failed in netconf server {}", e.getMessage());
       return false;
     }
     LOG.debug("Loading yang schema completed");
@@ -132,7 +132,7 @@ public class NetConfServerManagerImpl {
         try {
           restartServersHandler.restart(entity);
         } catch (RetryFailedException e) {
-          e.printStackTrace();
+          LOG.error("submit task for restarting is failed {}", e.toString());
         }
       }
     }
@@ -154,15 +154,17 @@ public class NetConfServerManagerImpl {
       return null;
     }
 
-    if (null != entity) {
+    if (null != entity && ncServerStarter.isNetConfServerRunning(deviceId)) {
+      if (isVersionChanged(entity, swVersion, hwVersion)) {
+        return restartOnVersionChange(deviceId, enodeBName, swVersion, hwVersion);
+      }
+
       // found the entity. server is already running. double check and run
       // if
       // required. else return the details.
 
       // update the ENB Name if Changed
       entity.setEnodeBName(enodeBName);
-      entity.setSwVersion(swVersion);
-      entity.setHwVersion(hwVersion);
       netconfDAO.save(entity);
       result = getNetConfServerDetails(deviceId, entity);
       return result;
@@ -221,29 +223,50 @@ public class NetConfServerManagerImpl {
     return result;
   }
 
-  public NetConfServerDetails restartServer(String deviceId, String enodeBName, String swVersion,
-      String hwVersion) {
+  public NetConfServerDetails restartOnVersionChange(String deviceId, String enodeBName,
+      String swVersion, String hwVersion) {
 
     NetConfServerDetailsEntity entity = null;
     if (deviceId != null) {
       entity = netconfDAO.findByDeviceId(deviceId);
     }
-    if (entity != null) {
-      boolean result = this.ncServerStarter.stopServer(deviceId);
-      restartServersOnStartup(entity);
+    if (entity == null) {
+      return null;
     }
 
-    return null;
+    boolean isVersionChanged = isVersionChanged(entity, swVersion, hwVersion);
+    if (isVersionChanged) {
+      LOG.debug("software version changed, stopping the the existing netconf instance");
+      boolean result = this.ncServerStarter.stopServer(deviceId);
+      if (result) {
+        LOG.debug(
+            "successfully stopped the netconf instance; trying to start with new version yang models");
+        entity.setSwVersion(swVersion);
+        entity.setHwVersion(hwVersion);
+        netconfDAO.save(entity);
+
+        boolean isSuccess = startNetConfServerInstance(entity);
+
+        if (!isSuccess) {
+          try {
+            restartServersHandler.restart(entity);
+          } catch (RetryFailedException e) {
+            LOG.debug("");
+          }
+        }
+      }
+    }
+    return getNetConfServerDetails(deviceId, entity);
   }
 
 
-  public boolean restartServersOnStartup(NetConfServerDetailsEntity entity) {
+  public boolean startNetConfServerInstance(NetConfServerDetailsEntity entity) {
     boolean isSuccess = false;
 
     boolean isServerStarted = ncServerStarter.startServer(entity.getListenPort(),
         entity.getDeviceId(), entity.getSwVersion(), entity.getHwVersion());
     if (isServerStarted) {
-      LOG.info("Successfully restarted NETCONF server {}  on port {}  upon application startup.",
+      LOG.info("Successfully restarted NETCONF server {}  on port {} .",
           entity.getDeviceId(), entity.getListenPort());
       // we need to push the pnfEntry for IP updated
       NetConfServerDetails details = getNetConfServerDetails(entity.getDeviceId(), entity);
@@ -308,6 +331,7 @@ public class NetConfServerManagerImpl {
       resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName
           + ". Invalid deviceId/enodeBName specified.";
       LOG.info(resultMsg);
+      return resultMsg;
     }
     boolean result = this.ncServerStarter.stopServer(deviceId);
     if (result) {
@@ -386,6 +410,14 @@ public class NetConfServerManagerImpl {
     return null;
   }
 
+  private boolean isVersionChanged(NetConfServerDetailsEntity entity, String swVersion,
+      String hwVersion) {
+    String existingProfileId =
+        versionManager.getAssociatedProfileId(entity.getSwVersion(), entity.getHwVersion());
+    String newProfiled = versionManager.getAssociatedProfileId(swVersion, hwVersion);
+    return !existingProfileId.equalsIgnoreCase(newProfiled) ? true : false;
+  }
+
   class ServerStartTask implements Runnable {
 
     NetConfServerDetailsEntity entity;
@@ -399,7 +431,7 @@ public class NetConfServerManagerImpl {
 
     @Override
     public void run() {
-      boolean isSuccess = netconfServerManager.restartServersOnStartup(entity);
+      boolean isSuccess = netconfServerManager.startNetConfServerInstance(entity);
       if (!isSuccess) {
         try {
           netconfServerManager.restartServersHandler.restart(entity);

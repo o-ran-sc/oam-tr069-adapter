@@ -20,7 +20,6 @@ package org.commscope.tr069adapter.acs.nbi.impl;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_OP_RESULT_CF;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_OP_RESULT_Q;
-
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.nbi.mapper.service.DeviceEventsMapperNotificationService;
 import org.slf4j.Logger;
@@ -41,17 +40,13 @@ public class DeviceRPCResponseForwarder {
   @JmsListener(destination = NBI_OP_RESULT_Q, containerFactory = NBI_OP_RESULT_CF)
   @Transactional(rollbackFor = Exception.class)
   public void onMessage(DeviceRPCResponse opResult) {
-    try {
-      if (null != opResult) {
-        logger.debug("NBIOperationResult message is received for deviceId : {}, , OprationId: {}",
-            opResult.getDeviceDetails().getDeviceId(), opResult.getOperationId());
-        deviceEventsMapperNotificationService.processOperationResponse(opResult);
-        logger.debug("Successfully processed NBI operation result.");
-      } else {
-        logger.error("Null device response is received!!!");
-      }
-    } catch (Exception e) {
-      logger.error("Error while processing the notification, Reason: {}", e.getMessage());
+    if (null != opResult) {
+      logger.debug("NBIOperationResult message is received for deviceId : {}, , OprationId: {}",
+          opResult.getDeviceDetails().getDeviceId(), opResult.getOperationId());
+      deviceEventsMapperNotificationService.processOperationResponse(opResult);
+      logger.debug("Successfully processed NBI operation result.");
+    } else {
+      logger.error("Null device response is received!!!");
     }
   }
 }

@@ -36,7 +36,6 @@ import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.acs.ACSNotificationHandler;
 import org.commscope.tr069adapter.mapper.dao.DeviceOperationsDAO;
 import org.commscope.tr069adapter.mapper.entity.DeviceOperationDetails;
-import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.NetconfServerManagementError;
 import org.commscope.tr069adapter.mapper.netconf.NetConfNotificationSender;
@@ -118,30 +117,38 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
       vesnotiSender.sendNotification(bootstrapNotification, serverInfo);
       BootstrapInform bsInform =
           getDeviceBootStrapNotification(bootstrapNotification, TR069InformType.BOOTSTRAP);
+      ValueChangeInform vcInform = null;
       if (bootstrapNotification.getValueChangeNotification() != null) {
         logger.info("Bootstrap notification received along with VC");
-        ValueChangeInform vcInform =
+        vcInform =
             getDeviceValueChangeNotification(bootstrapNotification, TR069InformType.VALUECHANGE);
         processVCNotification(vcInform, isAlarmVC);
       }
       notiSender.sendNotification(bsInform);
+      if (vcInform != null)
+        processVCNotification(vcInform, isAlarmVC);
     } else if (notification instanceof BootInform) {
       logger.info("Boot notification received");
+
+      NetConfServerDetails serverInfo = createNtConfServer(notification);
+      if (serverInfo == null)
+        return;
+
       checkForActivateNotification(notification);
       BootInform bootNotification = (BootInform) notification;
       BootInform bInform = getDeviceBootNotification(bootNotification, TR069InformType.BOOT);
+      ValueChangeInform vcInform = null;
       if (bootNotification.getValueChangeNotification() != null) {
         logger.info("Boot notification received along with VC");
-        ValueChangeInform vcInform =
-            getDeviceValueChangeNotification(bootNotification, TR069InformType.VALUECHANGE);
-        processVCNotification(vcInform, isAlarmVC);
+        vcInform = getDeviceValueChangeNotification(bootNotification, TR069InformType.VALUECHANGE);
       }
       notiSender.sendNotification(bInform);
+      processVCNotification(vcInform, isAlarmVC);
     } else if (notification instanceof PeriodicInform) {
       PeriodicInform pINotificaiton = (PeriodicInform) notification;
       vesnotiSender.sendNotification(pINotificaiton, null);
       notiSender.sendNotification(pINotificaiton);
-      logger.info("VC notification received");
+      logger.info("PI notification received");
     } else if (notification instanceof ConnectionRequestInform) {
       ConnectionRequestInform crNotificaiton = (ConnectionRequestInform) notification;
       vesnotiSender.sendNotification(crNotificaiton, null);
@@ -162,21 +169,20 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
     pnpPreProvisioningHandler.onDeviceNotification(notification);
   }
 
-  private NetConfServerDetails createNtConfServer(BootstrapInform bootstrapNotification) {
+  private NetConfServerDetails createNtConfServer(DeviceInform inform) {
     String eNodeBName = pnpPreProvisioningHandler.getEnodeBName(
-        bootstrapNotification.getDeviceDetails().getDeviceId(),
-        bootstrapNotification.getDeviceDetails().getSoftwareVersion(),
-        bootstrapNotification.getDeviceDetails().getHardwareVersion());
+        inform.getDeviceDetails().getDeviceId(), inform.getDeviceDetails().getSoftwareVersion(),
+        inform.getDeviceDetails().getHardwareVersion());
     if (eNodeBName == null)
-      eNodeBName = bootstrapNotification.getDeviceDetails().getDeviceId();
+      eNodeBName = inform.getDeviceDetails().getDeviceId();
     NetConfServerDetails serverInfo =
-        netconfManager.createNetconfServer(bootstrapNotification.getDeviceDetails().getDeviceId(),
-            eNodeBName, bootstrapNotification.getDeviceDetails().getSoftwareVersion(),
-            bootstrapNotification.getDeviceDetails().getHardwareVersion());
+        netconfManager.createNetconfServer(inform.getDeviceDetails().getDeviceId(), eNodeBName,
+            inform.getDeviceDetails().getSoftwareVersion(),
+            inform.getDeviceDetails().getHardwareVersion());
     if (serverInfo != null && !NetconfServerManagementError.SUCCESS.equals(serverInfo.getError())) {
-      logger.error("Failed to handle bootstrap notification. Server INFO: {}", serverInfo);
+      logger.error("Failed to handle boot/bootstrap notification. Server INFO: {}", serverInfo);
       logger.error("Failed to create the netconf server for device ID: {}  Error: {}",
-          bootstrapNotification.getDeviceDetails().getDeviceId(), serverInfo.getError());
+          inform.getDeviceDetails().getDeviceId(), serverInfo.getError());
       return null;
     } else if (serverInfo == null) {
       logger.error(

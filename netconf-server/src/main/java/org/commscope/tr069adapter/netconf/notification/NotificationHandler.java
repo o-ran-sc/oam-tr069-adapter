@@ -19,22 +19,38 @@
 package org.commscope.tr069adapter.netconf.notification;
 
 import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
+import org.commscope.tr069adapter.netconf.server.utils.NetConfServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(NotificationHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(NotificationHandler.class);
+  private static final String CLIENT_STR = "client";
 
   @Autowired
   NetConfSessionUtil netConfSessionUtil;
 
-  public void handleNetConfNotification(NetConfNotificationDTO netConNotifDTO) {
-    LOG.debug("processing netconf notification " + netConNotifDTO);
-    netConfSessionUtil.sendNetConfNotification(netConNotifDTO);
-  }
+  @Autowired
+  private JmsTemplate jmsTemplate;
 
+  public void handleNetConfNotification(NetConfNotificationDTO netConNotifDTO) {
+    logger.debug("processing netconf notification {}", netConNotifDTO);
+    try {
+      MDC.put(CLIENT_STR, netConNotifDTO.getDeviceID());
+
+      logger.debug("NetConf notificaiton reviced for {}", netConNotifDTO.getDeviceID());
+      jmsTemplate.convertAndSend(NetConfServerConstants.NETCONF_NOTIFICATION_Q, netConNotifDTO);
+      logger.debug("Successfully posted the notiticaiton to JMS to forward to SDNR");
+    } catch (Exception e) {
+      logger.error("Posting notification failed; Reason: {}", e.getMessage());
+    } finally {
+      MDC.remove(CLIENT_STR);
+    }
+  }
 }

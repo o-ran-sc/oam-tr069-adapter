@@ -102,8 +102,7 @@ public class NetConfServerDetails implements Serializable {
   @Override
   public String toString() {
     return "NetConfServerDetails [deviceId=" + deviceId + ", enodeBName=" + enodeBName
-        + ", listenAddress=" + listenAddress + ", listenPort=" + listenPort + ", error=" + error
-        + "]";
+        + ", listenAddress=" + listenAddress + ", listenPort=" + listenPort + ", swversion="
+        + swVersion + ", hwversion=" + hwVersion + ", error=" + error + "]";
   }
-
 }

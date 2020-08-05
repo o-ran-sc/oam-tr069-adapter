@@ -23,6 +23,8 @@ public class NetConfServerConstants {
     throw new IllegalStateException("Utility class");
   }
 
+  public static final String NETCONF_NOTIFICATION_Q = "NetConfNotificationQueue";
+  public static final String NETCONF_NOTIFICATION_CF = "netConfNotificationCF";
   public static final String HEART_BEAT = "heartbeat";
   public static final int SUCCESS = 0;
 }

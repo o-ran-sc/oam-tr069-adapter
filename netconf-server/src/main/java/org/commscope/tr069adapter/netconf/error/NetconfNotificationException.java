@@ -16,41 +16,16 @@
  * ===============LICENSE_END=======================================================================
  */
 
-package org.commscope.tr069adapter.mapper.model;
+package org.commscope.tr069adapter.netconf.error;
 
-import java.io.Serializable;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+public class NetconfNotificationException extends Exception {
+  private static final long serialVersionUID = -7152022827444291350L;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-public class NetConfNotificationDTO implements Serializable {
-
-  private static final long serialVersionUID = 4928942484595767042L;
-  private String deviceID;
-  private String notificaiton;
-
-  public NetConfNotificationDTO() {
-    super();
+  public NetconfNotificationException(String message) {
+    super(message);
   }
 
-  public NetConfNotificationDTO(String deviceID, String notificaiton) {
-    super();
-    this.deviceID = deviceID;
-    this.notificaiton = notificaiton;
-  }
-
-  public String getDeviceID() {
-    return deviceID;
-  }
-
-  public void setDeviceID(String deviceID) {
-    this.deviceID = deviceID;
-  }
-
-  public String getNotificaiton() {
-    return notificaiton;
-  }
-
-  public void setNotificaiton(String notificaiton) {
-    this.notificaiton = notificaiton;
+  public NetconfNotificationException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

@@ -21,9 +21,7 @@ package org.commscope.tr069adapter.acs.cpe.handler;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CR_REQ_CF;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CR_REQ_Q;
-
 import java.io.IOException;
-
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.exception.SessionManagerException;
 import org.commscope.tr069adapter.acs.cpe.processor.ConnectionReqEventProcessor;
@@ -47,7 +45,8 @@ public class ConnectionReqEventHandler {
 
   @JmsListener(destination = CR_REQ_Q, containerFactory = CR_REQ_CF)
   @Transactional(rollbackFor = Exception.class)
-  public void onMessage(TR069DeviceDetails tr069DeviceDetails) {
+  public void onMessage(TR069DeviceDetails tr069DeviceDetails)
+      throws SessionManagerException, IOException {
     try {
       if (tr069DeviceDetails != null) {
         MDC.put(CLIENT_STR, tr069DeviceDetails.getDeviceId());
@@ -60,8 +59,6 @@ public class ConnectionReqEventHandler {
             "Received a JMS message for initiating connection request with no device details, "
                 + "hence could not initiate connection request");
       }
-    } catch (SessionManagerException | IOException e) {
-      logger.error(e.getMessage());
     } finally {
       MDC.remove(CLIENT_STR);
     }

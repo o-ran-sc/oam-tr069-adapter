@@ -40,14 +40,14 @@ public class RestartNetconfServerHandler {
   @Autowired
   ServerPortAllocationHelper serverPortAllocator;
 
-  @Retryable(value = {RetryFailedException.class}, maxAttempts = 100,
+  @Retryable(value = {RetryFailedException.class}, maxAttempts = 10,
       backoff = @Backoff(delay = 15000))
   public void restart(NetConfServerDetailsEntity entity) throws RetryFailedException {
     boolean isSucess = false;
     try {
       // restart netconf servers
       serverPortAllocator.checkAndReserveServerPort(entity.getListenPort());
-      isSucess = manager.restartServersOnStartup(entity);
+      isSucess = manager.startNetConfServerInstance(entity);
     } catch (Exception e) {
       logger.error("Retry to netconf servers has  is failed. {}", e.toString());
       throw new RetryFailedException(e);

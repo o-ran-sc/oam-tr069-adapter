@@ -21,7 +21,6 @@ package org.commscope.tr069adapter.acs.requestprocessor.handler;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.TR069_NBI_REQUEST_CF;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.TR069_NBI_REQUEST_Q;
-
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.exception.SessionConcurrentAccessException;
 import org.commscope.tr069adapter.acs.common.exception.TR069EventProcessingException;
@@ -47,7 +46,7 @@ public class DeviceRPCRequestHandler {
   @JmsListener(destination = TR069_NBI_REQUEST_Q, containerFactory = TR069_NBI_REQUEST_CF)
   @Transactional(rollbackFor = Exception.class)
   public void onMessage(DeviceRPCRequest mapperDeviceOperationRequest)
-      throws SessionConcurrentAccessException {
+      throws SessionConcurrentAccessException, TR069EventProcessingException {
     logger.debug("Received a JMS message from Mapper for TR069 Device RPC operation");
     try {
       if (mapperDeviceOperationRequest != null) {
@@ -59,8 +58,6 @@ public class DeviceRPCRequestHandler {
             mapperDeviceOperationRequest.getOperationId());
 
       }
-    } catch (TR069EventProcessingException ex) {
-      logger.error(ex.getMessage());
     } finally {
       MDC.remove(CLIENT_STR);
     }

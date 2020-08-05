@@ -18,9 +18,6 @@
 
 package org.commscope.tr069adapter.netconf.rpc;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -34,12 +31,11 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
-
+import org.commscope.tr069adapter.netconf.error.NetconfNotificationException;
 import org.opendaylight.netconf.api.NetconfMessage;
 import org.opendaylight.netconf.api.xml.XmlElement;
 import org.opendaylight.netconf.api.xml.XmlNetconfConstants;
@@ -52,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 public class CreateSubscription extends AbstractLastNetconfOperation
     implements DefaultNetconfOperation {
@@ -163,17 +161,26 @@ public class CreateSubscription extends AbstractLastNetconfOperation
     netconfServerSessionMap.put(deviceID, newSession);
   }
 
-  public static void sendNotification(NetconfMessage netconfMessage, String deviceID) {
+  public static void sendNotification(NetconfMessage netconfMessage, String deviceID)
+      throws NetconfNotificationException {
     logger.debug("Request to send notification. NetConfMessage : {}", netconfMessage);
     NetconfServerSession session = netconfServerSessionMap.get(deviceID);
     if (session != null && session.isUp()) {
-      session.sendMessage(netconfMessage);
-      logger.debug("Successfully send notification for deviceID: {}", deviceID);
-    } else {
-      logger.debug("Failed to send notification. None of valid netconf session is available.");
-    }
-    logger.debug("Available netconf sessions : {}", netconfServerSessionMap);
+      try {
+        session.sendMessage(netconfMessage);
+        logger.debug("Successfully send notification for deviceID: {}", deviceID);
+      } catch (Exception e) {
+        logger.error("Failed to send notification. while posting got error. {}", e.toString());
+        throw new NetconfNotificationException("Exception while posting the netconf message", e);
+      }
 
+    } else {
+      logger.debug(
+          "Failed to send notification. None of valid netconf session is available for {}.",
+          deviceID);
+      logger.debug("Available netconf sessions : {}", netconfServerSessionMap);
+      throw new NetconfNotificationException("NetConf active session deosn't not exist");
+    }
   }
 
   @XmlRootElement(name = "notifications")
