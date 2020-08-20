@@ -23,13 +23,21 @@ import com.google.common.collect.Sets;
 import java.util.Optional;
 import java.util.Set;
 
+import org.commscope.tr069adapter.netconf.rpc.AddObjectOperation;
+import org.commscope.tr069adapter.netconf.rpc.ConnectionStatus;
 import org.commscope.tr069adapter.netconf.rpc.CreateSubscription;
 import org.commscope.tr069adapter.netconf.rpc.DeleteConfigOperation;
+import org.commscope.tr069adapter.netconf.rpc.DeleteObjectOperation;
+import org.commscope.tr069adapter.netconf.rpc.DownloadOperation;
+import org.commscope.tr069adapter.netconf.rpc.GPAObjectOperation;
 import org.commscope.tr069adapter.netconf.rpc.GetConfigOperation;
 import org.commscope.tr069adapter.netconf.rpc.GetOperation;
 import org.commscope.tr069adapter.netconf.rpc.OperationCommit;
 import org.commscope.tr069adapter.netconf.rpc.OperationLock;
 import org.commscope.tr069adapter.netconf.rpc.OperationUnLock;
+import org.commscope.tr069adapter.netconf.rpc.RebootOperation;
+import org.commscope.tr069adapter.netconf.rpc.ResetOperation;
+import org.commscope.tr069adapter.netconf.rpc.SPAObjectOperation;
 import org.commscope.tr069adapter.netconf.rpc.SetConfigOperation;
 import org.commscope.tr069adapter.netconf.rpc.SoftwareActivateOperation;
 import org.commscope.tr069adapter.netconf.rpc.SoftwareDownloadOperation;
@@ -104,8 +112,19 @@ public final class CustomOperationsCreator implements OperationsCreator {
           new SoftwareDownloadOperation(macID, swVersion, hwVersion);
       SoftwareActivateOperation swActivateOperation =
           new SoftwareActivateOperation(macID, swVersion, hwVersion);
+      AddObjectOperation addObjectOperation = new AddObjectOperation(macID, swVersion, hwVersion);
+      DeleteObjectOperation deleteObjectOperation =
+          new DeleteObjectOperation(macID, swVersion, hwVersion);
+      GPAObjectOperation gpaObjectOperation = new GPAObjectOperation(macID, swVersion, hwVersion);
+      SPAObjectOperation spaObjectOperation = new SPAObjectOperation(macID, swVersion, hwVersion);
+      ConnectionStatus connStatus = new ConnectionStatus(macID, swVersion, hwVersion);
+      RebootOperation rebootOperation = new RebootOperation(macID, swVersion, hwVersion);
+      ResetOperation resetOperation = new ResetOperation(macID, swVersion, hwVersion);
+      DownloadOperation downloadOp = new DownloadOperation(macID, swVersion, hwVersion);
       return Sets.newHashSet(oGet, oGetConfig, oSetConfig, oDelConfig, oCommit, oLock, oUnlock,
-          sCreateSubs, swDownloadOperation, swActivateOperation);
+          sCreateSubs, swDownloadOperation, swActivateOperation, addObjectOperation,
+          deleteObjectOperation, gpaObjectOperation, spaObjectOperation, connStatus,
+          rebootOperation, resetOperation, downloadOp);
     }
 
     @Override

@@ -20,10 +20,12 @@ package org.commscope.tr069adapter.acs.requestprocessor.custom;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NUMBER_REGEX;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.SUCCESS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationDetails;
@@ -87,7 +89,7 @@ public class ConfigureMultipleObject implements CustomOperation {
         deviceRPCRequestRepositoryHelper.saveAll(tr069DeviceRPCRequestEntityList);
 
         OperationResponse operationResponse = new GetParameterValueResponse();
-        operationResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        operationResponse.setParameterDTOs(new ArrayList<>());
         operationResponse.setStatus(1);
         deviceRPCResponse.setOperationResponse(operationResponse);
 

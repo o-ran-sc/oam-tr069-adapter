@@ -21,6 +21,7 @@ package org.commscope.tr069adapter.vesagent.util;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
@@ -33,6 +34,8 @@ import org.commscope.tr069adapter.vesagent.exception.VesAgentException;
 
 
 public class VesAgentUtils {
+  private VesAgentUtils() {}
+
   private static final Log logger = LogFactory.getLog(VesAgentUtils.class);
 
   private static String errorMsg = null;

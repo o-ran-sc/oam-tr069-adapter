@@ -65,6 +65,15 @@ public class TR069DeviceEntity implements Serializable {
   @Column(name = "LAST_UPDATED_TIME")
   private Date lastUpdatedTime;
 
+  @Column(name = "LAST_FAILED_ATTEMPT_TIME")
+  private Date lastFailedAttemptTime;
+
+  @Column(name = "CONN_STATUS")
+  private boolean connStatus;
+
+  @Column(name = "ERROR_MESSGAE")
+  private String errorMsg;
+
   public TR069DeviceEntity() {
     super();
   }
@@ -131,6 +140,30 @@ public class TR069DeviceEntity implements Serializable {
 
   public void setLastUpdatedTime(Date rowUpdatedTime) {
     this.lastUpdatedTime = rowUpdatedTime;
+  }
+
+  public Date getLastFailedAttemptTime() {
+    return lastFailedAttemptTime;
+  }
+
+  public void setLastFailedAttemptTime(Date lastFailedAttemptTime) {
+    this.lastFailedAttemptTime = lastFailedAttemptTime;
+  }
+
+  public boolean isConnStatus() {
+    return connStatus;
+  }
+
+  public void setConnStatus(boolean connStatus) {
+    this.connStatus = connStatus;
+  }
+
+  public String getErrorMsg() {
+    return errorMsg;
+  }
+
+  public void setErrorMsg(String errorMsg) {
+    this.errorMsg = errorMsg;
   }
 
 }

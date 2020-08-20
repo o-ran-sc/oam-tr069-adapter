@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.commscope.tr069adapter.common.deviceversion.DeviceVersionManager;
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
 import org.commscope.tr069adapter.netconf.operations.CustomOperationsCreator;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
 import com.google.common.base.Preconditions;
 
 
@@ -50,6 +52,7 @@ import com.google.common.base.Preconditions;
 public class NetconfServerStarter {
 
   private static final Logger LOG = LoggerFactory.getLogger(NetconfServerStarter.class);
+  public static final String PATTERN = "[\n|\r|\t]";
 
   private static Map<String, NetconfDevice> serversMap = new HashMap<>();
 
@@ -60,7 +63,7 @@ public class NetconfServerStarter {
   DeviceVersionManager versionManager;
 
   public boolean startServer(String netConfPort, String macID, String swVersion, String hwVersion) {
-
+	  macID = macID.replaceAll(PATTERN, "_");
     if (netConfPort == null) {
       LOG.error("Invalid NETCONF port for deviceID: {}, port is null.", macID);
       return false;
@@ -99,14 +102,15 @@ public class NetconfServerStarter {
     configuration.setSsh(Boolean.TRUE);
     configuration.setCapabilities(Configuration.DEFAULT_BASE_CAPABILITIES_EXI);
     configuration.setIp("0.0.0.0");
-
+    
     String versionPath = versionManager.getNetconfYangSchemaPath(swVersion, hwVersion);
     if (versionPath == null && swVersion != null) {
+    	swVersion = swVersion.replaceAll(PATTERN, "_");
       LOG.error("Failed to get version path for software version {}, calling base version",
           swVersion);
       versionPath = versionManager.getBaseNetconfYangSchemaPath();
     } else if (swVersion == null) {
-      LOG.error("Software version is null {}", swVersion);
+       LOG.error("Software version is null ");
       return false;
     }
     String schemaVerPath = schemaDirPath + File.separator + versionPath;

@@ -27,15 +27,12 @@ import org.commscope.tr069adapter.mapper.sync.SynchronizedRequestHandler;
 import org.commscope.tr069adapter.mapper.util.ErrorCodeUtil;
 import org.commscope.tr069adapter.mapper.util.MapperConstants;
 import org.commscope.tr069adapter.mapper.ves.VesRequestHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VesRequestHandlerImpl implements VesRequestHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(VesRequestHandlerImpl.class);
 
   @Autowired
   SynchronizedRequestHandler syncHandler;

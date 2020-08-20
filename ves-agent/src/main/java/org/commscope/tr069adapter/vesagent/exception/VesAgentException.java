@@ -29,7 +29,6 @@ public class VesAgentException extends Exception {
 
   private static final String ERRORMSG_PREFIX = "ves-agent";
 
-  private String[] arguments;
 
   private String errorCode;
   private String message;
@@ -57,7 +56,6 @@ public class VesAgentException extends Exception {
 
   public VesAgentException(String... args) {
     super();
-    arguments = args;
     setErrorMessage(getErrorMessage());
   }
 
@@ -75,14 +73,13 @@ public class VesAgentException extends Exception {
     this.errorIndex = errorIndex;
   }
 
-
+  @Override
   public String getMessage() {
     return message;
   }
 
   private String getErrorMessage() {
-    String key = ERRORMSG_PREFIX + ".";
-    return key;
+    return ERRORMSG_PREFIX + ".";
   }
 
   private void setErrorMessage(String message) {

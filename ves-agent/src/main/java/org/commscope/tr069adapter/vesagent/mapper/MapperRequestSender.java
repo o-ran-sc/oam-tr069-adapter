@@ -44,11 +44,6 @@ public class MapperRequestSender {
   @Autowired
   WaitForNotifications waitForNotifications;
 
-  // public DeviceRPCResponse sendRequest(DeviceRPCRequest deviceRPCRequest) {
-  // return restTemplate.postForObject(config.getMapperPath(), deviceRPCRequest,
-  // DeviceRPCResponse.class);
-  // }
-
   @Async("threadPoolTaskExecutor2")
   public Future<DeviceRPCResponse> sendRequest(DeviceRPCRequest deviceRPCRequest) {
     LOG.info("Sending device connectivity request to ACS for device {}",

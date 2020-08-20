@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
@@ -163,8 +164,9 @@ public class PnPPreProvisioningHandler {
       }
       DeviceRPCResponse deviceRPCResponse = syncHandler.performDeviceOperation(adminDownOpRequest);
       if (deviceRPCResponse == null || !StringUtils.isEmpty(deviceRPCResponse.getFaultString())) {
-        logger.error("Device operation failed, Reason: {}", ((deviceRPCResponse == null)
-            ? "Null Operation result" : deviceRPCResponse.getFaultString()));
+        logger.error("Device operation failed, Reason: {}",
+            ((deviceRPCResponse == null) ? "Null Operation result"
+                : deviceRPCResponse.getFaultString()));
       }
     }
   }

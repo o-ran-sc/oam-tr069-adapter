@@ -103,7 +103,7 @@ public class NetConfServerManagerImpl {
         try {
           FileUtils.copyDirectory(schemaDir, schemaVerDir);
         } catch (IOException e) {
-          LOG.error("Failed to copy directory " + e.getMessage());
+          LOG.error("Failed to copy directory {} ", e.getMessage());
         }
         boolean isSchemaLoaded = ncServerStarter.loadSchemas(schemaVerDir);
         if (!isSchemaLoaded) {
@@ -112,7 +112,7 @@ public class NetConfServerManagerImpl {
         }
       }
     } catch (Exception e) {
-      LOG.error("Load schema's failed in netconf server {}", e.getMessage());
+      LOG.error("Load schemas failed in netconf server {}", e.getMessage());
       return false;
     }
     LOG.debug("Loading yang schema completed");
@@ -132,7 +132,7 @@ public class NetConfServerManagerImpl {
         try {
           restartServersHandler.restart(entity);
         } catch (RetryFailedException e) {
-          LOG.error("submit task for restarting is failed {}", e.toString());
+          LOG.error("Error while restarting netconf servers {}",e.getMessage());
         }
       }
     }

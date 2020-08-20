@@ -102,12 +102,10 @@ public class ACSServiceBooter {
 
     ActiveMQQueue crQueue = new ActiveMQQueue(CR_REQ_Q);
     RedeliveryPolicy crQueuePolicy = new RedeliveryPolicy();
-    crQueuePolicy.setInitialRedeliveryDelay(18000);
+    crQueuePolicy.setInitialRedeliveryDelay(10 * 1000L);
     crQueuePolicy.setUseCollisionAvoidance(true);
-    crQueuePolicy.setRedeliveryDelay(18000);
-    crQueuePolicy.setUseExponentialBackOff(true);
-    crQueuePolicy.setBackOffMultiplier(2);
-    crQueuePolicy.setMaximumRedeliveries(4);
+    crQueuePolicy.setRedeliveryDelay(10 * 1000L);
+    crQueuePolicy.setMaximumRedeliveries(2);
     crQueuePolicy.setDestination(crQueue);
 
     ActiveMQQueue notificationQueue = new ActiveMQQueue(NBI_NOTIFICATION_Q);
@@ -142,36 +140,39 @@ public class ACSServiceBooter {
   public JmsListenerContainerFactory<MessageListenerContainer> tr069NBIRequestCF(
       ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    return handleJMSCommonConfiguration(connectionFactory, configurer);
+    return handleJMSCommonConfiguration(connectionFactory, configurer, "5-10");
   }
 
   @Bean
   public JmsListenerContainerFactory<MessageListenerContainer> tr069DeviceResponseCF(
       ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    return handleJMSCommonConfiguration(connectionFactory, configurer);
+    return handleJMSCommonConfiguration(connectionFactory, configurer, "10-20");
   }
 
   @Bean
   public JmsListenerContainerFactory<MessageListenerContainer> nbiNotificationCF(
       ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    return handleJMSCommonConfiguration(connectionFactory, configurer);
+    return handleJMSCommonConfiguration(connectionFactory, configurer, "5-10");
   }
 
   @Bean
   public JmsListenerContainerFactory<MessageListenerContainer> nbiOpResultCF(
       ConnectionFactory connectionFactory,
       DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    return handleJMSCommonConfiguration(connectionFactory, configurer);
+    return handleJMSCommonConfiguration(connectionFactory, configurer, "5-10");
   }
 
-  public JmsListenerContainerFactory handleJMSCommonConfiguration(
-      ConnectionFactory connectionFactory,
-      DefaultJmsListenerContainerFactoryConfigurer configurer) {
+  public JmsListenerContainerFactory<MessageListenerContainer> handleJMSCommonConfiguration(
+      ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configurer,
+      String threadCoutRange) {
     DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
     configurer.configure(factory, connectionFactory);
-    return factory;
+    factory.setConcurrency(threadCoutRange);
+    JmsListenerContainerFactory<MessageListenerContainer> result =
+        (JmsListenerContainerFactory) factory;
+    return result;
   }
 
   /*

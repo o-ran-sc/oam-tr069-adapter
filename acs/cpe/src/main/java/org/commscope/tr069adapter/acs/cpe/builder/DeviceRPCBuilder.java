@@ -46,6 +46,8 @@ public class DeviceRPCBuilder {
    * @param deviceRPCRequest
    * @return
    */
+
+
   public TR069RPC constructDeviceRPC(DeviceRPCRequest deviceRPCRequest) {
     TR069RPC message = null;
 

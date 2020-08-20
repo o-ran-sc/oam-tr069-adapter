@@ -41,7 +41,7 @@ class ServerPortAllocationExceptionTest {
       throw new ServerPortAllocationException(NetconfServerManagementError.PORT_IN_USE);
 
     } catch (ServerPortAllocationException e) {
-      assertTrue(e.getError().equals(NetconfServerManagementError.PORT_IN_USE));
+      assertEquals(NetconfServerManagementError.PORT_IN_USE, e.getError());
     }
   }
 
@@ -53,7 +53,7 @@ class ServerPortAllocationExceptionTest {
       throw se;
 
     } catch (ServerPortAllocationException e) {
-      assertTrue(e.getError().equals(NetconfServerManagementError.INTERNAL_ERROR));
+      assertEquals(NetconfServerManagementError.INTERNAL_ERROR, e.getError());
     }
   }
 

@@ -20,6 +20,7 @@ package org.commscope.tr069adapter.acs.requestprocessor.impl;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.SESSION_ID;
 
+import java.util.Date;
 import java.util.List;
 
 import org.commscope.tr069adapter.acs.common.DeviceDetails;
@@ -46,10 +47,12 @@ import org.commscope.tr069adapter.acs.common.response.DeviceInformResponse;
 import org.commscope.tr069adapter.acs.common.utils.ErrorCode;
 import org.commscope.tr069adapter.acs.requestprocessor.DeviceOperationInterface;
 import org.commscope.tr069adapter.acs.requestprocessor.dao.DeviceRPCRequestRepositoryHelper;
+import org.commscope.tr069adapter.acs.requestprocessor.dao.DeviceRepository;
 import org.commscope.tr069adapter.acs.requestprocessor.dto.CustomOperationData;
 import org.commscope.tr069adapter.acs.requestprocessor.dto.SessionDTO;
 import org.commscope.tr069adapter.acs.requestprocessor.dto.SessionState;
 import org.commscope.tr069adapter.acs.requestprocessor.dto.TR069RequestProcessorData;
+import org.commscope.tr069adapter.acs.requestprocessor.entity.TR069DeviceEntity;
 import org.commscope.tr069adapter.acs.requestprocessor.entity.TR069DeviceRPCRequestEntity;
 import org.commscope.tr069adapter.acs.requestprocessor.helper.TR069RequestProcessEngineHelper;
 import org.commscope.tr069adapter.acs.requestprocessor.util.TR069RequestProcessorUtility;
@@ -74,6 +77,9 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
 
   @Autowired
   protected DeviceRPCRequestRepositoryHelper deviceRPCRequestRepositoryHelper;
+
+  @Autowired
+  private DeviceRepository deviceRepository;
 
   /**
    * @param deviceRPCRequest
@@ -166,7 +172,7 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
     }
 
     SessionDTO sessionDTO = getSession(tr069DeviceDetails.getDeviceId());
-
+    tr069DeviceDetails.setCrRetryCount(1);
     if (null != sessionDTO && !SessionState.TERMINATED.equals(sessionDTO.getSessionState())) {
       logger.debug("Device is reachable as device tr069 session is in {} state.",
           sessionDTO.getSessionState());
@@ -530,6 +536,7 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
       if (session.getCurrentOperationId() == null) {
         logger.debug("There exists no pending operation request for the session: {}", sessionId);
       } else {
+        sessionId = sessionId.replaceAll("[\n|\r|\t]", "_");
         logger.debug("There exists pending operation request for the session: {}", sessionId);
         List<TR069DeviceRPCRequestEntity> tr069DeviceRPCRequestEntityList =
             deviceRPCRequestRepositoryHelper.findByDeviceIdAndOperationId(deviceId,
@@ -563,7 +570,8 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
     } catch (DeviceOperationException e) {
       SessionManagerException ex =
           new SessionManagerException(ErrorCode.DEVICE_NOT_EXISTS, deviceId);
-      logger.error(ex.getMessage());
+      String exceptionMessage = ex.getMessage().replaceAll("[\n|\r|\t]", "_");
+      logger.error(exceptionMessage);
       throw ex;
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -701,6 +709,17 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
             e.getMessage());
         logger.error(e.getMessage());
       }
+    } else {
+      TR069DeviceDetails tr069DeviceDetails =
+          (TR069DeviceDetails) tr069RequestProcessorData.getTr069DeviceDetails();
+      TR069DeviceEntity tr069DeviceEntity =
+          deviceRepository.findByDeviceId(tr069DeviceDetails.getDeviceId());
+      logger.info("Setting connection status as true for device: {}",
+          tr069DeviceDetails.getDeviceId());
+      tr069DeviceEntity.setConnStatus(true);
+      tr069DeviceEntity.setLastUpdatedTime(new Date());
+      tr069DeviceEntity.setErrorMsg(null);
+      deviceRepository.save(tr069DeviceEntity);
     }
   }
 

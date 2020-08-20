@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="m-101">
-	<software-download xmlns="urn:o-ran:software-management:1.0">
-		<remote-file-path>sftp://root@10.208.224.201/root/vishal/BCRP_OneImage_4.3.00.158.signed.bin</remote-file-path>
-		<password>
-			<password>airvana123</password>
-		</password>
-	</software-download>
-</rpc>

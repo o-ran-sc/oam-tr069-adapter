@@ -42,6 +42,8 @@ public class TR069NBIUtility {
     tr069DeviceEntity.setUserName(tr069DeviceDetails.getUsername());
     tr069DeviceEntity.setPassword(tr069DeviceDetails.getPassword());
     tr069DeviceEntity.setLastUpdatedTime(new Date());
+    tr069DeviceEntity.setConnStatus(true);
+    tr069DeviceEntity.setErrorMsg(null);
 
     if (tr069DeviceDetails.getConnectionRequestURL() != null) {
       tr069DeviceEntity.setConnectionReqURL(tr069DeviceDetails.getConnectionRequestURL());

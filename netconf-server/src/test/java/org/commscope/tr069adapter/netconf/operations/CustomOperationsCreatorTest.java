@@ -18,6 +18,7 @@
 
 package org.commscope.tr069adapter.netconf.operations;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
@@ -37,7 +38,7 @@ class CustomOperationsCreatorTest {
     Set<NetconfOperation> opers =
         coc.getNetconfOperationService(capabilities, new SessionIdProvider(), "1")
             .getNetconfOperations();
-    assertTrue(opers != null);
+    assertNotNull(opers);
     assertTrue(!opers.isEmpty());
   }
 

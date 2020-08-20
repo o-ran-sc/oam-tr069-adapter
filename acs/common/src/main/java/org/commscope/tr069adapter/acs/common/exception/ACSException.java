@@ -27,17 +27,20 @@ public class ACSException extends Exception {
 
   private static final String ERRORMSG_PREFIX = "TR069";
 
-  private ErrorCode errorCode;
+  private final ErrorCode errorCode;
 
-  private String[] arguments;
+  private final String[] arguments;
 
-  private String message;
+  private final String message;
 
   /**
    * @param s
    */
   public ACSException(String s) {
     super(s);
+    this.errorCode = null;
+    this.arguments = null;
+    this.message = "";
   }
 
   /**
@@ -46,44 +49,31 @@ public class ACSException extends Exception {
   public ACSException(ErrorCode errorCode) {
     super();
     this.errorCode = errorCode;
-    setErrorMessage(getErrorMessage());
+    this.arguments = null;
+    this.message = getErrorMessage();
   }
 
-  /**
-   * @param errorCode
-   * @param args
-   */
+
   public ACSException(ErrorCode errorCode, String... args) {
     super();
     this.errorCode = errorCode;
     arguments = args;
-    setErrorMessage(getErrorMessage());
+    this.message = getErrorMessage();
   }
 
   public ErrorCode getErrorCode() {
     return errorCode;
   }
 
-  public void setErrorCode(ErrorCode errorCode) {
-    this.errorCode = errorCode;
-  }
 
   @Override
   public String getMessage() {
     return message;
   }
 
-  /**
-   * All the error messages defined in the TR069 ErrorMessage properties must have prefix "TR069"
-   * 
-   * @return
-   */
   private String getErrorMessage() {
     String key = ERRORMSG_PREFIX + "." + errorCode.getErrorCodeKey();
     return Utility.getMessage(key, arguments);
   }
 
-  private void setErrorMessage(String message) {
-    this.message = message;
-  }
 }

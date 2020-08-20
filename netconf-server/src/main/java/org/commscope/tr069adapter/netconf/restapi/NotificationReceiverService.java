@@ -39,10 +39,8 @@ public class NotificationReceiverService {
 
   @PostMapping("/notification")
   public void processNotification(@RequestBody NetConfNotificationDTO netConNotifDTO) {
-    System.out.println("Received NetConf Notification :" + netConNotifDTO);
-    LOG.debug("Received NetConf Notification :" + netConNotifDTO);
+    LOG.debug("Received NetConf Notification : {}", netConNotifDTO);
     handler.handleNetConfNotification(netConNotifDTO);
-    LOG.debug("Processed NetConf Notification for :" + netConNotifDTO);
-    System.out.println("Processed NetConf Notification for :" + netConNotifDTO);
+    LOG.debug("Processed NetConf Notification for : {}", netConNotifDTO);
   }
 }

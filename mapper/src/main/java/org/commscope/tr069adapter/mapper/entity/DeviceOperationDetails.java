@@ -48,6 +48,10 @@ public class DeviceOperationDetails implements Serializable {
   @Column(name = "FIRMWARE_FILE", length = 1024)
   private String fileName;
 
+  @Column(name = "ORIGIN", length = 30)
+  private String origin;
+
+
   public Long getId() {
     return id;
   }
@@ -86,5 +90,13 @@ public class DeviceOperationDetails implements Serializable {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
+  }
+
+  public String getOrigin() {
+    return origin;
+  }
+
+  public void setOrigin(String origin) {
+    this.origin = origin;
   }
 }

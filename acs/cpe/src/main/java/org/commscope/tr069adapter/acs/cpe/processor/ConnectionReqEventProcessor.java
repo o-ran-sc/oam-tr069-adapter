@@ -19,11 +19,9 @@
 package org.commscope.tr069adapter.acs.cpe.processor;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CONNECTION_REQUEST;
-import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CONNECTION_RETRY_SLEEP_TIME;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CR_TIMEOUT;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CR_TIMEOUT_CALLBACK;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.HTTP_OP_FAILED;
-import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.MAX_CONNECT_RETRY_COUNT;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.SEPERATOR;
 
 import java.io.IOException;
@@ -31,6 +29,7 @@ import java.io.IOException;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.exception.SessionManagerException;
+import org.commscope.tr069adapter.acs.common.requestprocessor.service.TR069DeviceEventHandler;
 import org.commscope.tr069adapter.acs.common.utils.ErrorCode;
 import org.commscope.tr069adapter.acs.cpe.utils.DeviceConnector;
 import org.commscope.tr069adapter.common.timer.TimerException;
@@ -51,41 +50,42 @@ public class ConnectionReqEventProcessor {
   @Autowired
   private TimerServiceManagerAPI timerServiceManagerAPI;
 
+  @Autowired
+  TR069DeviceEventHandler tr069EventHandler;
+
   public void initiateConnectionRequest(TR069DeviceDetails tr069DeviceDetails, Boolean isRetry)
       throws SessionManagerException, IOException {
     DeviceRPCResponse deviceRPCResponse = null;
 
-    for (int retryCount = 0; retryCount < MAX_CONNECT_RETRY_COUNT; retryCount++) {
-      logger.info("Initiating connection request on the device. Connection request URL is : {}",
-          tr069DeviceDetails.getConnectionRequestURL());
-      deviceRPCResponse = deviceConnector.requestConnectionHttp(tr069DeviceDetails);
-
-      if (deviceRPCResponse.getOperationResponse().getStatus() == HTTP_OP_FAILED) {
-        onFailedHTTPGetOperation(deviceRPCResponse);
-        logger.debug("Connection Request Retry attempt - {}", retryCount + 1);
-
-        if ((retryCount + 1) == MAX_CONNECT_RETRY_COUNT) {
-          SessionManagerException e = new SessionManagerException(
-              ErrorCode.SESSION_INITIATION_FAILED, tr069DeviceDetails.getDeviceId());
-          logger.error(e.getMessage());
-          throw e;
-        }
-      } else {
-        onSuccessHTTPGetOperation(tr069DeviceDetails, isRetry);
-        break;
-      }
-    }
-  }
-
-  private void onFailedHTTPGetOperation(DeviceRPCResponse deviceRPCResponse) {
-    logger.warn("Connection request failed with device, Error: {}",
-        deviceRPCResponse.getFaultString());
-    logger.debug("Waiting for " + CONNECTION_RETRY_SLEEP_TIME + " millisec before retry");
+    logger.info("Initiating connection request on the device. Connection request URL is : {}",
+        tr069DeviceDetails.getConnectionRequestURL());
+    boolean isConnectionFailed = true;
     try {
-      Thread.sleep(CONNECTION_RETRY_SLEEP_TIME);
-    } catch (InterruptedException e1) {
-      logger.error("Interrupted exception while waiting for CR retry");
-      Thread.currentThread().interrupt();
+      deviceRPCResponse = deviceConnector.requestConnectionHttp(tr069DeviceDetails);
+    } catch (Exception e) {
+      logger.error("Connection Failed with the Device: {}", e.getMessage());
+      isConnectionFailed = false;
+    }
+
+    if (!isConnectionFailed
+        || deviceRPCResponse.getOperationResponse().getStatus() == HTTP_OP_FAILED) {
+      tr069DeviceDetails.setCrRetryCount(tr069DeviceDetails.getCrRetryCount() + 1);
+      String faultStr = "";
+      if (deviceRPCResponse != null) {
+        faultStr = deviceRPCResponse.getFaultString();
+      }
+      logger.warn("Connection request failed with device, Error: {}, on attempt- {}", faultStr,
+          tr069DeviceDetails.getCrRetryCount());
+      if (tr069DeviceDetails.getCrRetryCount() == 1) {
+        logger.error("CONNECT request is failed, not retrying the CR to device");
+      } else {
+        SessionManagerException e = new SessionManagerException(ErrorCode.SESSION_INITIATION_FAILED,
+            tr069DeviceDetails.getDeviceId());
+        logger.error(e.getMessage());
+        throw e;
+      }
+    } else {
+      onSuccessHTTPGetOperation(tr069DeviceDetails, isRetry);
     }
   }
 

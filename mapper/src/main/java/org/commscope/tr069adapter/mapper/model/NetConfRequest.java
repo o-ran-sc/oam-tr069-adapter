@@ -30,7 +30,7 @@ public class NetConfRequest implements Serializable {
   private String deviceId;
   private String swVersion;
   private String hwVersion;
-  
+
   public NetConfRequest() {
     super();
   }

@@ -24,6 +24,7 @@ import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.dto.DeviceOperationRequestDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.exception.DeviceOperationException;
+import org.commscope.tr069adapter.acs.common.exception.SessionConcurrentAccessException;
 import org.commscope.tr069adapter.acs.common.exception.SessionManagerException;
 import org.commscope.tr069adapter.acs.common.response.DeviceInformResponse;
 
@@ -32,8 +33,10 @@ public interface TR069DeviceEventHandler {
   /**
    * @param deviceNotification
    * @return
+   * @throws SessionConcurrentAccessException
    */
-  public DeviceInformResponse processDeviceInform(DeviceInform deviceNotification) throws Exception;
+  public DeviceInformResponse processDeviceInform(DeviceInform deviceNotification)
+      throws InterruptedException, SessionConcurrentAccessException;
 
   /**
    * Return type can be null, such case Empty HTTP response to be sent to the device
@@ -42,7 +45,7 @@ public interface TR069DeviceEventHandler {
    * @return
    */
   public DeviceRPCRequest processDeviceRPCResponse(DeviceRPCResponse operationResult)
-      throws Exception;
+      throws SessionConcurrentAccessException, InterruptedException;
 
   /**
    * Return type can be null, such case Empty HTTP response to be sent to the device
@@ -50,7 +53,7 @@ public interface TR069DeviceEventHandler {
    * @return
    */
   public DeviceRPCRequest processEmptyDeviceRequest(TR069DeviceDetails deviceDetails)
-      throws Exception;
+      throws SessionConcurrentAccessException, InterruptedException;
 
   /**
    * @param sessionId
@@ -66,5 +69,7 @@ public interface TR069DeviceEventHandler {
    * @throws DeviceOperationException
    */
   public TR069DeviceDetails getDeviceDetails(String deviceId) throws DeviceOperationException;
+
+  public void processConnectionRequest(String errorMsg, String deviceId, boolean isSuccess);
 
 }

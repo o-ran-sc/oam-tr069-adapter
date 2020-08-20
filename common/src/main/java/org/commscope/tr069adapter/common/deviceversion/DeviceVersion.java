@@ -21,11 +21,15 @@ package org.commscope.tr069adapter.common.deviceversion;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DeviceVersion implements Serializable, Comparable<DeviceVersion> {
 
   /**
    * 
    */
+  private static final Logger LOG = LoggerFactory.getLogger(DeviceVersion.class);
   private static final long serialVersionUID = -7251276716604249440L;
   private int svMajorVersion = 0;
   private int svMinorVersion = 0;
@@ -41,8 +45,7 @@ public class DeviceVersion implements Serializable, Comparable<DeviceVersion> {
     this.hwVersion = hwVersion;
   }
 
-  public DeviceVersion(String swVersion, String hwVersion, boolean isSwRegex,
-      boolean isHwRegex) {
+  public DeviceVersion(String swVersion, String hwVersion, boolean isSwRegex, boolean isHwRegex) {
     super();
     this.hwVersion = hwVersion;
     this.swVersion = swVersion;
@@ -83,7 +86,7 @@ public class DeviceVersion implements Serializable, Comparable<DeviceVersion> {
         svMinorVersion = Integer.parseInt(verArray[1]);
         svPatchVersion = Integer.parseInt(verArray[2]);
       } catch (Exception e) {
-        // TODO: handle exception
+        LOG.error("Software Version setting has failed. {}", e.toString());
       }
 
     } else if (swVersion.indexOf("x") > 0) {
@@ -122,17 +125,19 @@ public class DeviceVersion implements Serializable, Comparable<DeviceVersion> {
     return isGenericVersion;
   }
 
-  public static Comparator<DeviceVersion> softwareComparator = new Comparator<DeviceVersion>() {
-    @Override
-    public int compare(DeviceVersion d1, DeviceVersion d2) {
-      if (d1.getSvMajorVersion() != d2.getSvMajorVersion()) {
-        return (d1.getSvMajorVersion() - d2.getSvMajorVersion());
-      } else if (d1.getSvMinorVersion() != d2.getSvMinorVersion()) {
-        return d1.getSvMinorVersion() - d2.getSvMinorVersion();
-      } else
-        return d1.getSvPatchVersion() - d2.getSvPatchVersion();
-    }
-  };
+  public static final Comparator<DeviceVersion> softwareComparator =
+      new Comparator<DeviceVersion>() {
+        @Override
+        public int compare(DeviceVersion d1, DeviceVersion d2) {
+          if (d1.getSvMajorVersion() != d2.getSvMajorVersion()) {
+            return (d1.getSvMajorVersion() - d2.getSvMajorVersion());
+          } else if (d1.getSvMinorVersion() != d2.getSvMinorVersion()) {
+            return d1.getSvMinorVersion() - d2.getSvMinorVersion();
+          } else {
+            return d1.getSvPatchVersion() - d2.getSvPatchVersion();
+          }
+        }
+      };
 
   @Override
   public int compareTo(DeviceVersion o) {
@@ -152,6 +157,39 @@ public class DeviceVersion implements Serializable, Comparable<DeviceVersion> {
         return hwVersion.compareToIgnoreCase(o.hwVersion);
       }
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    DeviceVersion other = (DeviceVersion) obj;
+    if (deviceTypeId != other.deviceTypeId)
+      return false;
+    if (hwVersion == null && other.hwVersion != null) {
+      return false;
+    }
+    if (isGenericVersion != other.isGenericVersion)
+      return false;
+    if (isHwRegex != other.isHwRegex)
+      return false;
+    if (isSwRegex != other.isSwRegex)
+      return false;
+    if (svMajorVersion != other.svMajorVersion)
+      return false;
+    if (svMinorVersion != other.svMinorVersion)
+      return false;
+    if (svPatchVersion != other.svPatchVersion)
+      return false;
+    if (swVersion == null) {
+      if (other.swVersion != null)
+        return false;
+    }
+    return true;
   }
 
   @Override

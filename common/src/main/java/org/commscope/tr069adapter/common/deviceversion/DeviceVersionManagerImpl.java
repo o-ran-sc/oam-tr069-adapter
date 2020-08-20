@@ -18,6 +18,8 @@
 
 package org.commscope.tr069adapter.common.deviceversion;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,12 +31,16 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class DeviceVersionManagerImpl implements DeviceVersionManager {
+  private static final Logger LOG = LoggerFactory.getLogger(DeviceVersionManagerImpl.class);
 
   TreeMap<DeviceVersion, String> deviceVersionMap = new TreeMap<>();
   TreeMap<String, ProfileDefinition> profileDefinitionMap = new TreeMap<>();
@@ -63,24 +69,12 @@ public class DeviceVersionManagerImpl implements DeviceVersionManager {
         profileDefinitionMap.put(profileId, definition);
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG.info("context", e);
+
     }
   }
 
-  public static void main(String[] args) {
-    System.out.println("started loading the json file");
-    DeviceVersionManagerImpl impl = new DeviceVersionManagerImpl();
-    try {
-      impl.loadProfileConfiguration();
-      System.out.println(impl.getAssociatedProfileId("4.3.0.0", "*"));
-    } catch (Exception e) {
-      System.out.println("Exception While loading the file");
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    System.out.println("File loading is completed");
-  }
+
 
   @Override
   public String getNetconfYangSchemaPath(String swVersion, String hwVersion) {
@@ -145,8 +139,6 @@ public class DeviceVersionManagerImpl implements DeviceVersionManager {
                     || deviceVersion.getHwVersion().matches(profileVersion.getHwVersion())) {
                   return entry.getValue();
                 }
-              } else {
-
               }
             } else {
               // Check Strict match of Hardware
@@ -181,7 +173,7 @@ public class DeviceVersionManagerImpl implements DeviceVersionManager {
       }
     }
 
-    if (mSoftwareList.size() > 0) {
+    if (!mSoftwareList.isEmpty()) {
       // return the least matched software version profile
       Collections.sort(mSoftwareList, DeviceVersion.softwareComparator);
       return deviceVersionMap.get(mSoftwareList.get(mSoftwareList.size() - 1));

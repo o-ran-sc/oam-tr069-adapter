@@ -132,7 +132,7 @@ public class CPEManagementService {
           if (reqType.equals(INFORM)) {
             processDeviceInform(msg, request, response, out);
           } else if (reqType.equals(TRANSFER_COMPLETE)) {
-            processTransferComplete(msg, response, out);
+            processTransferComplete(msg, request, response, out);
           } else {
             processOperationResult(msg, response, reqType, acsSessionID, out);
           }
@@ -182,7 +182,11 @@ public class CPEManagementService {
       deviceInformResponse =
           deviceEventHandler.processDeviceInform(inform, request.getHeader("Authorization"));
       Cookie cookie = new Cookie(ACS_SESSIONID, deviceInformResponse.getSessionId());
+      cookie.setSecure(request.isSecure());
+      cookie.setHttpOnly(true);
       Cookie cwmpVerCookie = new Cookie(CWMP_VERSION, msg.getCWMPVersion());
+      cwmpVerCookie.setSecure(request.isSecure());
+      cwmpVerCookie.setHttpOnly(true);
       response.addCookie(cookie);
       response.addCookie(cwmpVerCookie);
     } catch (TR069EventProcessingException tr069ex) {
@@ -203,13 +207,17 @@ public class CPEManagementService {
     resp.writeTo(out);
   }
 
-  private void processTransferComplete(TR069RPC msg, HttpServletResponse response,
-      ByteArrayOutputStream out) {
+  private void processTransferComplete(TR069RPC msg, HttpServletRequest request,
+      HttpServletResponse response, ByteArrayOutputStream out) {
     TransferComplete tc = (TransferComplete) msg;
     try {
       DeviceInformResponse deviceInformResponse = deviceEventHandler.processTransferComplete(tc);
       Cookie cookie = new Cookie(ACS_SESSIONID, deviceInformResponse.getSessionId());
+      cookie.setSecure(request.isSecure());
+      cookie.setHttpOnly(true);
       Cookie cwmpVerCookie = new Cookie(CWMP_VERSION, msg.getCWMPVersion() + ";");
+      cwmpVerCookie.setSecure(request.isSecure());
+      cwmpVerCookie.setHttpOnly(true);
       response.addCookie(cookie);
       response.addCookie(cwmpVerCookie);
     } catch (Exception e) {
@@ -294,6 +302,7 @@ public class CPEManagementService {
       len = l;
       istream = is;
     }
+
 
     @Override
     public int read() throws IOException {

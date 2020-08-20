@@ -28,7 +28,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FileUtils;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.common.deviceversion.DeviceVersionManager;
@@ -145,10 +147,8 @@ public class MOMetaDataUtil {
 
   public MOMetaData getMetaDataByNetConfName(String moName, String swVersion, String hwVersion) {
     String moNameInGnrForm = moName.replaceAll(INDEX_REGEX, STRING_I);
-
     String profileId = versionManager.getAssociatedProfileId(swVersion, hwVersion);
     Map<String, MOMetaData> metaData = metaDataMap.get(profileId);
-
     return metaData.get(moNameInGnrForm);
   }
 
@@ -171,6 +171,16 @@ public class MOMetaDataUtil {
     String netConfNMoName = reverseMetaData.get(moNameInGnrForm);
     return netConfNMoName != null ? getNetConfMOByReplacingIndexes(netConfNMoName, moName)
         : netConfNMoName;
+  }
+
+  public String getTR069NameByNetconfNameWithIndexes(String netconfName, String swVersion,
+      String hwVersion) {
+    String moNameInGnrForm = netconfName.replaceAll(INDEX_REGEX, STRING_I);
+    String profileId = versionManager.getAssociatedProfileId(swVersion, hwVersion);
+    Map<String, MOMetaData> profileMetaData = metaDataMap.get(profileId);
+    String tr069MoName = profileMetaData.get(moNameInGnrForm).getMoName();
+    return tr069MoName != null ? getTR69MOByReplacingIndexes(netconfName, tr069MoName)
+        : tr069MoName;
   }
 
   public List<ParameterDTO> getSupportedChildParameters(List<ParameterDTO> parameters,
@@ -231,4 +241,33 @@ public class MOMetaDataUtil {
     }
     return netconfMo;
   }
+
+  public String getNetconfXPathNameByTR69NameWithIndexes(String paramName, String swVersion,
+      String hwVersion) {
+    String netconfName = getNetconfNameByTR69NameWithIndexes(paramName, swVersion, hwVersion);
+    if (netconfName == null)
+      return null;
+    String[] splitArray = netconfName.split("\\.");
+    StringBuilder sb = new StringBuilder();
+    StringBuilder nodeName = new StringBuilder();
+    String tokenizer = ".";
+    for (String token : splitArray) {
+      if (nodeName.length() == 0)
+        nodeName.append(token);
+      else {
+        nodeName.append(tokenizer);
+        nodeName.append(token);
+      }
+      MOMetaData metaData = getMetaDataByNetConfName(nodeName.toString(), swVersion, hwVersion);
+      if (null != metaData && null != metaData.getURI()) {
+        sb.append("/" + token + "[" + "@xmlns=" + metaData.getURI() + "]");
+      } else if (token.matches("[0-9]*")) {
+        sb.append("[" + token + "]");
+      } else {
+        sb.append("/" + token);
+      }
+    }
+    return sb.toString();
+  }
+
 }

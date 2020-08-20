@@ -26,6 +26,7 @@ package org.commscope.tr069adapter.vesagent.util;
  */
 
 public class VesAgentConstants {
+  private VesAgentConstants() {}
 
   public static final String HEART_BEAT = "heartbeat";
 
@@ -37,6 +38,7 @@ public class VesAgentConstants {
   public static final String ENODEB_NAME = "ENODEB_NAME";
 
   public static final String OBJECT_DATA_TYPE = "object";
+  public static final String COUNT_DOWN_TIMER_ZERO = "0";
 
   public static final String REMOVE_HEART_BEAT_TIMER_VAL = "0";
   public static final int DEVICE_IS_REACHABLE = 100;

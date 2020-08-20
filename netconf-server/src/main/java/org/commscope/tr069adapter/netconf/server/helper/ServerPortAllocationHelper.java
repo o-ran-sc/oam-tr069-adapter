@@ -75,7 +75,7 @@ public class ServerPortAllocationHelper {
     }
     LOG.debug("Successfully populated available ports list.");
   }
-  
+
   public synchronized String reserveServerPort() throws ServerPortAllocationException {
 
     if (availablePorts.isEmpty()) {
@@ -113,9 +113,9 @@ public class ServerPortAllocationHelper {
       semaphore.acquire();
       availablePorts.add(port);
       semaphore.release();
-      LOG.error("Successfully un-reserved the port " + port + " to start netconf server.");
+      LOG.error("Successfully un-reserved the port {} to start netconf server.", port);
     } catch (InterruptedException e) {
-      LOG.warn("Failed to un-reserve the port " + port, e);
+      LOG.warn("Failed to un-reserve the port  {} {}", port, e.getMessage());
       Thread.currentThread().interrupt();
       return false;
     }
@@ -124,7 +124,7 @@ public class ServerPortAllocationHelper {
   }
 
   public boolean checkAndReserveServerPort(String port) {
-
+    port = port.replaceAll("[\n|\r|\t]", "_");
     try {
       Semaphore semaphore = semaphoreMap.get(port);
       semaphore.acquire();

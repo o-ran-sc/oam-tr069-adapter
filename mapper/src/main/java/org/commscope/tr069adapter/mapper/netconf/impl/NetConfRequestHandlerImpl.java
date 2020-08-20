@@ -18,20 +18,27 @@
 
 package org.commscope.tr069adapter.mapper.netconf.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationOptions;
 import org.commscope.tr069adapter.acs.common.OperationResponse;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.CustomOperationCode;
+import org.commscope.tr069adapter.acs.common.dto.ParameterAttributeDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationDetails;
+import org.commscope.tr069adapter.acs.common.response.AddObjectResponse;
 import org.commscope.tr069adapter.acs.common.response.SetParameterValueResponse;
+import org.commscope.tr069adapter.acs.common.utils.ConnectionStatusPOJO;
 import org.commscope.tr069adapter.mapper.MOMetaData;
+import org.commscope.tr069adapter.mapper.acs.ACSRequestSender;
 import org.commscope.tr069adapter.mapper.dao.DeviceOperationsDAO;
 import org.commscope.tr069adapter.mapper.entity.DeviceOperationDetails;
 import org.commscope.tr069adapter.mapper.model.ErrorCodeDetails;
@@ -45,7 +52,6 @@ import org.commscope.tr069adapter.mapper.util.ErrorCodeUtil;
 import org.commscope.tr069adapter.mapper.util.FirwareUpgradeStatus;
 import org.commscope.tr069adapter.mapper.util.MOMetaDataUtil;
 import org.commscope.tr069adapter.mapper.util.MapperConstants;
-import org.commscope.tr069adapter.mapper.util.MapperValidator;
 import org.commscope.tr069adapter.mapper.util.NetconfToTr069MapperUtil;
 import org.commscope.tr069adapter.mapper.ves.VESNotificationSender;
 import org.slf4j.Logger;
@@ -56,6 +62,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 @Component
 public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
@@ -64,6 +71,14 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
   private static final String BOOLEAN_TRUE_VALUE = "1";
   private static final String BOOLEAN_FALSE_VALUE = "0";
   private static final String BOOLEAN_DATA_TYPE = "boolean";
+  private static final String CONFIG = "config";
+  private static final String FILTER = "filter";
+  private static final String NO_DEVICE_PARAM_FOUND =
+      "There are no device parameters found for get.";
+  private static final String RPC_REPLY_STATUS = "rpc-reply.ns1:status";
+  private static final String RPC_REPLY_ERROR = "rpc-reply.ns1:error-message";
+  private static final String FAILED = "FAILED";
+  private static final String PARAMETER = "parameter";
 
   @Autowired
   SynchronizedRequestHandler syncHandler;
@@ -83,12 +98,15 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
   @Autowired
   DeviceOperationsDAO deviceOperDAO;
 
+  @Autowired
+  ACSRequestSender tr069ReqSender;
+
   @Override
   public NetConfResponse handleSetConfigRequest(NetConfRequest netConfRequest) {
     Element el = NetconfToTr069MapperUtil.convertStringToDocument(netConfRequest.getRequestXml());
     NetConfResponse response = null;
     DeviceRPCRequest deviceRPCRequest = NetconfToTr069MapperUtil.prepareTR069Request(
-        netConfRequest.getDeviceId(), el, "config", TR069OperationCode.SET_PARAMETER_VALUES);
+        netConfRequest.getDeviceId(), el, CONFIG, TR069OperationCode.SET_PARAMETER_VALUES);
 
     if (deviceRPCRequest == null) {
       LOG.debug("There are no supported device parameters found for edit-config.");
@@ -133,11 +151,6 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     List<ParameterDTO> allParamList = deviceRPCRequest.getOpDetails().getParmeters();
 
     if (!vesRequestParams.isEmpty()) {
-      if (!MapperValidator.isCountDownTimerValid(vesRequestParams)) {
-        return getErrorResponse(MapperConstants.INVALID_PARAM_VAL_ERROR_CODE,
-            MapperConstants.INVALID_COUNT_DOWN_TIMER_MSG);
-      }
-
       deviceRPCRequest.getOpDetails().setParmeters(vesRequestParams);
       deviceRPCResponseVes = vesnotiSender.sendEditConfigNotification(deviceRPCRequest);
 
@@ -184,7 +197,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     Element el = NetconfToTr069MapperUtil.convertStringToDocument(netConfRequest.getRequestXml());
     NetConfResponse response = null;
     DeviceRPCRequest request = NetconfToTr069MapperUtil.prepareTR069Request(
-        netConfRequest.getDeviceId(), el, "config", TR069OperationCode.DELETE_OBJECT);
+        netConfRequest.getDeviceId(), el, CONFIG, TR069OperationCode.DELETE_OBJECT);
 
     if (request == null) {
       LOG.debug("There are no supported device parameters found for delete-config.");
@@ -229,11 +242,11 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     Element el = NetconfToTr069MapperUtil.convertStringToDocument(netConfRequest.getRequestXml());
     NetConfResponse response = null;
     DeviceRPCRequest request = NetconfToTr069MapperUtil.prepareTR069Request(
-        netConfRequest.getDeviceId(), el, "filter", TR069OperationCode.GET_PARAMETER_VALUES);
+        netConfRequest.getDeviceId(), el, FILTER, TR069OperationCode.GET_PARAMETER_VALUES);
 
     if (request == null || request.getOpDetails() == null
         || request.getOpDetails().getParmeters().isEmpty()) {
-      LOG.debug("There are no device parameters found for get.");
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
       return getEmptyResponse();
     } else if (request.getOpDetails() != null) {
 
@@ -271,7 +284,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     }
 
     DeviceRPCRequest request = NetconfToTr069MapperUtil.prepareTR069Request(
-        netConfRequest.getDeviceId(), el, "filter", TR069OperationCode.GET_PARAMETER_VALUES);
+        netConfRequest.getDeviceId(), el, FILTER, TR069OperationCode.GET_PARAMETER_VALUES);
 
     if (request == null || request.getOpDetails() == null
         || request.getOpDetails().getParmeters().isEmpty()) {
@@ -306,7 +319,6 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       }
     }
 
-
     allParamList.removeAll(vesRequestParams);
 
     DeviceRPCResponse opResultDevice = null;
@@ -324,9 +336,9 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     if (null == opResult) {
       return getTimeOutResponse();
     }
-    LOG.debug("Received GPV response : FaultKey = " + opResult.getFaultKey() + ", FaultString = "
-        + opResult.getFaultString() + ", Parameters :"
-        + opResult.getOperationResponse().getParameterDTOs());
+    LOG.debug("Received GPV response : FaultKey = {}, FaultString = {}, Parameters : {}",
+        opResult.getFaultKey(), opResult.getFaultString(),
+        opResult.getOperationResponse().getParameterDTOs());
     if (null != opResult.getOperationResponse().getParameterDTOs())
       handleBooleanParameters(opResult.getOperationResponse().getParameterDTOs(),
           netConfRequest.getSwVersion(), netConfRequest.getHwVersion());
@@ -361,7 +373,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     Map<String, String> map =
         NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "software-download");
     if (map == null || map.size() <= 0) {
-      LOG.debug("There are no device parameters found for get.");
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
       return getEmptyResponse();
     }
 
@@ -399,7 +411,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     deviceRPCRequest.getOpDetails().setParmeters(paramDTOList);
     deviceRPCRequest.getOpDetails().setOpCode(TR069OperationCode.DOWNLOAD);
 
-    LOG.debug("Prepared NBI request for download " + deviceRPCRequest);
+    LOG.debug("Prepared NBI request for download {}", deviceRPCRequest);
 
     DeviceOperationDetails fwDetails = deviceOperDAO.findByDeviceId(request.getDeviceId());
     if (fwDetails == null) {
@@ -410,7 +422,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     if (fwDetails.getDownLoadStatus() != FirwareUpgradeStatus.DOWNLOAD_INTIATED.getStatus()
         && fwDetails.getDownLoadStatus() != FirwareUpgradeStatus.DOWNLOAD_COMPLETED.getStatus()) {
 
-      LOG.debug("persisting the fw details " + fwDetails.toString());
+      LOG.debug("persisting the fw details {}", fwDetails);
 
       DeviceRPCResponse opResult;
       opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
@@ -419,15 +431,15 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       }
       fwDetails.setFileName(fileName);
       fwDetails.setDownLoadStatus(FirwareUpgradeStatus.DOWNLOAD_INTIATED.getStatus());
+      fwDetails.setOrigin("sdnr");
       deviceOperDAO.save(fwDetails);
       ArrayList<ParameterDTO> responseParamDTOList = new ArrayList<>();
 
       if (opResult.getOperationResponse().getStatus() == 1) {
-        responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:status", "STARTED"));
+        responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, "STARTED"));
       } else {
-        responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:status", "FAILED"));
-        responseParamDTOList
-            .add(new ParameterDTO("rpc-reply.ns1:error-message", opResult.getFaultString()));
+        responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, FAILED));
+        responseParamDTOList.add(new ParameterDTO(RPC_REPLY_ERROR, opResult.getFaultString()));
       }
       responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:notification-timeout", "1200"));
 
@@ -435,7 +447,411 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       response = mapperUtil.getNetconfResponse(opResult, request.getSwVersion(),
           request.getHwVersion(), true);
 
-      LOG.debug("update the status for fw details " + fwDetails.toString());
+      LOG.debug("update the status for fw details {}", fwDetails);
+    } else {
+      LOG.debug("FirmWare Upgrade is in progress");
+      String errorMsg = "TR069 device request has been aborted as Firmware Upgrade is inProgress";
+      return getOperationAbortedResponse(errorMsg);
+    }
+
+    return response;
+  }
+
+  @Override
+  public NetConfResponse handleAddObjectRequest(NetConfRequest request) {
+    LOG.debug("request received for addObject");
+    Document d1 = NetconfToTr069MapperUtil.convertStringToDocumentXml(request.getRequestXml());
+    NetConfResponse response = null;
+    Map<String, String> map =
+        NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "add-object");
+    if (map == null || map.size() <= 0) {
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
+      return getEmptyResponse();
+    }
+
+    Element el = NetconfToTr069MapperUtil.convertStringToDocument(request.getRequestXml());
+    DeviceRPCRequest deviceRPCRequest = NetconfToTr069MapperUtil
+        .prepareTR069Request(request.getDeviceId(), el, PARAMETER, TR069OperationCode.ADD_OBJECT);
+
+    if (deviceRPCRequest == null || deviceRPCRequest.getOpDetails() == null
+        || deviceRPCRequest.getOpDetails().getParmeters().isEmpty()) {
+      LOG.debug("There are no device parameters found for addobject.");
+      return getEmptyResponse();
+    } else if (deviceRPCRequest.getOpDetails() != null) {
+      deviceRPCRequest.getOpDetails()
+          .setParmeters(filteredGetParameters(deviceRPCRequest.getOpDetails().getParmeters(),
+              request.getSwVersion(), request.getHwVersion()));
+      if (deviceRPCRequest.getOpDetails().getParmeters().isEmpty()) {
+        LOG.debug("There are no supported device parameters found for addobject.");
+        return getEmptyResponse();
+      }
+    }
+
+    LOG.debug("Prepared NBI request for addobject {}", deviceRPCRequest);
+
+    DeviceRPCResponse opResult;
+    opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
+    if (null == opResult) {
+      return getTimeOutResponse();
+    }
+    if (null == opResult.getOperationResponse()) {
+      return getTimeOutResponse();
+    }
+    AddObjectResponse addOpresult = (AddObjectResponse) opResult.getOperationResponse();
+
+    ArrayList<ParameterDTO> responseParamDTOList = new ArrayList<>();
+
+    if (opResult.getFaultKey() == null) {
+      String status = String.valueOf(opResult.getOperationResponse().getStatus());
+      responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, status));
+      String instanceNumber = String.valueOf(addOpresult.getInstanceNumber());
+      LOG.info("AddObject Passed : Instance Number: {}", instanceNumber);
+      responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:instance-number", instanceNumber));
+    }
+    LOG.info("AddObject Label value: {}", addOpresult.getLabel());
+    if (null == addOpresult.getLabel()) {
+      responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:label", ""));
+    } else {
+      responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:label", addOpresult.getLabel()));
+    }
+
+    opResult.getOperationResponse().setParameterDTOs(responseParamDTOList);
+    response = mapperUtil.getNetconfResponse(opResult, request.getSwVersion(),
+        request.getHwVersion(), true);
+
+    return response;
+  }
+
+  @Override
+  public NetConfResponse handleDeleteObjectRequest(NetConfRequest request) {
+    LOG.debug("request received for deleteObject");
+    Document d1 = NetconfToTr069MapperUtil.convertStringToDocumentXml(request.getRequestXml());
+    NetConfResponse response = null;
+    Map<String, String> map =
+        NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "delete-object");
+    if (map == null || map.size() <= 0) {
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
+      return getEmptyResponse();
+    }
+
+    Element el = NetconfToTr069MapperUtil.convertStringToDocument(request.getRequestXml());
+    DeviceRPCRequest deviceRPCRequest = NetconfToTr069MapperUtil.prepareTR069Request(
+        request.getDeviceId(), el, PARAMETER, TR069OperationCode.DELETE_OBJECT);
+
+    if (deviceRPCRequest == null || deviceRPCRequest.getOpDetails() == null
+        || deviceRPCRequest.getOpDetails().getParmeters().isEmpty()) {
+      LOG.debug("There are no device parameters found for deleteobject.");
+      return getEmptyResponse();
+    } else if (deviceRPCRequest.getOpDetails() != null) {
+      deviceRPCRequest.getOpDetails()
+          .setParmeters(filteredGetParameters(deviceRPCRequest.getOpDetails().getParmeters(),
+              request.getSwVersion(), request.getHwVersion()));
+
+      if (deviceRPCRequest.getOpDetails().getParmeters().isEmpty()) {
+        LOG.debug("There are no supported device parameters found for deleteobject.");
+        return getEmptyResponse();
+      }
+    }
+
+    LOG.debug("Prepared NBI request for addobject: {}", deviceRPCRequest);
+
+    DeviceRPCResponse opResult;
+    opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
+    if (null == opResult) {
+      return getTimeOutResponse();
+    }
+    if (null == opResult.getOperationResponse()) {
+      return getTimeOutResponse();
+    }
+
+    ArrayList<ParameterDTO> responseParamDTOList = new ArrayList<>();
+
+    if (opResult.getFaultKey() == null) {
+      String status = String.valueOf(opResult.getOperationResponse().getStatus());
+      responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, status));
+    }
+    opResult.getOperationResponse().setParameterDTOs(responseParamDTOList);
+    response = mapperUtil.getNetconfResponse(opResult, request.getSwVersion(),
+        request.getHwVersion(), true);
+
+    return response;
+  }
+
+  @Override
+  public NetConfResponse handleRequestWithoutInputParams(NetConfRequest request) {
+    Document d1 = NetconfToTr069MapperUtil.convertStringToDocumentXml(request.getRequestXml());
+    NetConfResponse response = null;
+    TR069OperationDetails opDetails = new TR069OperationDetails();
+    Map<String, String> map = null;
+
+    if (request.getRequestXml().contains("reboot")) {
+      LOG.info("Request Contains Reboot");
+      map = NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "reboot");
+      opDetails.setOpCode(TR069OperationCode.REBOOT);
+    } else if (request.getRequestXml().contains("reset")) {
+      LOG.info("Request Contains Reset");
+      map = NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "reset");
+      opDetails.setOpCode(TR069OperationCode.FACTORY_RESET);
+    }
+
+    if (map == null || map.size() <= 0) {
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
+      return getEmptyResponse();
+    }
+
+    DeviceRPCRequest deviceRPCRequest = new DeviceRPCRequest();
+    TR069DeviceDetails tr069DeviceDetails = new TR069DeviceDetails();
+    tr069DeviceDetails.setDeviceId(request.getDeviceId());
+    deviceRPCRequest.setOpDetails(opDetails);
+    deviceRPCRequest.setDeviceDetails(tr069DeviceDetails);
+    OperationOptions options = new OperationOptions();
+    options.setExecutionTimeout(60l);
+    deviceRPCRequest.setOptions(options);
+
+    DeviceRPCResponse opResult;
+    opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
+    if (null == opResult) {
+      return getTimeOutResponse();
+    }
+    LOG.debug("Received response for request without input params : FaultKey = {}",
+        opResult.getFaultKey());
+
+    response = mapperUtil.getNetconfResponseForRequestWithoutInputParams(opResult);
+
+    return response;
+  }
+
+  @Override
+  public NetConfResponse handleSPAObjectRequest(NetConfRequest request) {
+    LOG.debug("request received for spaObject");
+    Document d1 = NetconfToTr069MapperUtil.convertStringToDocumentXml(request.getRequestXml());
+    NetConfResponse response = null;
+    Map<String, String> map =
+        NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "set-parameter-attributes");
+    if (map == null || map.size() <= 0) {
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
+      return getEmptyResponse();
+    }
+    List<ParameterDTO> params = new ArrayList<>();
+    NodeList nl = d1.getElementsByTagName(CONFIG);
+    int len = nl.getLength();
+    for (int i = 0; i < len; i++) {
+      Element elm = (Element) nl.item(i);
+      ParameterAttributeDTO param = mapperUtil.getParamNameAndValueForSPA(elm, CONFIG,
+          request.getSwVersion(), request.getHwVersion());
+
+      if (param == null) {
+        LOG.debug("There are no device parameters found for spaconfig.");
+        return getEmptyResponse();
+      }
+
+      params.add(param);
+    }
+
+    TR069OperationDetails opDetails = new TR069OperationDetails();
+    DeviceRPCRequest deviceRPCRequest = new DeviceRPCRequest();
+    TR069DeviceDetails tr069DeviceDetails = new TR069DeviceDetails();
+    tr069DeviceDetails.setDeviceId(request.getDeviceId());
+    deviceRPCRequest.setOpDetails(opDetails);
+    deviceRPCRequest.setDeviceDetails(tr069DeviceDetails);
+    OperationOptions options = new OperationOptions();
+    options.setExecutionTimeout(60l);
+    deviceRPCRequest.setOptions(options);
+
+    deviceRPCRequest.getOpDetails().setParmeters(params);
+    deviceRPCRequest.getOpDetails().setOpCode(TR069OperationCode.SET_PARAMETER_ATTRIBUTES);
+
+    LOG.debug("Prepared NBI request for spaobject {} ", deviceRPCRequest);
+
+    DeviceRPCResponse opResult;
+    opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
+    if (null == opResult) {
+      return getTimeOutResponse();
+    }
+
+    ArrayList<ParameterDTO> responseParamDTOList = new ArrayList<>();
+
+    if (opResult.getFaultKey() == null) {
+      responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, "SUCCESS"));
+    } else {
+      responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, FAILED));
+      responseParamDTOList.add(new ParameterDTO(RPC_REPLY_ERROR, opResult.getFaultString()));
+    }
+
+    opResult.getOperationResponse().setParameterDTOs(responseParamDTOList);
+    response = mapperUtil.getNetconfResponse(opResult, request.getSwVersion(),
+        request.getHwVersion(), true);
+
+    return response;
+  }
+
+  @Override
+  public NetConfResponse handleGPAObjectRequest(NetConfRequest netConfRequest) {
+    LOG.debug("request received for gpaObject");
+    Document d1 =
+        NetconfToTr069MapperUtil.convertStringToDocumentXml(netConfRequest.getRequestXml());
+    NetConfResponse response = null;
+    Map<String, String> map =
+        NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "get-parameter-attributes");
+    if (map == null || map.size() <= 0) {
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
+      return getEmptyResponse();
+    }
+    List<ParameterDTO> params = new ArrayList<>();
+    NodeList nl = d1.getElementsByTagName(FILTER);
+    int len = nl.getLength();
+    for (int i = 0; i < len; i++) {
+      Element elm = (Element) nl.item(i);
+      ParameterDTO param = mapperUtil.getParamNameAndValueForGPA(elm, PARAMETER,
+          netConfRequest.getSwVersion(), netConfRequest.getHwVersion());
+
+      if (param == null) {
+        LOG.debug("There are no device parameters found for GPA.");
+        return getEmptyResponse();
+      }
+
+      params.add(param);
+    }
+
+    TR069OperationDetails opDetails = new TR069OperationDetails();
+    DeviceRPCRequest deviceRPCRequest = new DeviceRPCRequest();
+    TR069DeviceDetails tr069DeviceDetails = new TR069DeviceDetails();
+    tr069DeviceDetails.setDeviceId(netConfRequest.getDeviceId());
+    deviceRPCRequest.setOpDetails(opDetails);
+    deviceRPCRequest.setDeviceDetails(tr069DeviceDetails);
+    OperationOptions options = new OperationOptions();
+    options.setExecutionTimeout(60l);
+    deviceRPCRequest.setOptions(options);
+
+    deviceRPCRequest.getOpDetails().setParmeters(params);
+    deviceRPCRequest.getOpDetails().setOpCode(TR069OperationCode.GET_PARAMETER_ATTRIBUTES);
+
+    LOG.debug("Prepared NBI request for gpaobject {}", deviceRPCRequest);
+
+    DeviceRPCResponse opResult;
+    opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
+    if (null == opResult) {
+      return getTimeOutResponse();
+    }
+
+    response = mapperUtil.getNetconfResponseForGPA(opResult, netConfRequest.getSwVersion(),
+        netConfRequest.getHwVersion());
+
+    return response;
+  }
+
+  @Override
+  public NetConfResponse handleConnectionStatusRequest(NetConfRequest request) {
+    NetConfResponse netConfResponse = new NetConfResponse();
+    ConnectionStatusPOJO connStatusPOJO =
+        tr069ReqSender.sendConnectionStatusReq(request.getDeviceId());
+
+    List<ParameterDTO> paramDTOList = new ArrayList<>();
+    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    if (connStatusPOJO.isStatus()) {
+      paramDTOList.add(new ParameterDTO("rpc-reply.ns1:last-access-status", "SUCCESS"));
+    } else {
+      paramDTOList.add(new ParameterDTO("rpc-reply.ns1:last-access-status", FAILED));
+      paramDTOList.add(new ParameterDTO(RPC_REPLY_ERROR, connStatusPOJO.getErrorMessage()));
+    }
+    String lastContactDate = dateFormat.format(connStatusPOJO.getLastContactTime());
+    paramDTOList.add(new ParameterDTO("rpc-reply.ns1:last-contact-time", lastContactDate));
+
+    String lastFailedAttemptDate = dateFormat.format(connStatusPOJO.getLastFailedAttemptTime());
+    paramDTOList
+        .add(new ParameterDTO("rpc-reply.ns1:last-failure-attempt-time", lastFailedAttemptDate));
+
+    String xml = mapperUtil.getNetconfResponseXML(paramDTOList, request.getSwVersion(),
+        request.getHwVersion(), true);
+    LOG.debug("handleConnectionStatusRequest XML String: {}", xml);
+    netConfResponse.setNetconfResponseXml(xml);
+    return netConfResponse;
+  }
+
+  @Override
+  public NetConfResponse handleDownloadRequest(NetConfRequest request) {
+    LOG.debug("request received for download");
+    Document d1 = NetconfToTr069MapperUtil.convertStringToDocumentXml(request.getRequestXml());
+    NetConfResponse response = null;
+    Map<String, String> map =
+        NetconfToTr069MapperUtil.extractRequestParamters(d1, "rpc", "download");
+    if (map == null || map.size() <= 0) {
+      LOG.debug(NO_DEVICE_PARAM_FOUND);
+      return getEmptyResponse();
+    }
+
+    TR069OperationDetails opDetails = new TR069OperationDetails();
+    DeviceRPCRequest deviceRPCRequest = new DeviceRPCRequest();
+    TR069DeviceDetails tr069DeviceDetails = new TR069DeviceDetails();
+    tr069DeviceDetails.setDeviceId(request.getDeviceId());
+    deviceRPCRequest.setOpDetails(opDetails);
+    deviceRPCRequest.setDeviceDetails(tr069DeviceDetails);
+    OperationOptions options = new OperationOptions();
+    options.setExecutionTimeout(60l);
+    deviceRPCRequest.setOptions(options);
+    String fileName = map.get("rpc.download.target-file-name");
+    String password = map.get("rpc.download.password");
+    String url = map.get("rpc.download.url");
+    String userName = map.get("rpc.download.username");
+
+    if (fileName == null || password == null || url == null || userName == null) {
+      LOG.error("fileName or password or url or userName is not as per yang model");
+      return getOperationAbortedResponse(
+          "fileName or password or url or userName is not as per yang model");
+    }
+
+    List<ParameterDTO> paramDTOList = new ArrayList<>();
+    paramDTOList.add(new ParameterDTO("FileType", map.get("rpc.download.file-type")));
+    paramDTOList.add(new ParameterDTO("URL", url));
+    paramDTOList.add(new ParameterDTO("Username", userName));
+    paramDTOList.add(new ParameterDTO("Password", password));
+    paramDTOList.add(new ParameterDTO("FileSize", map.get("rpc.download.file-size")));
+    paramDTOList.add(new ParameterDTO("TargetFileName", fileName));
+    paramDTOList.add(new ParameterDTO("DelaySeconds", map.get("rpc.download.delay-in-seconds")));
+    paramDTOList.add(new ParameterDTO("SuccessURL", map.get("rpc.download.success-url")));
+    paramDTOList.add(new ParameterDTO("FailureURL", map.get("rpc.download.failure-url")));
+    paramDTOList.add(new ParameterDTO("CommandKey", map.get("rpc.download.command-key")));
+
+    deviceRPCRequest.getOpDetails().setParmeters(paramDTOList);
+    deviceRPCRequest.getOpDetails().setOpCode(TR069OperationCode.DOWNLOAD);
+
+    LOG.debug("Prepared NBI request for download {} ", deviceRPCRequest);
+
+    DeviceOperationDetails fwDetails = deviceOperDAO.findByDeviceId(request.getDeviceId());
+    if (fwDetails == null) {
+      String errorMsg = "TR069 device request has been aborted,due to device not identified";
+      return getOperationAbortedResponse(errorMsg);
+    }
+
+    if (fwDetails.getDownLoadStatus() != FirwareUpgradeStatus.DOWNLOAD_INTIATED.getStatus()
+        && fwDetails.getDownLoadStatus() != FirwareUpgradeStatus.DOWNLOAD_COMPLETED.getStatus()) {
+
+      LOG.debug("persisting the fw details {}", fwDetails);
+
+      DeviceRPCResponse opResult;
+      opResult = syncHandler.performDeviceOperation(deviceRPCRequest);
+      if (null == opResult) {
+        return getTimeOutResponse();
+      }
+      fwDetails.setFileName(fileName);
+      fwDetails.setDownLoadStatus(FirwareUpgradeStatus.DOWNLOAD_INTIATED.getStatus());
+      fwDetails.setOrigin("csem");
+      deviceOperDAO.save(fwDetails);
+      ArrayList<ParameterDTO> responseParamDTOList = new ArrayList<>();
+
+      if (opResult.getOperationResponse().getStatus() == 1) {
+        responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, "STARTED"));
+      } else {
+        responseParamDTOList.add(new ParameterDTO(RPC_REPLY_STATUS, FAILED));
+        responseParamDTOList.add(new ParameterDTO(RPC_REPLY_ERROR, opResult.getFaultString()));
+      }
+      responseParamDTOList.add(new ParameterDTO("rpc-reply.ns1:notification-timeout", "1200"));
+
+      opResult.getOperationResponse().setParameterDTOs(responseParamDTOList);
+      response = mapperUtil.getNetconfResponse(opResult, request.getSwVersion(),
+          request.getHwVersion(), true);
+
+      LOG.debug("update the status for fw details {} ", fwDetails);
     } else {
       LOG.debug("FirmWare Upgrade is in progress");
       String errorMsg = "TR069 device request has been aborted as Firmware Upgrade is inProgress";
@@ -637,8 +1053,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
       String[] str = filepath.split("@");
       String[] strForUserName = str[0].split("//");
       if (str.length > 1) {
-        String Url = strForUserName[0] + "//" + str[1];
-        return Url;
+        return strForUserName[0] + "//" + str[1];
       }
     }
     return null;
@@ -671,7 +1086,7 @@ public class NetConfRequestHandlerImpl implements NetConfRequestHandler {
     }
 
     OperationResponse operationResponse = new SetParameterValueResponse();
-    operationResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+    operationResponse.setParameterDTOs(new ArrayList<>());
 
     if (null == deviceRPCResponse.getFaultKey()) {
       operationResponse.setStatus(MapperConstants.RPC_SUCCESS_CODE);

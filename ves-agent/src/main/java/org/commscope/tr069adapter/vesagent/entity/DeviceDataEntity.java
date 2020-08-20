@@ -126,7 +126,7 @@ public class DeviceDataEntity {
   public void setLastUpdateTime(Date lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
   }
-  
+
   @Transient
   private Long startEpochMicrosec;
 

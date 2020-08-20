@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,8 +35,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import org.commscope.tr069adapter.acs.common.inform.TransferCompleteInform;
 import org.commscope.tr069adapter.mapper.MOMetaData;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.model.NetConfNotificationDTO;
@@ -80,8 +84,11 @@ public class NetConfNotificationSender {
           deviceInform.getParameters());
       List<ParameterDTO> parameters = new ArrayList<>();
       for (ParameterDTO parameterDTO : deviceInform.getParameters()) {
-        parameters.add(parameterDTO);
+        if (!parameterDTO.getParamName().equalsIgnoreCase("Device.DeviceInfo.SerialNumber"))
+          parameters.add(parameterDTO);
       }
+      parameters.add(new ParameterDTO("Device.DeviceInfo.SerialNumber",
+          deviceInform.getDeviceDetails().getDeviceId()));
 
       convertTR069ToNetConfParams(parameters, deviceInform.getDeviceDetails().getSoftwareVersion(),
           deviceInform.getDeviceDetails().getHardwareVersion());
@@ -104,11 +111,49 @@ public class NetConfNotificationSender {
     return response;
   }
 
+  public ResponseEntity sendTransferCompleteNotification(TransferCompleteInform tcInform) {
+    ResponseEntity response = null;
+    final String uri = getUri();
+    LOG.debug("Posting notification to netconf server {}", uri);
+
+    try {
+      // LOG.debug("deviceInform : {} {}", tcInform.getInformTypeList(),
+      // tcInform.getParameters());
+      // List<ParameterDTO> parameters = new ArrayList<>();
+      // for (ParameterDTO parameterDTO : tcInform.getParameters()) {
+      // parameters.add(parameterDTO);
+      // }
+
+      List<ParameterDTO> parameters = new ArrayList<>();
+      parameters.add(new ParameterDTO("command-key", tcInform.getCommandKey()));
+      parameters.add(new ParameterDTO("fault-code", String.valueOf(tcInform.getFaultCode())));
+      parameters.add(new ParameterDTO("fault-string", tcInform.getFaultString()));
+      parameters.add(new ParameterDTO("start-time", tcInform.getStartTime()));
+      parameters.add(new ParameterDTO("complete-time", tcInform.getCompleteTime()));
+
+      String nameSpace = metaDataUtil.getMetaDataByTR69Name(tcInform.getInformType().toString(),
+          tcInform.getDeviceDetails().getSoftwareVersion(),
+          tcInform.getDeviceDetails().getHardwareVersion()).getURI();
+
+      String notificationXml =
+          getNetConfReposneXMLForTC(parameters, tcInform.getInformType().toString(), nameSpace);
+      NetConfNotificationDTO netConfDTO =
+          new NetConfNotificationDTO(tcInform.getDeviceDetails().getDeviceId(), notificationXml);
+
+      LOG.debug("Posting notification to netconf server");
+      response = restTemplate.postForObject(uri, netConfDTO, ResponseEntity.class);
+      LOG.debug("Posting notification to netconf server completed ");
+    } catch (Exception e) {
+      LOG.error("Exception while sending the notification.", e);
+    }
+    return response;
+  }
+
   public ResponseEntity sendCustomNotification(String deviceId, List<ParameterDTO> parameters,
       String nameSpace) {
     ResponseEntity response = null;
     final String uri = getUri();
-    LOG.debug("Posting custom notification to netconf server " + uri);
+    LOG.debug("Posting custom notification to netconf server {}", uri);
     try {
       String notificationXml = getNetconfResponseXML(parameters, null, nameSpace);
       NetConfNotificationDTO netConfDTO = new NetConfNotificationDTO(deviceId, notificationXml);
@@ -116,7 +161,7 @@ public class NetConfNotificationSender {
       response = restTemplate.postForObject(uri, netConfDTO, ResponseEntity.class);
       LOG.debug("Posting custom notification to netconf server sucessfull");
     } catch (Exception e) {
-      LOG.error("Exception while sending the custom notification.", e.toString());
+      LOG.error("Exception while sending the custom notification.", e);
     }
     return response;
   }
@@ -170,6 +215,8 @@ public class NetConfNotificationSender {
     String result = null;
     try {
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
       Document doc = docBuilder.newDocument();
 
@@ -200,7 +247,11 @@ public class NetConfNotificationSender {
                                                       // index nodes
 
             // get parent tabular node from parent MAP
-            parentNodeKey = parentNodeKey + "." + nodeName;
+            StringBuilder bld = new StringBuilder();
+            bld.append(parentNodeKey);
+            bld.append(".");
+            bld.append(nodeName);
+            parentNodeKey = bld.toString();
             Element node = parentNodeMap.get(parentNodeKey);
 
             // create a tabular parent node if doesn't exit in MAP
@@ -229,7 +280,11 @@ public class NetConfNotificationSender {
                                                             // attribute
                                                             // is
                                                             // found
-            parentNodeKey = parentNodeKey + "." + nodeName;
+            StringBuilder bld = new StringBuilder();
+            bld.append(parentNodeKey);
+            bld.append(".");
+            bld.append(nodeName);
+            parentNodeKey = bld.toString();
             parentNodeName = nodeName;
           } else {
             // construct intermediate nodes
@@ -245,7 +300,11 @@ public class NetConfNotificationSender {
               if (null != parentNode)
                 parentNode.appendChild(node);
             }
-            parentNodeKey = parentNodeKey + "." + nodeName;
+            StringBuilder bld = new StringBuilder();
+            bld.append(parentNodeKey);
+            bld.append(".");
+            bld.append(nodeName);
+            parentNodeKey = bld.toString();
             parentNodeName = nodeName;
             parentNode = node;
           }
@@ -253,7 +312,8 @@ public class NetConfNotificationSender {
         // construct leaf node
         Element leafNode = doc.createElement(parentNodeName);
         leafNode.setTextContent(paramValue);
-        parentNode.appendChild(leafNode);
+        if (null != parentNode)
+          parentNode.appendChild(leafNode);
       }
 
       if (null != dataNode) {
@@ -280,17 +340,48 @@ public class NetConfNotificationSender {
     return result;
   }
 
+  private static String getNetConfReposneXMLForTC(List<ParameterDTO> parameters,
+      String notificationType, String nameSpace) {
+    String result = null;
+    try {
+      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      Document doc = docBuilder.newDocument();
+      final Element element = doc.createElement(NOTIFICATION_ELEMENT_NAME);
+      final Element eventTime = doc.createElement(EVENT_TIME);
+      eventTime.setTextContent(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date()));
+      element.appendChild(element.getOwnerDocument().importNode(eventTime, true));
+
+      final Element evtTypeElement = doc.createElementNS(nameSpace, notificationType);
+
+      for (ParameterDTO paramDto : parameters) {
+        final Element paramNode = doc.createElement(paramDto.getParamName());
+        paramNode.setTextContent(paramDto.getParamValue());
+        evtTypeElement.appendChild(paramNode);
+      }
+      element.appendChild(element.getOwnerDocument().importNode(evtTypeElement, true));
+      result = convertDocumentToString(element);
+    } catch (Exception e) {
+      LOG.error("Exception in getNetConfReposneXMLForTC: {}", e.getMessage());
+    }
+    return result;
+  }
+
   public static String convertDocumentToString(Element element) {
     String strxml = null;
     try {
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
       Transformer transformer = transformerFactory.newTransformer();
       DOMSource source = new DOMSource(element);
       StreamResult result = new StreamResult(new StringWriter());
       transformer.transform(source, result);
       strxml = result.getWriter().toString();
     } catch (Exception e) {
-      LOG.error("Error while converting Element to String" + e);
+      LOG.error("Error while converting Element to String", e);
     }
     LOG.debug("Converted XML is : {}", strxml);
     return strxml;

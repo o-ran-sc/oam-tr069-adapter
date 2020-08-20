@@ -18,6 +18,7 @@
 
 package org.commscope.tr069adapter.netconf.rpc;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -34,7 +35,7 @@ class XmlUtilityTest {
     try {
       Element el = XmlUtility.convertStringToDocument(xmlStr);
       String result = XmlUtility.convertDocumentToString(el);
-      assertTrue(result != null);
+      assertNotNull(result);
     } catch (Exception e) {
       fail("Failed to convert string into document.");
     }

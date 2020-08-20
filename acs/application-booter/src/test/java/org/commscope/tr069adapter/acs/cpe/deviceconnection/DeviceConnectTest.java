@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.apache.activemq.broker.BrokerService;
 import org.commscope.tr069adapter.acs.booter.ACSServiceBooter;
@@ -32,6 +33,8 @@ import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.utils.AcsConstants;
 import org.commscope.tr069adapter.acs.cpe.handler.ConnectionReqEventHandler;
 import org.commscope.tr069adapter.acs.cpe.utils.DeviceConnector;
+import org.commscope.tr069adapter.acs.requestprocessor.dao.DeviceRepository;
+import org.commscope.tr069adapter.acs.requestprocessor.entity.TR069DeviceEntity;
 import org.commscope.tr069adapter.common.timer.TimerServiceManagerAPI;
 import org.junit.After;
 import org.junit.Test;
@@ -62,6 +65,10 @@ public class DeviceConnectTest {
   @Autowired
   BrokerService broker;
 
+  @MockBean
+  private DeviceRepository deviceRepository;
+
+
   @Test
   public void deviceConnect() {
     try {
@@ -79,6 +86,26 @@ public class DeviceConnectTest {
       TR069DeviceDetails deviceDetails = new TR069DeviceDetails();
       deviceDetails.setDeviceId("0005B9AAAA22");
       deviceDetails.setConnectionRequestURL("http://10.10.10.10:8888/connect/device");
+
+      TR069DeviceEntity tr069DeviceEntity = new TR069DeviceEntity();
+      tr069DeviceEntity.setDeviceId(deviceDetails.getDeviceId());
+      tr069DeviceEntity.setUserName(deviceDetails.getUsername());
+      tr069DeviceEntity.setPassword(deviceDetails.getPassword());
+      tr069DeviceEntity.setLastUpdatedTime(new Date());
+      tr069DeviceEntity.setConnStatus(true);
+      tr069DeviceEntity.setErrorMsg(null);
+
+      if (deviceDetails.getSoftwareVersion() != null) {
+        tr069DeviceEntity.setSwVersion(deviceDetails.getSoftwareVersion());
+      }
+      if (deviceDetails.getHardwareVersion() != null) {
+        tr069DeviceEntity.setHwVersion(deviceDetails.getHardwareVersion());
+      }
+      Mockito.when(deviceRepository.findByDeviceId(Mockito.anyString()))
+          .thenReturn(tr069DeviceEntity);
+
+      Mockito.when(deviceRepository.save(Mockito.any(TR069DeviceEntity.class)))
+          .thenReturn(tr069DeviceEntity);
 
       connectionReqEventHandler.onMessage(deviceDetails);
 

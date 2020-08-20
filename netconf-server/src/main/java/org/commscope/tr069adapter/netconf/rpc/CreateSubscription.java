@@ -18,6 +18,9 @@
 
 package org.commscope.tr069adapter.netconf.rpc;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -31,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -48,8 +52,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 public class CreateSubscription extends AbstractLastNetconfOperation
     implements DefaultNetconfOperation {

@@ -22,9 +22,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import org.commscope.tr069adapter.acs.common.DeviceInform;
+import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.VESNotification;
 import org.commscope.tr069adapter.mapper.model.VESNotificationResponse;
@@ -57,7 +61,7 @@ public class PnfRegMappingHandler {
   public VESNotificationResponse handlePnfRegNotification(VESNotification vesNoti)
       throws JsonProcessingException {
     Event event = convertNotificationToVESEvent(vesNoti.getDevnotification(),
-        vesNoti.getNetconfDetails(), vesNoti.geteNodeBName());
+        vesNoti.getNetconfDetails(), vesNoti.geteNodeBName(), vesNoti.getNetconfParameters());
     if (null != event) {
       EventMessage evMsg = new EventMessage();
       evMsg.setEvent(event);
@@ -68,7 +72,7 @@ public class PnfRegMappingHandler {
       if (requestBody.isEmpty()) {
         logger.debug("VES Event body is empty");
       }
-
+      logger.debug("VES message for PnfRegistration : {}", requestBody);
       String url = config.getPnfRegVesUrl();
       return sender.postRequest(url, requestBody);
     } else {
@@ -96,7 +100,8 @@ public class PnfRegMappingHandler {
   }
 
   Event convertNotificationToVESEvent(DeviceInform notification,
-      NetConfServerDetails netconfServerDetails, String eNodeBName) {
+      NetConfServerDetails netconfServerDetails, String eNodeBName,
+      List<ParameterDTO> netconfParameters) {
     logger.debug("Converting Notification to VES pnfevent started");
     Parser parser = new Parser();
 
@@ -116,7 +121,7 @@ public class PnfRegMappingHandler {
 
     PnfRegEventFields pnfRegistrationFields =
         parser.parseNotificationParams(notification.getParameters());
-    populatePnfRegFeilds(netconfServerDetails, pnfRegistrationFields);
+    populatePnfRegFeilds(netconfServerDetails, pnfRegistrationFields, netconfParameters);
     pnfRegistrationFields.setModelNumber(notification.getDeviceDetails().getProductClass());
 
     regEvent.setPnfRegistrationFields(pnfRegistrationFields);
@@ -131,7 +136,7 @@ public class PnfRegMappingHandler {
     CommonEventHeader eventHeader = new CommonEventHeader();
 
     if (null == netconfServerDetails) {
-      logger.error("netconf server details as received as null {}", netconfServerDetails);
+      logger.error("netconf server details as received as null");
       return null;
     }
     eventHeader.setDomain("pnfRegistration");
@@ -158,7 +163,7 @@ public class PnfRegMappingHandler {
       eventHeader.setSourceId(netconfServerDetails.getDeviceId());
     }
 
-    eventHeader.setStartEpochMicrosec(System.currentTimeMillis()*1000);
+    eventHeader.setStartEpochMicrosec(System.currentTimeMillis() * 1000);
     eventHeader.setVersion(config.getEventVersion());
     eventHeader.setNfNamingCode("");
     eventHeader.setNfcNamingCode("");
@@ -167,20 +172,19 @@ public class PnfRegMappingHandler {
     regEvent.setCommonEventHeader(eventHeader);
     PnfRegEventFields pnfRegistrationFields = new PnfRegEventFields();
     regEvent.setPnfRegistrationFields(
-        populatePnfRegFeilds(netconfServerDetails, pnfRegistrationFields));
+        populatePnfRegFeilds(netconfServerDetails, pnfRegistrationFields, new ArrayList<>()));
     logger.debug("Converting Notification to VES pnfevent completed");
     return regEvent;
   }
 
   private PnfRegEventFields populatePnfRegFeilds(NetConfServerDetails netconfServerDetails,
-      PnfRegEventFields pnfRegistrationFields) {
+      PnfRegEventFields pnfRegistrationFields, List<ParameterDTO> netconfParameters) {
 
     pnfRegistrationFields.setSerialNumber(netconfServerDetails.getDeviceId());
     pnfRegistrationFields.setPnfRegistrationFieldsVersion(config.getPnfFeildVersion());
     pnfRegistrationFields.setMacAddress(netconfServerDetails.getDeviceId());
     pnfRegistrationFields.setVendorName(config.getVendorName());
     pnfRegistrationFields.setSoftwareVersion(netconfServerDetails.getSwVersion());
-    PnfRegEventAdditionalFeilds additionalFields = new PnfRegEventAdditionalFeilds();
 
     pnfRegistrationFields.setOamV4IpAddress(netconfServerDetails.getListenAddress());
     // TODO: since not supporting 1pv6 we are configuring empty value
@@ -190,6 +194,10 @@ public class PnfRegMappingHandler {
     pnfRegistrationFields.setUnitType(config.getUnitType());
     pnfRegistrationFields.setUnitFamily(config.getUnitFamily());
     pnfRegistrationFields.setLastServiceDate(new SimpleDateFormat("ddMMyyyy").format(new Date()));
+
+    // Add additional attributes and device parameters to the VES message in additionalFields
+    HashMap<String, String> additionalFieldsMap = new HashMap<>();
+    PnfRegEventAdditionalFeilds additionalFields = new PnfRegEventAdditionalFeilds();
     additionalFields.setOamPort(netconfServerDetails.getListenPort());
     additionalFields.setProtocol("SSH");
     additionalFields.setUsername(SSH_USERNAME);
@@ -202,8 +210,25 @@ public class PnfRegMappingHandler {
     additionalFields.setBetweenAttemptsTimeout("2000");
     additionalFields.setKeepaliveDelay("120");
 
-    pnfRegistrationFields.setAdditionalFields(additionalFields);
+    ObjectMapper mapper = new ObjectMapper();
+    String additionalFieldsString;
+    try {
+      additionalFieldsString = mapper.writeValueAsString(additionalFields);
+      HashMap<String, String> pnfAdditionalFieldsMap = new HashMap<>();
+      pnfAdditionalFieldsMap =
+          mapper.readValue(additionalFieldsString, pnfAdditionalFieldsMap.getClass());
+      additionalFieldsMap.putAll(pnfAdditionalFieldsMap);
+    } catch (JsonProcessingException e) {
+      logger.error("Failed to add pnf Reg Additional fields {}", e.getMessage());
+    }
 
+    if (null != netconfParameters) {
+      for (ParameterDTO param : netconfParameters) {
+        additionalFieldsMap.put(param.getParamName(), param.getParamValue());
+      }
+    }
+
+    pnfRegistrationFields.setAdditionalFields(additionalFieldsMap);
     return pnfRegistrationFields;
 
   }

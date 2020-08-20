@@ -35,7 +35,7 @@ public class Upload extends TR069RPC {
     password = "";
     delaySeconds = 0;
     fileType = FT_CONFIG;
-    url = "http://192.168.1.1:8080/acs-war/upload/tst.cfg";
+    url = "http://localhost:8080/acs-war/upload/tst.cfg";
     commandKey = "default.command.key";
   }
 

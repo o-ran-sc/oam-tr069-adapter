@@ -18,14 +18,19 @@
 
 package org.commscope.tr069adapter.mapper.ves;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
+import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.commscope.tr069adapter.mapper.acs.impl.PnPPreProvisioningHandler;
 import org.commscope.tr069adapter.mapper.model.NetConfServerDetails;
 import org.commscope.tr069adapter.mapper.model.VESNotification;
 import org.commscope.tr069adapter.mapper.model.VESNotificationResponse;
+import org.commscope.tr069adapter.mapper.util.MOMetaDataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +54,9 @@ public class VESNotificationSender {
   @Autowired
   RestTemplate restTemplate;
 
+  @Autowired
+  MOMetaDataUtil metaDataUtil;
+
   public VESNotificationResponse sendNotification(DeviceInform deviceInform,
       NetConfServerDetails serverInfo) {
     final String uri = getUri();
@@ -56,6 +64,24 @@ public class VESNotificationSender {
 
     VESNotification vesNotifi = new VESNotification();
     if (deviceInform != null) {
+      // Replace TR-069 parameter names with NETCONF parameter names
+      List<ParameterDTO> parameters = deviceInform.getParameters();
+      if (parameters != null && !parameters.isEmpty()) {
+        List<ParameterDTO> netconfParameters = new ArrayList<>();
+        for (ParameterDTO param : parameters) {
+          String paramXPath = metaDataUtil.getNetconfXPathNameByTR69NameWithIndexes(
+              param.getParamName(), deviceInform.getDeviceDetails().getSoftwareVersion(),
+              deviceInform.getDeviceDetails().getHardwareVersion());
+          if (paramXPath != null)
+            netconfParameters
+                .add(new ParameterDTO(paramXPath, param.getParamValue(), param.getDataType()));
+          else {
+            LOG.warn("Skipping param {}, as it is not present in mapping configuration",
+                param.getParamName());
+          }
+        }
+        vesNotifi.setNetconfParameters(netconfParameters);
+      }
       vesNotifi.seteNodeBName(
           pnpPreProvisioningHandler.getEnodeBName(deviceInform.getDeviceDetails().getDeviceId(),
               deviceInform.getDeviceDetails().getSoftwareVersion(),

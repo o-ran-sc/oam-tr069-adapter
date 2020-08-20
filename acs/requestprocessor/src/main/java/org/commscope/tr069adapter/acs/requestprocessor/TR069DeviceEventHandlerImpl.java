@@ -20,6 +20,8 @@ package org.commscope.tr069adapter.acs.requestprocessor;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.*;
 
+import java.util.Date;
+
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
@@ -30,6 +32,8 @@ import org.commscope.tr069adapter.acs.common.exception.SessionConcurrentAccessEx
 import org.commscope.tr069adapter.acs.common.exception.SessionManagerException;
 import org.commscope.tr069adapter.acs.common.requestprocessor.service.TR069DeviceEventHandler;
 import org.commscope.tr069adapter.acs.common.response.DeviceInformResponse;
+import org.commscope.tr069adapter.acs.requestprocessor.dao.DeviceRepository;
+import org.commscope.tr069adapter.acs.requestprocessor.entity.TR069DeviceEntity;
 import org.commscope.tr069adapter.acs.requestprocessor.impl.TR069RequestProcessEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +57,9 @@ public class TR069DeviceEventHandlerImpl implements TR069DeviceEventHandler {
   @Autowired
   private TR069RequestProcessEngine tr069RequestProcessEngine;
 
+  @Autowired
+  private DeviceRepository deviceRepository;
+
   public TR069RequestProcessEngine getProcessEngine() {
     return tr069RequestProcessEngine;
   }
@@ -62,10 +69,29 @@ public class TR069DeviceEventHandlerImpl implements TR069DeviceEventHandler {
   }
 
   @Override
+  @Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRES_NEW,
+      timeout = 300, rollbackFor = RuntimeException.class)
+  public void processConnectionRequest(String errorMsg, String deviceId, boolean isSuccess) {
+    TR069DeviceEntity tr069DeviceEntity = deviceRepository.findByDeviceId(deviceId);
+
+    if (isSuccess) {
+      logger.debug("processConnectionRequest success case");
+      tr069DeviceEntity.setConnStatus(true);
+      tr069DeviceEntity.setLastUpdatedTime(new Date());
+    } else {
+      logger.debug("processConnectionRequest failed case");
+      tr069DeviceEntity.setConnStatus(false);
+      tr069DeviceEntity.setLastFailedAttemptTime(new Date());
+    }
+    tr069DeviceEntity.setErrorMsg(errorMsg);
+    deviceRepository.save(tr069DeviceEntity);
+  }
+
+  @Override
   @Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRED, timeout = 300,
       rollbackFor = RuntimeException.class)
   public DeviceInformResponse processDeviceInform(final DeviceInform deviceNotification)
-      throws Exception {
+      throws SessionConcurrentAccessException, InterruptedException {
     DeviceInformResponse deviceNotificationResponse = null;
     try {
       String deviceId = deviceNotification.getDeviceDetails().getDeviceId();
@@ -83,7 +109,7 @@ public class TR069DeviceEventHandlerImpl implements TR069DeviceEventHandler {
   @Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRED, timeout = 300,
       rollbackFor = RuntimeException.class)
   public DeviceRPCRequest processDeviceRPCResponse(DeviceRPCResponse operationResult)
-      throws Exception {
+      throws SessionConcurrentAccessException, InterruptedException {
     DeviceRPCRequest deviceRPCRequest = null;
     try {
       String deviceId = operationResult.getDeviceDetails().getDeviceId();
@@ -99,7 +125,7 @@ public class TR069DeviceEventHandlerImpl implements TR069DeviceEventHandler {
   @Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRED, timeout = 300,
       rollbackFor = RuntimeException.class)
   public DeviceRPCRequest processEmptyDeviceRequest(TR069DeviceDetails deviceDetails)
-      throws Exception {
+      throws SessionConcurrentAccessException, InterruptedException {
     DeviceRPCRequest deviceRPCRequest = null;
     try {
       String deviceId = deviceDetails.getDeviceId();

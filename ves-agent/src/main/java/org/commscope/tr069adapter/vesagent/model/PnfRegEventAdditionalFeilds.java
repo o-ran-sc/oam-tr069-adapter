@@ -129,4 +129,15 @@ public class PnfRegEventAdditionalFeilds implements Serializable {
   public void setKeepaliveDelay(String keepaliveDelay) {
     this.keepaliveDelay = keepaliveDelay;
   }
+
+  @Override
+  public String toString() {
+    return "PnfRegEventAdditionalFeilds [oamPort=" + oamPort + ", protocol=" + protocol
+        + ", username=" + username + ", password=" + password + ", reconnectOnChangedSchema="
+        + reconnectOnChangedSchema + ", sleepfactor=" + sleepfactor + ", tcpOnly=" + tcpOnly
+        + ", connectionTimeout=" + connectionTimeout + ", maxConnectionAttempts="
+        + maxConnectionAttempts + ", betweenAttemptsTimeout=" + betweenAttemptsTimeout
+        + ", keepaliveDelay=" + keepaliveDelay + "]";
+  }
+
 }

@@ -69,18 +69,22 @@ public class TR069EventNotificationService {
     String deviceId = deviceRPCResponse.getDeviceDetails().getDeviceId();
     try {
       MDC.put(CLIENT_STR, deviceId);
+      String opercode;
       if (deviceRPCResponse.getOperationResponse()
           .getOperationCode() instanceof TR069OperationCode) {
         TR069OperationCode operCode =
             (TR069OperationCode) deviceRPCResponse.getOperationResponse().getOperationCode();
-        logger.debug("Device RPC Response received for operation: '" + operCode.name()
-            + "' with operation ID:" + deviceRPCResponse.getOperationId());
+        opercode = operCode.name();
+        logger.debug("Device RPC Response received for operation: {}  with operation ID: {}",
+            opercode, deviceRPCResponse.getOperationId());
+
       } else if (deviceRPCResponse.getOperationResponse()
           .getOperationCode() instanceof CustomOperationCode) {
         CustomOperationCode operCode =
             (CustomOperationCode) deviceRPCResponse.getOperationResponse().getOperationCode();
-        logger.debug("Device RPC Response received for operation: '" + operCode.getJndiName()
-            + "' with operation ID:" + deviceRPCResponse.getOperationId());
+        opercode = operCode.name();
+        logger.debug("Device RPC Response received for operation: {}  with operation ID: {}",
+            opercode, deviceRPCResponse.getOperationId());
       }
       jmsTemplate.convertAndSend(NBI_OP_RESULT_Q, deviceRPCResponse);
       logger.debug("Successfully posted the operation result event to DM to forward to NBI");

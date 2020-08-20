@@ -36,4 +36,18 @@ public interface NetConfRequestHandler {
 
   public NetConfResponse handleSWDownloadRequest(NetConfRequest request);
 
+  public NetConfResponse handleAddObjectRequest(NetConfRequest request);
+
+  public NetConfResponse handleDeleteObjectRequest(NetConfRequest request);
+
+  public NetConfResponse handleRequestWithoutInputParams(NetConfRequest request);
+
+  public NetConfResponse handleSPAObjectRequest(NetConfRequest request);
+
+  public NetConfResponse handleConnectionStatusRequest(NetConfRequest request);
+
+  public NetConfResponse handleGPAObjectRequest(NetConfRequest request);
+
+  public NetConfResponse handleDownloadRequest(NetConfRequest request);
+
 }

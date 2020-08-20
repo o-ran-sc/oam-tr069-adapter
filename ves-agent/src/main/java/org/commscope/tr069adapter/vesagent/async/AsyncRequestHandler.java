@@ -72,7 +72,6 @@ public class AsyncRequestHandler {
       return null;
     }
 
-    boolean isSuccess = false;
     DeviceRPCResponse response = null;
 
     OperationCode opCode = deviceRPCRequest.getOpDetails().getOpCode();
@@ -91,19 +90,11 @@ public class AsyncRequestHandler {
       }
       waitForNotifications.stopOperation(deviceId, opCode);
 
-      // if(isSuccess) {
-      // response = waitForNotifications.getOperationResult(deviceId, opCode);
-      // LOG.debug("Received operation result for device : {}, operation = {} as {}",deviceId,
-      // opCode,response);
-      //
-      // waitForNotifications.stopOperation(deviceId, opCode);
-      // }else {
-      // LOG.error("Request got timed out.");
-      // }
     } catch (InterruptedException e) {
       LOG.debug(
           "InterruptedException while waiting for mapper operation result for device : {}, operation : {} request.",
           deviceId, opCode);
+      Thread.currentThread().interrupt();
     }
 
     return response;
@@ -123,7 +114,7 @@ public class AsyncRequestHandler {
 
   @Async("threadPoolTaskExecutor1")
   public void initiateDeviceReachabilityCheck(DeviceDataEntity deviceDataEntity) {
-    deviceDataEntity.setStartEpochMicrosec(VesAgentUtils.getStartEpochTime()*1000);
+    deviceDataEntity.setStartEpochMicrosec(VesAgentUtils.getStartEpochTime() * 1000);
     DeviceDetails deviceDetails = new DeviceDetails();
     deviceDetails.setDeviceId(deviceDataEntity.getDeviceId());
     deviceDetails.setOui(deviceDataEntity.getOui());

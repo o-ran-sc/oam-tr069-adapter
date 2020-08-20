@@ -66,7 +66,7 @@ public class VesAgentServiceHelper {
   ScheduleTaskService timerService;
 
   private boolean saveDeviceDataEntity(DeviceDetails deviceDetails, String eNodeBName,
-      String heartBeatPeriod) throws VesAgentException {
+      String heartBeatPeriod, String countDownTimer) throws VesAgentException {
 
     List<DeviceDataEntity> deviceDataEntityList = vesDataRepository
         .findByDeviceIdAndAttrGroup(deviceDetails.getDeviceId(), VesAgentConstants.HEART_BEAT);
@@ -97,6 +97,14 @@ public class VesAgentServiceHelper {
                 .equalsIgnoreCase(VesAgentConstants.REMOVE_HEART_BEAT_TIMER_VAL))) {
       return false;
     }
+    if (null != countDownTimer
+        && !countDownTimer.equalsIgnoreCase(VesAgentConstants.COUNT_DOWN_TIMER_ZERO)) {
+      if (null == heartBeatPeriod || heartBeatPeriod.equalsIgnoreCase(existingHeartBeatPeriod)) {
+        String exceptionReason = "Can't change timer value if heartbeat value is same";
+        throw new VesAgentException(VesAgentConstants.INVALID_PARAMETER_VALUE, exceptionReason);
+      }
+
+    }
 
     if (!VesAgentUtils.isNullOrEmpty(heartBeatPeriod)) {
       attrJsonMap.put(VesAgentConstants.HEART_BEAT_PERIOD, heartBeatPeriod);
@@ -120,6 +128,7 @@ public class VesAgentServiceHelper {
         && VesAgentUtils.isNullOrEmpty(countDownTimer)) {
       String errorMsg =
           "Invalid input: HeartBeatPeriod and countDownTimer both are null for device " + deviceId;
+      errorMsg = errorMsg.replaceAll("[\n|\r|\t]", "_");
       logger.error(errorMsg);
       throw new VesAgentException(VesAgentConstants.INVALID_PARAMETER_VALUE, errorMsg);
     }
@@ -131,8 +140,8 @@ public class VesAgentServiceHelper {
       eNodeBName = (String) eNodeBNameObj;
     }
 
-    boolean resetTimerJob =
-        saveDeviceDataEntity(deviceRPCRequest.getDeviceDetails(), eNodeBName, heartBeatPeriod);
+    boolean resetTimerJob = saveDeviceDataEntity(deviceRPCRequest.getDeviceDetails(), eNodeBName,
+        heartBeatPeriod, countDownTimer);
 
     if (resetTimerJob) {
       resetTimerJob(deviceId, heartBeatPeriod, countDownTimer);
@@ -235,12 +244,12 @@ public class VesAgentServiceHelper {
   }
 
 
-  public void processHeartBeatGetRequest(String deviceId, Integer HeartBeatPeriod,
+  public void processHeartBeatGetRequest(String deviceId, Integer heartBeatPeriod,
       Integer countDownTimer) throws VesAgentException {
     VesAgentUtils.validateDeviceId(deviceId);
 
 
-    if (null == HeartBeatPeriod && null == countDownTimer) {// this should just check if heartbeat
+    if (null == heartBeatPeriod && null == countDownTimer) {// this should just check if heartbeat
                                                             // is null
       String errorMsg =
           "Invalid input: HeartBeatPeriod and countDownTimer both are null for device " + deviceId;
@@ -259,15 +268,15 @@ public class VesAgentServiceHelper {
       deviceDataEntity.setDeviceId(deviceId);
       deviceDataEntity.setAttrGroup(VesAgentConstants.HEART_BEAT);
 
-      attrJsonMap = new HashMap<String, String>();
+      attrJsonMap = new HashMap<>();
     } else {
       deviceDataEntity = deviceDataEntityList.get(0);
       attrJsonMap = new Gson().fromJson(deviceDataEntity.getAttrJson(), Map.class);
     }
 
 
-    if (null != HeartBeatPeriod) {
-      attrJsonMap.put(VesAgentConstants.HEART_BEAT_PERIOD, HeartBeatPeriod.toString());
+    if (null != heartBeatPeriod) {
+      attrJsonMap.put(VesAgentConstants.HEART_BEAT_PERIOD, heartBeatPeriod.toString());
     }
 
     if (null != countDownTimer) {

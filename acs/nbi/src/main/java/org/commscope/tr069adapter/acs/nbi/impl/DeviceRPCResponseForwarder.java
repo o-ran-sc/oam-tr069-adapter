@@ -20,6 +20,7 @@ package org.commscope.tr069adapter.acs.nbi.impl;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_OP_RESULT_CF;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_OP_RESULT_Q;
+
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.nbi.mapper.service.DeviceEventsMapperNotificationService;
 import org.slf4j.Logger;

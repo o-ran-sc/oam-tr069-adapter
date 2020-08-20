@@ -84,7 +84,8 @@ public class SessionManager {
     if (session == null) {
       SessionManagerException sme = new SessionManagerException(ErrorCode.SESSION_CREATION_ERROR,
           "Session object cannot be null");
-      logger.error(sme.getMessage());
+      String smeMessage = sme.getMessage().replaceAll("[\n|\r|\t]", "_");
+      logger.error(smeMessage);
       throw sme;
     }
     logger.debug("Creating a new session for the device");

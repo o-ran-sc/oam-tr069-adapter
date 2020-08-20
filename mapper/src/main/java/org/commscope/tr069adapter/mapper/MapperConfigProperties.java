@@ -31,6 +31,8 @@ public class MapperConfigProperties {
 
   private String sbiUri;
 
+  private String connStatusUri;
+
   private String configDBUri;
 
   private String nbiNotificationUri;
@@ -131,6 +133,14 @@ public class MapperConfigProperties {
 
   public void setVerConfigUri(String verConfigUri) {
     this.verConfigUri = verConfigUri;
+  }
+
+  public String getConnStatusUri() {
+    return connStatusUri;
+  }
+
+  public void setConnStatusUri(String connStatusUri) {
+    this.connStatusUri = connStatusUri;
   }
 
   public String getVendorName() {

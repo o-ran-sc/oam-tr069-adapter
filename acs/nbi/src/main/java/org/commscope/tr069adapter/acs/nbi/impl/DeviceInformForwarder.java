@@ -20,6 +20,7 @@ package org.commscope.tr069adapter.acs.nbi.impl;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_NOTIFICATION_CF;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.NBI_NOTIFICATION_Q;
+
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.nbi.mapper.service.DeviceEventsMapperNotificationService;
 import org.slf4j.Logger;

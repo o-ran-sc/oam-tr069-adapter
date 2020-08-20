@@ -26,7 +26,6 @@ import org.commscope.tr069adapter.acs.common.DeviceDetails;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationResponse;
-import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.CustomOperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.faults.AcsFaultCode;
@@ -125,28 +124,28 @@ public class TR069RequestProcessEngineUtility {
         break;
       case SET_PARAMETER_VALUES:
         opResponse = new SetParameterValueResponse();
-        opResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        opResponse.setParameterDTOs(new ArrayList<>());
         break;
       case GET_PARAMETER_VALUES:
       case INITIATE_CR:
         opResponse = new GetParameterValueResponse();
-        opResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        opResponse.setParameterDTOs(new ArrayList<>());
         break;
       case SET_PARAMETER_ATTRIBUTES:
         opResponse = new SetParameterAttributeResponse();
-        opResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        opResponse.setParameterDTOs(new ArrayList<>());
         break;
       case GET_PARAMETER_ATTRIBUTES:
         opResponse = new GetParameterAttributeResponse();
-        opResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        opResponse.setParameterDTOs(new ArrayList<>());
         break;
       case ADD_OBJECT:
         opResponse = new AddObjectResponse();
-        opResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        opResponse.setParameterDTOs(new ArrayList<>());
         break;
       case DELETE_OBJECT:
         opResponse = new DeleteObjectResponse();
-        opResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+        opResponse.setParameterDTOs(new ArrayList<>());
         break;
       case REBOOT:
         opResponse = new RebootResponse();

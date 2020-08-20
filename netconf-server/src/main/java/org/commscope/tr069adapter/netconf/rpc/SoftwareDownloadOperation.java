@@ -20,6 +20,7 @@ package org.commscope.tr069adapter.netconf.rpc;
 
 import java.io.StringReader;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -44,6 +45,7 @@ import org.xml.sax.InputSource;
 public class SoftwareDownloadOperation implements NetconfOperation {
   private static final Logger logger = LoggerFactory.getLogger(SoftwareDownloadOperation.class);
   public static final String SOFT_MGMT_NAMESPACE = "urn:o-ran:software-management:1.0";
+  public static final String OP_NAME = "software-download";
 
   private String deviceID;
   private String swVersion;
@@ -73,7 +75,7 @@ public class SoftwareDownloadOperation implements NetconfOperation {
     final String msgId = requestElement.getAttribute(XmlNetconfConstants.MESSAGE_ID);
 
     String requestXml = XmlUtility.convertDocumentToString(requestElement);
-    logger.debug("soft-ware download rpc requestXml=" + requestXml);
+    logger.debug("soft-ware download rpc requestXml= {}", requestXml);
 
     NetConfServerProperties config =
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
@@ -87,14 +89,16 @@ public class SoftwareDownloadOperation implements NetconfOperation {
     ErrorCodeDetails errorCode = restResponse.getErrorCode();
     if (errorCode != null && errorCode.getFaultCode() != null
         && !errorCode.getFaultCode().equalsIgnoreCase("0")) {
-      logger.error("Error recevied : " + errorCode);
+      logger.error("Error recevied : {}", errorCode);
       throw new DocumentedException(errorCode.getErrorMessage(),
           ErrorType.from(errorCode.getErrorType()), ErrorTag.from(errorCode.getErrorTag()),
           ErrorSeverity.from(errorCode.getErrorSeverity()));
-    } else if (restResponse != null && restResponse.getNetconfResponseXml() != null) {
-      logger.debug("soft-ware download rpc response received from mapper "
-          + restResponse.getNetconfResponseXml());
+    } else if (restResponse.getNetconfResponseXml() != null) {
+      logger.debug("soft-ware download rpc response received from mapper {}",
+          restResponse.getNetconfResponseXml());
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
       DocumentBuilder builder;
       try {
         builder = factory.newDocumentBuilder();
@@ -105,7 +109,7 @@ public class SoftwareDownloadOperation implements NetconfOperation {
             XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         document.getDocumentElement().setAttribute(XmlNetconfConstants.MESSAGE_ID, msgId);
       } catch (Exception e) {
-        logger.error("while contruscting the response; ", e.toString());
+        logger.error("while contruscting the response; {} ", e.toString());
       }
     }
 
@@ -114,10 +118,9 @@ public class SoftwareDownloadOperation implements NetconfOperation {
 
   protected HandlingPriority canHandle(final String operationName,
       final String operationNamespace) {
-    return operationName.equals("software-download")
-        && operationNamespace.equals(SOFT_MGMT_NAMESPACE)
-            ? HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1100)
-            : HandlingPriority.CANNOT_HANDLE;
+    return operationName.equals(OP_NAME) && operationNamespace.equals(SOFT_MGMT_NAMESPACE)
+        ? HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1100)
+        : HandlingPriority.CANNOT_HANDLE;
   }
 
   public static final class OperationNameAndNamespace {
@@ -155,10 +158,10 @@ public class SoftwareDownloadOperation implements NetconfOperation {
   }
 
   protected String getOperationNamespace() {
-    return "urn:o-ran:software-management:1.0";
+    return SOFT_MGMT_NAMESPACE;
   }
 
   protected String getOperationName() {
-    return "software-download";
+    return OP_NAME;
   }
 }

@@ -67,7 +67,8 @@ public class NetConfServerManagerTest {
     Mockito.when(
         restTemplate.postForEntity(Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
         .thenReturn(res);
-    NetConfServerDetails nfDetails = server.createNetconfServer("0005B9A1", "EnodB1", "4.3.0.0", "*");
+    NetConfServerDetails nfDetails =
+        server.createNetconfServer("0005B9A1", "EnodB1", "4.3.0.0", "*");
 
     Assert.assertNotNull(nfDetails);
     Assert.assertEquals("17830", nfDetails.getListenPort());
@@ -75,7 +76,8 @@ public class NetConfServerManagerTest {
 
   @Test
   public void createServerFailureWithRestCallTest() {
-    NetConfServerDetails nfDetails = server.createNetconfServer("0005B9A1", "EnodB1", "4.3.0.0", "*");
+    NetConfServerDetails nfDetails =
+        server.createNetconfServer("0005B9A1", "EnodB1", "4.3.0.0", "*");
     Assert.assertNull(nfDetails);
   }
 

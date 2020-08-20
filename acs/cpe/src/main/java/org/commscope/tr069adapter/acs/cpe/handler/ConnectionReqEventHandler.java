@@ -21,7 +21,9 @@ package org.commscope.tr069adapter.acs.cpe.handler;
 
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CR_REQ_CF;
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.CR_REQ_Q;
+
 import java.io.IOException;
+
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.exception.SessionManagerException;
 import org.commscope.tr069adapter.acs.cpe.processor.ConnectionReqEventProcessor;

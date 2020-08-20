@@ -22,6 +22,7 @@ import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.MAPPER_SE
 import static org.commscope.tr069adapter.acs.common.utils.AcsConstants.TR069_NBI_REQUEST_Q;
 
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
+import org.commscope.tr069adapter.acs.common.OperationCode;
 import org.commscope.tr069adapter.acs.common.exception.MapperServiceException;
 import org.commscope.tr069adapter.acs.common.mapper.ACSServiceAPI;
 import org.commscope.tr069adapter.acs.nbi.util.OperationIdGenerator;
@@ -72,9 +73,8 @@ public class ACSServiceAPIImpl implements ACSServiceAPI {
         logger.error("Received null operation code.");
         throw new MapperServiceException("Received null operation code.");
       }
-
-      logger.info("Received request to perform device operation. OperationCode: {}",
-          deviceRPCRequest.getOpDetails().getOpCode());
+      OperationCode opCode = deviceRPCRequest.getOpDetails().getOpCode();
+      logger.info("Received request to perform device operation. OperationCode: {}", opCode);
       opId = opIdGenerator.generateOpId();
       logger.debug("The operation ID generated for processing the Device RPC request is - {}",
           opId);

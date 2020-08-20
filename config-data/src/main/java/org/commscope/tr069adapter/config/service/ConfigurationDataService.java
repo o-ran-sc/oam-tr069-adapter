@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+
 import org.commscope.tr069adapter.acs.common.dto.ConfigurationData;
 import org.commscope.tr069adapter.config.constants.Utility;
 import org.commscope.tr069adapter.config.exceptions.InvalidConfigurationServiceException;
@@ -75,6 +76,7 @@ public class ConfigurationDataService {
       Entry<DeviceVersion, ConfigurationData> floorEntry = configDataMap.floorEntry(inputVersion);
 
       if (null == floorEntry) {
+        macId = macId.replaceAll("[\n|\r|\t]", "_");
         logger.error("Configuration file is not available for device {}", macId);
         return Optional.ofNullable(configurationData);
       }
@@ -83,6 +85,7 @@ public class ConfigurationDataService {
       configurationData = configDataMap.get(floor);
       logger.debug("Parsing of device configuration file is completed");
     } else {
+      macId = macId.replaceAll("[\n|\r|\t]", "_");
       logger.error("Configuration file is not available for device {}", macId);
       return Optional.ofNullable(configurationData);
     }

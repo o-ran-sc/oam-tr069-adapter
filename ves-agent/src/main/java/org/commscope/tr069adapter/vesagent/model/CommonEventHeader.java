@@ -210,4 +210,17 @@ public class CommonEventHeader implements Serializable {
     this.nfcNamingCode = nfcNamingCode;
   }
 
+  @Override
+  public String toString() {
+    return "CommonEventHeader [version=" + version + ", vesEventListenerVersion="
+        + vesEventListenerVersion + ", domain=" + domain + ", eventName=" + eventName
+        + ", eventType=" + eventType + ", eventId=" + eventId + ", sequence=" + sequence
+        + ", priority=" + priority + ", reportingEntityId=" + reportingEntityId
+        + ", reportingEntityName=" + reportingEntityName + ", sourceId=" + sourceId
+        + ", sourceName=" + sourceName + ", nfVendorName=" + nfVendorName + ", nfNamingCode="
+        + nfNamingCode + ", nfcNamingCode=" + nfcNamingCode + ", startEpochMicrosec="
+        + startEpochMicrosec + ", lastEpochMicrosec=" + lastEpochMicrosec + ", timeZoneOffset="
+        + timeZoneOffset + "]";
+  }
+
 }

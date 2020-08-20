@@ -19,10 +19,11 @@
 package org.commscope.tr069adapter.acs.common.inform;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@JsonTypeInfo(use = Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public abstract class AbstractDeviceInform extends DeviceInform {
 
   private static final long serialVersionUID = -487248664548665087L;

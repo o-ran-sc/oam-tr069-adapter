@@ -19,6 +19,7 @@
 package org.commscope.tr069adapter.config.repository;
 
 import java.util.List;
+
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

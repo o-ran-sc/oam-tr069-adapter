@@ -42,7 +42,7 @@ public class PnfRegEventFields implements Serializable {
   private String macAddress;
   private String lastServiceDate;
   @JsonProperty("additionalFields")
-  private PnfRegEventAdditionalFeilds additionalFields = null;
+  private Serializable additionalFields = null;
 
   public String getPnfRegistrationFieldsVersion() {
     return pnfRegistrationFieldsVersion;
@@ -140,11 +140,23 @@ public class PnfRegEventFields implements Serializable {
     this.lastServiceDate = lastServiceDate;
   }
 
-  public PnfRegEventAdditionalFeilds getAdditionalFields() {
+  public Serializable getAdditionalFields() {
     return additionalFields;
   }
 
-  public void setAdditionalFields(PnfRegEventAdditionalFeilds additionalFields) {
+  public void setAdditionalFields(Serializable additionalFields) {
     this.additionalFields = additionalFields;
   }
+
+  @Override
+  public String toString() {
+    return "PnfRegEventFields [pnfRegistrationFieldsVersion=" + pnfRegistrationFieldsVersion
+        + ", serialNumber=" + serialNumber + ", vendorName=" + vendorName + ", oamV4IpAddress="
+        + oamV4IpAddress + ", oamV6IpAddress=" + oamV6IpAddress + ", softwareVersion="
+        + softwareVersion + ", unitType=" + unitType + ", unitFamily=" + unitFamily
+        + ", modelNumber=" + modelNumber + ", manufactureDate=" + manufactureDate + ", macAddress="
+        + macAddress + ", lastServiceDate=" + lastServiceDate + ", additionalFields="
+        + additionalFields + "]";
+  }
+
 }

@@ -192,15 +192,14 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
     return serverInfo;
   }
 
-  private void processVCNotification(ValueChangeInform valueChgNotificaiton, boolean isAlarmVC) {
-    if (isAlarmVC) {
-      logger.debug("Alarm VC received forwarding to VES Collector");
-      vesnotiSender.sendNotification(valueChgNotificaiton, null);
-    } else {
-      logger.info("VC notification received");
-      notiSender.sendNotification(valueChgNotificaiton);
-    }
-  }
+	private void processVCNotification(ValueChangeInform valueChgNotificaiton, boolean isAlarmVC) {
+		if (isAlarmVC) {
+			logger.debug("Alarm VC received forwarding to VES Collector");
+			vesnotiSender.sendNotification(valueChgNotificaiton, null);
+		}
+		logger.info("VC notification received");
+		notiSender.sendNotification(valueChgNotificaiton);
+	}
 
   private boolean isAlarmVC(DeviceInform notification) {
     if (null != notification && null != notification.getParameters()) {
@@ -316,7 +315,7 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
   private void processTransferCompleteInform(TransferCompleteInform notification) {
 
     try {
-      ArrayList<ParameterDTO> paramList = new ArrayList<ParameterDTO>();
+      ArrayList<ParameterDTO> paramList = new ArrayList<>();
       DeviceOperationDetails fwDetails =
           deviceOperDAO.findByDeviceId(notification.getDeviceDetails().getDeviceId());
       if (fwDetails == null || fwDetails.getFileName() == null) {
@@ -338,9 +337,13 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
           logger.debug("downloading file completed on the device successfully.");
         }
         deviceOperDAO.save(fwDetails);
-
+      
+        if(fwDetails.getOrigin().equals("csem"))
+        {
+        	logger.debug("sending transferComplete-event notification to netconfserver");
+        	notiSender.sendTransferCompleteNotification(notification);
+        }
         logger.debug("sending download-event notification to netconfserver");
-
         if (notiSender.sendCustomNotification(notification.getDeviceDetails().getDeviceId(),
             paramList, SOFT_MGMT_NS_URI).getStatusCode().is2xxSuccessful()) {
           logger.debug("sending download-event notification to netconfserver sucess");
@@ -352,14 +355,14 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
             "TransferCompleteInform recevied after boot is received; already software is activated");
       }
     } catch (Exception e) {
-      logger.debug("Exception occured while processing TransferCompleteInform " + e.toString());
+      logger.debug("Exception occured while processing TransferCompleteInform: {}" , e.getMessage());
     }
   }
 
   private void checkForActivateNotification(DeviceInform notification) {
 
     try {
-      ArrayList<ParameterDTO> paramList = new ArrayList<ParameterDTO>();
+      ArrayList<ParameterDTO> paramList = new ArrayList<>();
       DeviceOperationDetails devDetails =
           deviceOperDAO.findByDeviceId(notification.getDeviceDetails().getDeviceId());
 
@@ -407,7 +410,7 @@ public class ACSNotificationHandlerImpl implements ACSNotificationHandler {
       }
     } catch (Exception e) {
       logger.debug(
-          "Exception occured while processing ProcessFirmWareActivateNotification " + e.toString());
+          "Exception occured while processing ProcessFirmWareActivateNotification {}" , e.getMessage());
     }
   }
 }

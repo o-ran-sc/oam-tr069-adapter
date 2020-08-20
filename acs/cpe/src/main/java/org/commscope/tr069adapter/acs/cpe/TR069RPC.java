@@ -22,6 +22,7 @@ package org.commscope.tr069adapter.acs.cpe;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
@@ -52,7 +53,7 @@ public abstract class TR069RPC implements Serializable {
 
   protected static final Logger logger = LoggerFactory.getLogger(TR069RPC.class);
 
-  private Random mrandom = new Random();
+  private Random mrandom = new SecureRandom();
 
   /** Creates a new instance of Message */
   public TR069RPC() {}

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,10 +37,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationOptions;
 import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import org.commscope.tr069adapter.acs.common.dto.ParameterAttributeDTO;
 import org.commscope.tr069adapter.acs.common.dto.TR069DeviceDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationDetails;
@@ -50,7 +53,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -68,6 +73,11 @@ public class NetconfToTr069MapperUtil {
   private static final Logger logger = LoggerFactory.getLogger(NetconfToTr069MapperUtil.class);
   private static final String INDEX_STR = "index";
   private static final String INDEX_REGEX = "[0-9]{1,}";
+  private static final String APPLICATION = "application";
+  private static final String OPERATION_FAILED = "operation-failed";
+  private static final String ERROR = "ERROR";
+  private static final String OPERATION_ABORTED = "Operation Aborted";
+  private static final String INDEX_NODE_FOUND = "Index node found : {}";
 
   @Autowired
   private ErrorCodeUtil errorCodeUtil;
@@ -100,8 +110,13 @@ public class NetconfToTr069MapperUtil {
   public static Map<String, String> extractRequestParamters(Document operationElement,
       String netconfTag, String filterElement) {
     Node requestDataNode = getParameterDataNode(operationElement, netconfTag, filterElement);
-    Map<String, String> map = getParameterMapForNode(requestDataNode, -1);
-    return map;
+    Map<String, String> result = new HashMap<>();
+    try {
+      result = getParameterMapForNode(requestDataNode, -1);
+    } catch (Exception e) {
+      logger.error("Error while getting parameter Map {}", e.getMessage());
+    }
+    return result;
   }
 
   public static DeviceRPCRequest prepareTR069Request(String deviceId, Element operationElement,
@@ -121,7 +136,7 @@ public class NetconfToTr069MapperUtil {
         if (moName.endsWith("." + INDEX_STR)
             && (TR069OperationCode.GET_PARAMETER_VALUES.equals(opCode)
                 || TR069OperationCode.DELETE_OBJECT.equals(opCode))) {
-          logger.debug("Index node found : {}", moName);
+          logger.debug(INDEX_NODE_FOUND, moName);
           moName = moName.replaceFirst("." + INDEX_STR, ".");
           value = null;
 
@@ -168,9 +183,9 @@ public class NetconfToTr069MapperUtil {
     } else if (opResult.getFaultKey() != null && opResult.getFaultString() != null) {
       errorCode.setFaultCode(opResult.getFaultKey());
       errorCode.setErrorMessage(opResult.getFaultString());
-      errorCode.setErrorType("application");
-      errorCode.setErrorTag("operation-failed");
-      errorCode.setErrorSeverity("ERROR");
+      errorCode.setErrorType(APPLICATION);
+      errorCode.setErrorTag(OPERATION_FAILED);
+      errorCode.setErrorSeverity(ERROR);
       netConfResponse.setErrorCode(errorCode);
       netConfResponse.setErrorMessage(opResult.getFaultString());
     }
@@ -198,9 +213,9 @@ public class NetconfToTr069MapperUtil {
     } else if (opResult.getFaultKey() != null && opResult.getFaultString() != null) {
       errorCode.setFaultCode(opResult.getFaultKey());
       errorCode.setErrorMessage(opResult.getFaultString());
-      errorCode.setErrorType("application");
-      errorCode.setErrorTag("operation-failed");
-      errorCode.setErrorSeverity("ERROR");
+      errorCode.setErrorType(APPLICATION);
+      errorCode.setErrorTag(OPERATION_FAILED);
+      errorCode.setErrorSeverity(ERROR);
       netConfResponse.setErrorCode(errorCode);
       netConfResponse.setErrorMessage(opResult.getFaultString());
       return netConfResponse;
@@ -243,23 +258,25 @@ public class NetconfToTr069MapperUtil {
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.files.name", "BC_ONE"));
     paramDTOList.add(new ParameterDTO("software-inventory.software-slot.files.integrity", "OK"));
 
-    String XmlStr = getNetconfResponseXML(paramDTOList, swVersion, hwVersion, true);
+    String xmlStr = getNetconfResponseXML(paramDTOList, swVersion, hwVersion, true);
 
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
     DocumentBuilder builder;
     Document doc = null;
     try {
       builder = factory.newDocumentBuilder();
-      doc = builder.parse(new InputSource(new StringReader(XmlStr)));
+      doc = builder.parse(new InputSource(new StringReader(xmlStr)));
     } catch (Exception e) {
-      logger.error("Error while converting String to element" + e);
+      logger.error("Error while converting String to element", e);
       errorCode.setFaultCode("8002");
-      errorCode.setErrorMessage("Operation Aborted");
-      errorCode.setErrorType("application");
-      errorCode.setErrorTag("operation-failed");
-      errorCode.setErrorSeverity("ERROR");
+      errorCode.setErrorMessage(OPERATION_ABORTED);
+      errorCode.setErrorType(APPLICATION);
+      errorCode.setErrorTag(OPERATION_FAILED);
+      errorCode.setErrorSeverity(ERROR);
       netConfResponse.setErrorCode(errorCode);
-      netConfResponse.setErrorMessage("Operation Aborted");
+      netConfResponse.setErrorMessage(OPERATION_ABORTED);
       return netConfResponse;
     }
 
@@ -276,41 +293,169 @@ public class NetconfToTr069MapperUtil {
     String strxml = null;
     try {
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
       Transformer transformer = transformerFactory.newTransformer();
       DOMSource source = new DOMSource(doc);
       StreamResult result = new StreamResult(new StringWriter());
       transformer.transform(source, result);
       strxml = result.getWriter().toString();
     } catch (Exception e) {
-      logger.error("Error while converting Element to String" + e);
+      logger.error("Error while converting Element to String", e);
       errorCode.setFaultCode("8002");
-      errorCode.setErrorMessage("Operation Aborted");
-      errorCode.setErrorType("application");
-      errorCode.setErrorTag("operation-failed");
-      errorCode.setErrorSeverity("ERROR");
+      errorCode.setErrorMessage(OPERATION_ABORTED);
+      errorCode.setErrorType(APPLICATION);
+      errorCode.setErrorTag(OPERATION_FAILED);
+      errorCode.setErrorSeverity(ERROR);
       netConfResponse.setErrorCode(errorCode);
-      netConfResponse.setErrorMessage("Operation Aborted");
+      netConfResponse.setErrorMessage(OPERATION_ABORTED);
       return netConfResponse;
     }
 
     netConfResponse.setNetconfResponseXml(strxml);
-    logger.debug("NetConf Response XML String for software inventory: " + strxml);
+    logger.debug("NetConf Response XML String for software inventory:{} ", strxml);
     return netConfResponse;
   }
 
-  private String getNetconfResponseXML(List<ParameterDTO> parameters, String swVersion,
+  public NetConfResponse getNetconfResponseForRequestWithoutInputParams(
+      DeviceRPCResponse opResult) {
+    NetConfResponse netConfResponse = new NetConfResponse();
+    ErrorCodeDetails errorCodeDetails = errorCodeUtil.getErrorCodeMetaData(opResult.getFaultKey());
+    ErrorCodeDetails errorCode = new ErrorCodeDetails();
+    if (errorCodeDetails != null) {
+      errorCode.setFaultCode(opResult.getFaultKey());
+      errorCode.setErrorMessage(errorCodeDetails.getErrorMessage());
+      errorCode.setErrorType(errorCodeDetails.getErrorType());
+      errorCode.setErrorTag(errorCodeDetails.getErrorTag());
+      errorCode.setErrorSeverity(errorCodeDetails.getErrorSeverity());
+      netConfResponse.setErrorCode(errorCode);
+      netConfResponse.setErrorMessage(opResult.getFaultString());
+    } else if (opResult.getFaultKey() != null && opResult.getFaultString() != null) {
+      errorCode.setFaultCode(opResult.getFaultKey());
+      errorCode.setErrorMessage(opResult.getFaultString());
+      errorCode.setErrorType(APPLICATION);
+      errorCode.setErrorTag(OPERATION_FAILED);
+      errorCode.setErrorSeverity(ERROR);
+      netConfResponse.setErrorCode(errorCode);
+      netConfResponse.setErrorMessage(opResult.getFaultString());
+    }
+    String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rpc-reply><OK>true</OK></rpc-reply>";
+    netConfResponse.setNetconfResponseXml(xml);
+    return netConfResponse;
+  }
+
+  public NetConfResponse getNetconfResponseForGPA(DeviceRPCResponse opResult, String swVersion,
+      String hwVersion) {
+    NetConfResponse netConfResponse = new NetConfResponse();
+    ErrorCodeDetails errorCodeDetails = errorCodeUtil.getErrorCodeMetaData(opResult.getFaultKey());
+    ErrorCodeDetails errorCode = new ErrorCodeDetails();
+    if (errorCodeDetails != null) {
+      errorCode.setFaultCode(opResult.getFaultKey());
+      errorCode.setErrorMessage(errorCodeDetails.getErrorMessage());
+      errorCode.setErrorType(errorCodeDetails.getErrorType());
+      errorCode.setErrorTag(errorCodeDetails.getErrorTag());
+      errorCode.setErrorSeverity(errorCodeDetails.getErrorSeverity());
+      netConfResponse.setErrorCode(errorCode);
+      netConfResponse.setErrorMessage(opResult.getFaultString());
+    } else if (opResult.getFaultKey() != null && opResult.getFaultString() != null) {
+      errorCode.setFaultCode(opResult.getFaultKey());
+      errorCode.setErrorMessage(opResult.getFaultString());
+      errorCode.setErrorType(APPLICATION);
+      errorCode.setErrorTag(OPERATION_FAILED);
+      errorCode.setErrorSeverity(ERROR);
+      netConfResponse.setErrorCode(errorCode);
+      netConfResponse.setErrorMessage(opResult.getFaultString());
+    }
+    netConfResponse.setNetconfResponseXml(getGPANetconfResponseXML(
+        opResult.getOperationResponse().getParameterDTOs(), swVersion, hwVersion));
+    return netConfResponse;
+  }
+
+  private String getGPANetconfResponseXML(List<ParameterDTO> parameters, String swVersion,
+      String hwVersion) {
+
+    try {
+      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+      DOMImplementation impl = docBuilder.getDOMImplementation();
+      Document doc = impl.createDocument(null, "rpc-reply", (DocumentType) null);
+      Element parent = doc.getDocumentElement();
+      Element child = null;
+      String result = null;
+      int i = 1;
+      for (ParameterDTO param : parameters) {
+        child = doc.createElement("ns1:data");
+        Element keyNode = doc.createElement("ns1:keyindex");
+        keyNode.setTextContent(String.valueOf(i));
+        child.appendChild(keyNode);
+        i++;
+        List<ParameterDTO> paramList = new ArrayList<>();
+        paramList.add(param);
+        String paramName = metaDataUtil
+            .getNetconfXPathNameByTR69NameWithIndexes(param.getParamName(), swVersion, hwVersion);
+        Element parameterTag = doc.createElement("ns1:parameter");
+        parameterTag.setTextContent(paramName);
+        child.appendChild(parameterTag);
+        String[] accesslist = ((ParameterAttributeDTO) param).getAccessList();
+        int notification = ((ParameterAttributeDTO) param).getNotification();
+        Element notfChild = doc.createElement("ns1:notification");
+        notfChild.setTextContent(String.valueOf(notification));
+        child.appendChild(notfChild);
+        for (String access : accesslist) {
+          Element accChild = doc.createElement("ns1:access-list");
+          accChild.setTextContent(access);
+          child.appendChild(accChild);
+        }
+
+        parent.appendChild(child);
+      }
+      result = convertDocumentToString(parent);
+      return result;
+    } catch (Exception e) {
+      logger.error("Exception in getGPANetconfResponseXML: {}", e.getMessage());
+    }
+    return null;
+  }
+
+  public String getNetconfResponseXML(List<ParameterDTO> parameters, String swVersion,
       String hwVersion, boolean isCustomparameter) {
     if (null == parameters || parameters.isEmpty()) {
-      // LOG.debug("There are no parameters found in the response.");
+      logger.debug("There are no parameters found in the response.");
       return null;
     }
     Collections.sort(parameters, new SortByParamterName());
 
     String result = null;
     try {
-      DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-      Document doc = docBuilder.newDocument();
+      Document doc = null;
+      Element dataNode = getNetconfResponseXMLElement(parameters, isCustomparameter, doc, false,
+          swVersion, hwVersion);
+      if (null != dataNode) {
+        result = convertDocumentToString(dataNode);
+      }
+    } catch (Exception pce) {
+      logger.error("Exception: {}", pce.getMessage());
+    }
+
+    return result;
+  }
+
+  private Element getNetconfResponseXMLElement(List<ParameterDTO> parameters,
+      boolean isCustomparameter, Document doc, boolean isGPA, String swVersion, String hwVersion) {
+    if (null == parameters || parameters.isEmpty()) {
+      return null;
+    }
+    Collections.sort(parameters, new SortByParamterName());
+    try {
+      if (doc == null) {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        doc = docBuilder.newDocument();
+      }
 
       Map<String, Element> parentNodeMap = new HashMap<>();
       Element dataNode = null; // root of all nodes
@@ -322,7 +467,9 @@ public class NetconfToTr069MapperUtil {
           paramName = paramDto.getParamName();
         }
         String paramValue = paramDto.getParamValue();
-        if (paramValue == null || paramValue.trim().isEmpty()) {
+
+        if ((!isGPA) && (paramValue == null || paramValue.trim().isEmpty())) {
+          logger.debug("Values is empty so skipping this parameter.");
           continue;
         }
         StringTokenizer tokenizer = new StringTokenizer(paramName, ".");
@@ -346,13 +493,18 @@ public class NetconfToTr069MapperUtil {
                                                       // index nodes
 
             // get parent tabular node from parent MAP
-            parentNodeKey = parentNodeKey + "." + nodeName;
+            StringBuilder bld = new StringBuilder();
+            bld.append(parentNodeKey);
+            bld.append(".");
+            bld.append(nodeName);
+            parentNodeKey = bld.toString();
             Element node = parentNodeMap.get(parentNodeKey);
 
             // create a tabular parent node if doesn't exit in MAP
             if (null == node) {
-              if (metaDataUtil.getMetaDataByNetConfName(parentNodeKey + ".", swVersion,
-                  hwVersion) != null
+              if ((!isGPA)
+                  && metaDataUtil.getMetaDataByNetConfName(parentNodeKey + ".", swVersion,
+                      hwVersion) != null
                   && metaDataUtil
                       .getMetaDataByNetConfName(parentNodeKey + ".", swVersion, hwVersion)
                       .getURI() != null) {
@@ -383,29 +535,40 @@ public class NetconfToTr069MapperUtil {
                                                             // attribute
                                                             // is
                                                             // found
-            parentNodeKey = parentNodeKey + "." + nodeName;
+            StringBuilder bld = new StringBuilder();
+            bld.append(parentNodeKey);
+            bld.append(".");
+            bld.append(nodeName);
+            parentNodeKey = bld.toString();
             parentNodeName = nodeName;
           } else {
             // construct intermediate nodes
             Element node = parentNodeMap.get(parentNodeKey);
             if (null == node) {
-              if (metaDataUtil.getMetaDataByNetConfName(parentNodeKey, swVersion, hwVersion) != null
+              if ((!isGPA)
+                  && metaDataUtil.getMetaDataByNetConfName(parentNodeKey, swVersion,
+                      hwVersion) != null
                   && metaDataUtil.getMetaDataByNetConfName(parentNodeKey, swVersion, hwVersion)
                       .getURI() != null) {
                 node = doc.createElementNS(metaDataUtil
                     .getMetaDataByNetConfName(parentNodeKey, swVersion, hwVersion).getURI(),
                     parentNodeName);
-                if (dataNode == null)
-                  dataNode = node;
+
               } else {
                 node = doc.createElement(parentNodeName);
               }
+              if (dataNode == null)
+                dataNode = node;
               parentNodeMap.put(parentNodeKey, node);
               if (null != parentNode)
                 parentNode.appendChild(node);
 
             }
-            parentNodeKey = parentNodeKey + "." + nodeName;
+            StringBuilder bld = new StringBuilder();
+            bld.append(parentNodeKey);
+            bld.append(".");
+            bld.append(nodeName);
+            parentNodeKey = bld.toString();
             parentNodeName = nodeName;
             parentNode = node;
           }
@@ -418,13 +581,92 @@ public class NetconfToTr069MapperUtil {
       }
 
       if (null != dataNode) {
-        result = convertDocumentToString(dataNode);
+        return dataNode;
       }
     } catch (ParserConfigurationException pce) {
       logger.error("Response xml formatting is failed : {} ", pce.toString());
     }
 
-    return result;
+    return null;
+  }
+
+  public ParameterDTO getParamNameAndValueForGPA(Element operationElement, String netconfTag,
+      String swVersion, String hwVersion) {
+    Node deviceNode = getDeviceDataNode(operationElement, netconfTag);
+    Map<String, String> map = null;
+    try {
+      map = getParameterMapForNode(deviceNode, -1);
+    } catch (Exception e) {
+      logger.error("Exception in getParamNameAndValueForGPA: {}", e.getMessage());
+      return null;
+    }
+    ParameterDTO param = new ParameterDTO();
+    for (String moName : map.keySet()) {
+      if (moName.endsWith("." + INDEX_STR)) {
+        logger.debug(INDEX_NODE_FOUND, moName);
+        moName = moName.replaceFirst("." + INDEX_STR, ".");
+      }
+      String tr069Moname =
+          metaDataUtil.getTR069NameByNetconfNameWithIndexes(moName, swVersion, hwVersion);
+      param.setParamName(tr069Moname);
+      param.setParamValue("");
+    }
+    return param;
+  }
+
+  public ParameterAttributeDTO getParamNameAndValueForSPA(Element operationElement,
+      String netconfTag, String swVersion, String hwVersion) {
+    Node requestDataNode = getDeviceDataNode(operationElement, netconfTag);
+    if (requestDataNode == null) {
+      logger.debug("No matching device parameters found in the netconf request XML.");
+    }
+    Node deviceNode = getDeviceDataNode(operationElement, "parameter");
+    Map<String, String> map = new HashMap<>();
+    try {
+      map = getParameterMapForNode(deviceNode, -1);
+    } catch (Exception e) {
+      logger.error("Error while getting parameter Map {}", e.getMessage());
+    }
+
+    NodeList nodeList = operationElement.getChildNodes();
+    int length = nodeList.getLength();
+    String notificationVal = null;
+    List<String> accessList = new ArrayList<>();
+    String accesslistChange = null;
+    String notificationChange = null;
+    for (int i = 0; i < length; i++) {
+      if (nodeList.item(i).getNodeName().equals("notification")) {
+        notificationVal = nodeList.item(i).getTextContent();
+      } else if (nodeList.item(i).getNodeName().equals("access-list")) {
+        if (nodeList.item(i).getTextContent() != null
+            && !(nodeList.item(i).getTextContent().isEmpty())) {
+          accessList.add(nodeList.item(i).getTextContent());
+        }
+      } else if (nodeList.item(i).getNodeName().equals("access-list-change")) {
+        accesslistChange = nodeList.item(i).getTextContent();
+      } else if (nodeList.item(i).getNodeName().equals("notification-change")) {
+        notificationChange = nodeList.item(i).getTextContent();
+      }
+    }
+    String[] accList = accessList.toArray(new String[accessList.size()]);
+    ParameterAttributeDTO param = new ParameterAttributeDTO();
+    param.setAccessList(accList);
+    param.setNotification(Integer.valueOf(notificationVal));
+    param.setAccesslistChange(Boolean.parseBoolean(accesslistChange));
+    param.setNotificationChange(Boolean.parseBoolean(notificationChange));
+
+    for (String moName : map.keySet()) {
+      if (moName.endsWith("." + INDEX_STR)) {
+        logger.debug(INDEX_NODE_FOUND, moName);
+        moName = moName.replaceFirst("." + INDEX_STR, ".");
+      }
+      String tr069Moname =
+          metaDataUtil.getTR069NameByNetconfNameWithIndexes(moName, swVersion, hwVersion);
+      param.setParamName(tr069Moname);
+      param.setParamValue("");
+    }
+
+    return param;
   }
 
   public static String convertDocumentToString(Element element) {
@@ -454,7 +696,7 @@ public class NetconfToTr069MapperUtil {
       hasChildElements = checkMoreElements(result, childs, hasChildElements);
       if (!hasChildElements) {
         String moName = getMOName(moRNode);
-        if (moName.equals("software-inventory")) {
+        if (moName.contains("software-inventory")) {
           result.put("device.device-info.software-version", moRNode.getTextContent());
           result.put("device.device-info.product-class", moRNode.getTextContent());
         } else if (!moName.endsWith("." + INDEX_STR)) {
@@ -499,7 +741,7 @@ public class NetconfToTr069MapperUtil {
       if (pNode == null || pNode.getNodeType() != Node.ELEMENT_NODE
           || pNode.getNodeName().equals("edit-config") || pNode.getNodeName().equals("config")
           || pNode.getNodeName().equals("get-config") || pNode.getNodeName().equals("filter")
-          || pNode.getNodeName().equals("get")) {
+          || pNode.getNodeName().equals("get") || pNode.getNodeName().equals("parameter")) {
         return result;
       } else {
         String indexStr = getMOIndex(pNode);
@@ -571,7 +813,6 @@ public class NetconfToTr069MapperUtil {
     }
     return null;
   }
-
 }
 
 

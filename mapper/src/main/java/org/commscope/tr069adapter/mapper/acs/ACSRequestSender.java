@@ -19,8 +19,12 @@
 package org.commscope.tr069adapter.mapper.acs;
 
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
+import org.commscope.tr069adapter.acs.common.utils.ConnectionStatusPOJO;
 import org.commscope.tr069adapter.mapper.MapperConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,8 +41,18 @@ public class ACSRequestSender {
     return restTemplate.postForObject(uri, deviceRPCRequest, Long.class);
   }
 
+  public ConnectionStatusPOJO sendConnectionStatusReq(String deviceId) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> entity = new HttpEntity<>(deviceId, headers);
+    return restTemplate.postForObject(getUriForConnStatus(), entity, ConnectionStatusPOJO.class);
+  }
+
   private String getUri() {
     return config.getSbiUri();
   }
 
+  private String getUriForConnStatus() {
+    return config.getConnStatusUri();
+  }
 }

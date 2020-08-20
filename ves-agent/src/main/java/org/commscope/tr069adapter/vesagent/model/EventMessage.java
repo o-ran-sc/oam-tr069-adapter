@@ -38,4 +38,10 @@ public class EventMessage {
     this.event = event;
   }
 
+  @Override
+  public String toString() {
+    return "EventMessage [event=" + event + "]";
+  }
+
+
 }

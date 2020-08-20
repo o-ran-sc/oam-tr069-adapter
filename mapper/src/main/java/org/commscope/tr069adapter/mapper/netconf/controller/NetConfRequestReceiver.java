@@ -94,4 +94,68 @@ public class NetConfRequestReceiver {
     return result;
   }
 
+  @PostMapping("/addobject")
+  public NetConfResponse addObjectRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for addObject. Request : {}", request);
+    NetConfResponse response = handler.handleAddObjectRequest(request);
+    LOG.info("Processed addObject request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/deleteobject")
+  public NetConfResponse deleteObjectRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for deleteObject. Request : {}", request);
+    NetConfResponse response = handler.handleDeleteObjectRequest(request);
+    LOG.info("Processed deleteObject request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/reboot")
+  public NetConfResponse rebootRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for Reboot. Request : {}", request);
+    NetConfResponse response = handler.handleRequestWithoutInputParams(request);
+    LOG.info("Processed Reboot request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/reset")
+  public NetConfResponse resetRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for Reset. Request : {}", request);
+    NetConfResponse response = handler.handleRequestWithoutInputParams(request);
+    LOG.info("Processed Reset request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/spaobject")
+  public NetConfResponse spaObjectRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for SPAObject. Request : {}", request);
+    NetConfResponse response = handler.handleSPAObjectRequest(request);
+    LOG.info("Processed SPAObject request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/gpaobject")
+  public NetConfResponse gpaObjectRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for GPAObject. Request : {}", request);
+    NetConfResponse response = handler.handleGPAObjectRequest(request);
+    LOG.info("Processed GPAObject request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/connectionstatus")
+  public NetConfResponse connectionStatusRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for Connection Status. Request : {}", request);
+    NetConfResponse response = handler.handleConnectionStatusRequest(request);
+    LOG.info("Processed Connection Status request. Response : {}", response);
+    return response;
+  }
+
+  @PostMapping("/download")
+  public NetConfResponse downloadRequest(@RequestBody NetConfRequest request) {
+    LOG.info("Received request for download. Request : {}", request);
+    NetConfResponse response = handler.handleDownloadRequest(request);
+    LOG.info("Processed download request. Response : {}", response);
+    return response;
+  }
+
 }

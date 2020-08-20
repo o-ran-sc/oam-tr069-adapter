@@ -20,6 +20,7 @@ package org.commscope.tr069adapter.config;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.commscope.tr069adapter.config.model.ConfigFileContent;
 
 public class ConfigDataTestsUtils {

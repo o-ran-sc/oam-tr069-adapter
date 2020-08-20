@@ -1,0 +1,328 @@
+module tr069-operations {
+  yang-version 1;
+  namespace "urn:tr069rpc:1.0";
+  prefix cr;
+
+  organization
+    "CommScope";
+  contact
+    "Radio access OneCell <5g@commscope.com>
+
+     CommScope Inc
+     1100 10th Ave Ct SE,
+     Hickory,
+     NC 28602,
+     USA";
+  description
+    "This module contains a YANG definition for the TR069 device operations.";
+
+  revision 2020-08-07 {
+    description
+      "PLEASE READ BELOW NOTES BEFORE USING THE RPCs:
+       1)  All the RPCs supported by TR-069 protocol are translated to NETCONF
+           RPCs except following RPCs.
+       i. GetRPCMethods
+           ii. GetParameterNames
+           iii. InitiateCR
+           iv. Download
+           v. ScheduleDownload
+           vi. Upload
+      ";
+    reference
+      "Subset of TR-069 protocol RPCs mapped to NETCONF RPCs";
+  }
+
+  grouping add-object-output {
+    description
+      "Grouping for add-object rpc output";
+    leaf status {
+      type enumeration {
+        enum 0 {
+          description
+            "The Object has been created.";
+        }
+        enum 1 {
+          description
+            "The Object creation has been validated and committed, but not yet applied (for example, if a reboot is required before the new Object can be applied).";
+        }
+      }
+      mandatory true;
+      description
+        "Status of the addObject";
+    }
+
+    leaf instance-number {
+      type int32;
+      description
+        "Instance Number when the status is passed.";
+    }
+    leaf label {
+      type string;
+      description
+        "label attribute for add-object output.";
+    }
+  }
+
+  grouping delete-object-output {
+    description
+      "Grouping for add-object rpc output";
+    leaf status {
+      type enumeration {
+        enum 0 {
+          description
+            "The Object has been deleted.";
+        }
+        enum 1 {
+          description
+            "The Object deletion has been validated and committed, but not yet applied (for example, if a reboot is required before the Object can be deleted).";
+        }
+      }
+      mandatory true;
+      description
+        "Status of the addObject";
+    }
+  }
+
+  grouping set-parameter-attributes-input {
+    description
+      "Grouping for set-parameter-attributes rpc input";
+    list config {
+      key "keyindex";
+      description
+        "config container object for set parameter attributes RPC.";
+      leaf keyindex {
+        type uint16;
+        description
+          "keyindex for each set parameter attribute";
+      }
+      anyxml parameter {
+        description
+          "parameter attribute";
+      }
+      leaf notification {
+        type int32;
+        mandatory true;
+        description
+          "notification attribute for a set parameter attribute";
+      }
+      leaf notification-change {
+        type boolean;
+        description
+          "notification change attribute for a set parameter attribute";
+      }
+        leaf-list access-list {
+          type string;
+          description
+            "access list attributes for a set parameter attribute";
+      }
+      leaf access-list-change {
+        type boolean;
+        description
+          "access list change attribute for a set parameter attribute";
+      }
+    }
+  }
+
+  grouping get-parameter-attributes-output {
+    description
+      "Grouping for get-parameter-attributes rpc output";
+    list data {
+      key "keyindex";
+      description
+        "get parameter attribute configuration Object";
+      leaf keyindex {
+        type uint16;
+        description
+          "keyindex attribute";
+      }
+      leaf parameter {
+       type string;
+        description
+          "parameter attribute";
+      }
+      leaf notification {
+        type int32;
+        mandatory true;
+        description
+          "notification parameter";
+      }
+      leaf-list access-list {
+          type string;
+          description
+            "access list of a attribute";
+      }
+    }
+  }
+  
+  grouping download-input {
+  description
+      "Grouping for download rpc input";
+    leaf command-key {
+         type string;
+         description
+           "command key";
+       } 
+       leaf file-type {
+        type string;
+        description
+           "file type";
+       }
+       leaf url {
+        type string;
+        description
+           "url string";
+       }
+       leaf username {
+        type string;
+        description
+           "Username";
+       }
+       leaf password {
+        type string;
+        description
+           "password";
+       }
+       leaf file-size {
+        type int32;
+        description
+           "file size";
+       }
+       leaf target-file-name {
+        type string;
+        description
+           "target file name";
+       }
+       leaf delay-in-seconds {
+        type int32;
+        description
+           "delay in seconds";
+       }
+       leaf success-url {
+        type string;
+        description
+           "success url";
+       }
+       leaf failure-url {
+        type string;
+        description
+           "failure url";
+       }  
+  }
+
+  rpc add-object {
+    description
+      "adds object for parameter on the device.";
+    input {
+      anyxml parameter {
+        description
+          "parameter attribute for add-object";
+      }
+    }
+    output {
+      uses add-object-output;
+    }
+  }
+
+  rpc delete-object {
+    description
+      "adds object for parameter on the device.";
+    input {
+      anyxml parameter {
+        description
+          "access container Object";
+      }
+    }
+    output {
+      uses delete-object-output;
+    }
+  }
+
+  rpc set-parameter-attributes {
+    description
+      "SPA for parameter on the device.";
+    input {
+      uses set-parameter-attributes-input;
+    }
+  }
+
+  rpc get-parameter-attributes {
+    description
+      "GPA for parameter on the device.";
+    input {
+      list filter {
+        key "keyindex";
+        description
+          "get-parameter-attributes Object as rpc input";
+        leaf keyindex {
+          type uint16;
+          description
+            "keyindex attribute for a get parameter attribute";
+        }
+        anyxml parameter {
+          description
+            "parameter GPA RPC input";
+        }
+      }
+    }
+    output {
+      uses get-parameter-attributes-output;
+    }
+  }
+
+  rpc reboot {
+    description
+      "Reboots the device.";
+  }
+
+  rpc reset {
+    description
+      "resets the device.";
+  }
+
+  rpc connection-status {
+    description
+      "device connection status.";
+    output {
+      leaf last-contact-time {
+        type string;
+        mandatory true;
+        description
+          "when device has last contacted the ONAP.";
+      }
+	  leaf last-failure-attempt-time {
+        type string;
+        mandatory true;
+        description
+          "when the last access attempt has failed from ONAP.";
+      }
+      leaf last-access-status {
+        type enumeration {
+          enum SUCCESS {
+            description
+              "Last connection was successful.";
+          }
+          enum FAILED {
+            description
+              "Last device access was failed.";
+          }
+        }
+        mandatory true;
+        description
+          "Status of last device access.";
+      }
+      leaf error-message {
+        when "../current-status = 'FAILED'";
+        type string;
+        description
+          "Detailed error Message when the status is failed.";
+      }
+    }
+  }
+  rpc download {
+  description
+      "download.";
+      input {
+       uses download-input;
+     }
+  }
+}

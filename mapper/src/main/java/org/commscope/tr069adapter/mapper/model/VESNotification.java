@@ -18,18 +18,21 @@
 
 package org.commscope.tr069adapter.mapper.model;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import java.io.Serializable;
+import java.util.List;
 
 import org.commscope.tr069adapter.acs.common.DeviceInform;
 import org.commscope.tr069adapter.acs.common.OperationDetails;
+import org.commscope.tr069adapter.acs.common.ParameterDTO;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@JsonTypeInfo(use = Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class VESNotification implements Serializable {
   private DeviceInform devnotification;
   private OperationDetails operationDetails;
   private NetConfServerDetails netconfDetails;
+  private List<ParameterDTO> netconfParameters;
   private String eNodeBName;
 
   public DeviceInform getDevnotification() {
@@ -62,6 +65,14 @@ public class VESNotification implements Serializable {
 
   public void seteNodeBName(String eNodeBName) {
     this.eNodeBName = eNodeBName;
+  }
+
+  public List<ParameterDTO> getNetconfParameters() {
+    return netconfParameters;
+  }
+
+  public void setNetconfParameters(List<ParameterDTO> netconfParameters) {
+    this.netconfParameters = netconfParameters;
   }
 
 }

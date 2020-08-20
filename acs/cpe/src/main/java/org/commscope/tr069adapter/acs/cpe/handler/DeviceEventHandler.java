@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.DeviceRPCResponse;
 import org.commscope.tr069adapter.acs.common.OperationResponse;
-import org.commscope.tr069adapter.acs.common.ParameterDTO;
 import org.commscope.tr069adapter.acs.common.dto.DeviceOperationRequestDetails;
 import org.commscope.tr069adapter.acs.common.dto.TR069OperationCode;
 import org.commscope.tr069adapter.acs.common.exception.SessionManagerException;
@@ -61,6 +60,7 @@ import org.springframework.stereotype.Component;
 public class DeviceEventHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(DeviceEventHandler.class);
+  public static final String PATTERN = "[\n|\r|\t]";
 
   private static final String CLIENT_STR = "client";
 
@@ -125,7 +125,8 @@ public class DeviceEventHandler {
       if (!isAuthorized.booleanValue()) {
         TR069EventProcessingException ex =
             new TR069EventProcessingException(ErrorCode.UNAUTHORIZED_EVENT, "Authorization failed");
-        logger.error(ex.getMessage());
+        String exceptionMessage = ex.getMessage().replaceAll(PATTERN, "_");
+        logger.error(exceptionMessage);
         throw ex;
       }
 
@@ -164,7 +165,8 @@ public class DeviceEventHandler {
     } catch (Exception e) {
       TR069EventProcessingException ex =
           new TR069EventProcessingException(ErrorCode.FAILED_PROCESSING_INFORM, e.getMessage());
-      logger.error(ex.getMessage());
+      String exceptionMessage = ex.getMessage().replaceAll(PATTERN, "_");
+      logger.error(exceptionMessage);
       throw ex;
     } finally {
       MDC.remove(CLIENT_STR);
@@ -230,6 +232,7 @@ public class DeviceEventHandler {
           tr069DeviceEventHandler.getOpRequestDetailsBySessionId(sessionId);
       if (null == deviceOperationRequestDetails
           || null == deviceOperationRequestDetails.getDeviceDetails()) {
+        sessionId = sessionId.replaceAll(PATTERN, "_");
         logger.error("Response with invalid session ID: {}", sessionId);
         return null;
       }
@@ -253,7 +256,7 @@ public class DeviceEventHandler {
         operationResponse = constructResponseForFault(operationCode);
         if (operationResponse != null) {
           operationResponse.setStatus(1);
-          operationResponse.setParameterDTOs(new ArrayList<ParameterDTO>());
+          operationResponse.setParameterDTOs(new ArrayList<>());
         }
       } else {
         operationResponse = deviceRPCResponseBuilder.constructDeviceRPCResponse(msg);

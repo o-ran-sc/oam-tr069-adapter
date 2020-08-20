@@ -200,7 +200,7 @@ public class HeartBeatMessageHandler {
 
     eventHeader.setDomain("heartbeat");
     eventHeader
-        .setEventId("heartbeat_" + deviceDataEntity.getDeviceId() + System.currentTimeMillis());
+        .setEventId("heartbeat" + deviceDataEntity.getDeviceId() + System.currentTimeMillis());
     eventHeader.setEventName(
         "heartbeat_" + deviceDataEntity.getProductClass() + "-" + config.getVendorName());
     eventHeader.setEventType("CommScope_RAN_heartbeat");

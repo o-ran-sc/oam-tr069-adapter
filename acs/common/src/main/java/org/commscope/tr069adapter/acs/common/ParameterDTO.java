@@ -19,9 +19,11 @@
 package org.commscope.tr069adapter.acs.common;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import java.io.Serializable;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@JsonTypeInfo(use = Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class ParameterDTO implements Serializable {
 
   private static final long serialVersionUID = 1460021542834472410L;

@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NetConfServerManagerRestApi {
 
   private static final Logger LOG = LoggerFactory.getLogger(NetConfServerManagerRestApi.class);
+  public static final String PATTERN = "[\n|\r|\t]";
 
   @Autowired
   NetConfServerManagerImpl manager;
@@ -44,6 +45,8 @@ public class NetConfServerManagerRestApi {
   public NetConfServerDetails createNetConfServerInstance(@RequestParam String deviceId,
       @RequestParam String enodeBName, @RequestParam String swVersion,
       @RequestParam String hwVersion) {
+	  deviceId = deviceId.replaceAll(PATTERN, "_");
+	  enodeBName = enodeBName.replaceAll(PATTERN, "_");
     LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}, swversion: {}", deviceId,
         enodeBName, swVersion);
     NetConfServerDetails serverDetails =
@@ -56,6 +59,8 @@ public class NetConfServerManagerRestApi {
   public NetConfServerDetails restartOnVersionChange(@RequestParam String deviceId,
       @RequestParam String enodeBName, @RequestParam String swVersion,
       @RequestParam String hwVersion) {
+	  deviceId = deviceId.replaceAll(PATTERN, "_");
+	  enodeBName = enodeBName.replaceAll(PATTERN, "_");  
     LOG.info("Received Create NetConf Server request for deviceID: {}, enodeBName: {}", deviceId,
         enodeBName);
     NetConfServerDetails serverDetails =
@@ -75,6 +80,8 @@ public class NetConfServerManagerRestApi {
   @PostMapping("/unregisterServer")
   public String unregisterNetConfServerInstance(@RequestParam String deviceId,
       @RequestParam String enodeBName) {
+	  deviceId = deviceId.replaceAll(PATTERN, "_");
+	  enodeBName = enodeBName.replaceAll(PATTERN, "_");  
     LOG.info("Received request for Unregister NetConf Server for deviceID: {}, enodeBName: {} ",
         deviceId, enodeBName);
     String result = manager.unregister(deviceId, enodeBName);

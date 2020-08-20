@@ -19,14 +19,16 @@
 package org.commscope.tr069adapter.mapper.model;
 
 import java.io.Serializable;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
+@JsonTypeInfo(use = Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class NetConfNotificationDTO implements Serializable {
 
   private static final long serialVersionUID = 4928942484595767042L;
-  private String deviceID;
   private String notificaiton;
+  private String deviceID;
 
   public NetConfNotificationDTO() {
     super();

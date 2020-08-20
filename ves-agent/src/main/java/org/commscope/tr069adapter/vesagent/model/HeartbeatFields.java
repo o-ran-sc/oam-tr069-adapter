@@ -20,10 +20,15 @@ package org.commscope.tr069adapter.vesagent.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.io.Serializable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class HeartbeatFields {
-  public String heartbeatFieldsVersion;
-  public int heartbeatInterval;
+public class HeartbeatFields implements Serializable {
+
+  private static final long serialVersionUID = -4654513718975538805L;
+
+  private String heartbeatFieldsVersion;
+  private int heartbeatInterval;
 
   public String getHeartbeatFieldsVersion() {
     return heartbeatFieldsVersion;

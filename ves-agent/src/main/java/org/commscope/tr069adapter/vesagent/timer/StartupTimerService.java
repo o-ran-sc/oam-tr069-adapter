@@ -68,7 +68,10 @@ public class StartupTimerService {
         heartBeatPeriod =
             deviceDataEntity.getAttributesMap().get(VesAgentConstants.HEART_BEAT_PERIOD);
       }
-
+      if (heartBeatPeriod == null) {
+        logger.info("Heartbeat is null");
+        return;
+      }
       if (!VesAgentUtils.isNullOrEmpty(heartBeatPeriod)
           && !heartBeatPeriod.equals(VesAgentConstants.REMOVE_HEART_BEAT_TIMER_VAL)) {
         logger.info("Creating device connectivity check timer tasks for device {}.",

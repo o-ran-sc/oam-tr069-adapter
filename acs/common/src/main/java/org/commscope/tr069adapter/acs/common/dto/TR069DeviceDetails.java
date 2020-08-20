@@ -30,6 +30,7 @@ public class TR069DeviceDetails extends DeviceDetails {
 
   // Device connection request URL
   private String connectionRequestURL;
+  private int crRetryCount;
 
   public String getUsername() {
     return username;
@@ -53,6 +54,14 @@ public class TR069DeviceDetails extends DeviceDetails {
 
   public void setConnectionRequestURL(String connectionRequestURL) {
     this.connectionRequestURL = connectionRequestURL;
+  }
+
+  public int getCrRetryCount() {
+    return crRetryCount;
+  }
+
+  public void setCrRetryCount(int crRetryCount) {
+    this.crRetryCount = crRetryCount;
   }
 
 }
