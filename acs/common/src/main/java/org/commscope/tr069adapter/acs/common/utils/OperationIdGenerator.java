@@ -16,16 +16,15 @@
  * ===============LICENSE_END=======================================================================
  */
 
-package org.commscope.tr069adapter.netconf.rpc;
+package org.commscope.tr069adapter.acs.common.utils;
 
-public class ResetOperation extends GenericOperation {
+import org.springframework.stereotype.Component;
 
-  public ResetOperation(String deviceID, String swVersion, String hwVersion) {
-    this.deviceID = deviceID;
-    this.swVersion = swVersion;
-    this.hwVersion = hwVersion;
-    setOpString("reset");
-    setOpNamespace("urn:tr069rpc:1.0");
-    setOpName("reset");
+@Component
+public class OperationIdGenerator {
+
+  public Long generateOpId() {
+    return System.currentTimeMillis();
   }
+
 }

@@ -82,6 +82,10 @@ public class NetConfServerManagerImpl {
 
   ExecutorService executorService = Executors.newFixedThreadPool(10);
 
+  private static final String ENODEBNAME = "enodeBName";
+
+  private static final String FAIL_DEVICE_UNREGISTER = "Failed to unregister the device ";
+  
   public boolean loadSchemas() {
     LOG.debug("Loading yang schema started");
     List<ProfileDefinition> profiles = versionManager.getSupportedProfileDefinitions();
@@ -100,11 +104,7 @@ public class NetConfServerManagerImpl {
           return false;
         }
 
-        try {
-          FileUtils.copyDirectory(schemaDir, schemaVerDir);
-        } catch (IOException e) {
-          LOG.error("Failed to copy directory {} ", e.getMessage());
-        }
+        copyDir(schemaDir, schemaVerDir);
         boolean isSchemaLoaded = ncServerStarter.loadSchemas(schemaVerDir);
         if (!isSchemaLoaded) {
           LOG.debug("Failed to load schema for profile {}", profile.getProfileId());
@@ -119,6 +119,14 @@ public class NetConfServerManagerImpl {
     return true;
   }
 
+private void copyDir(File schemaDir, File schemaVerDir) {
+    try {
+      FileUtils.copyDirectory(schemaDir, schemaVerDir);
+    } catch (IOException e) {
+      LOG.error("Failed to copy directory {} ", e.getMessage());
+    }
+  }
+  
   public void restartServers() {
     LOG.debug("Restarting all netconf servers during startup...");
     Iterable<NetConfServerDetailsEntity> entities = netconfDAO.findAll();
@@ -324,12 +332,13 @@ public class NetConfServerManagerImpl {
     } else {
       LOG.error(
           "Both deviceID and enodeBName are null. Hence failed to unregister the netconf server.");
-      resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName
-          + ". Invalid deviceId/enodeBName specified.";
+      resultMsg = FAIL_DEVICE_UNREGISTER + deviceId + ", " + ENODEBNAME + "=" + enodeBName
+              + ". Invalid deviceId/enodeBName specified.";
+      LOG.info(resultMsg);
     }
     if (entity == null) {
-      resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName
-          + ". Invalid deviceId/enodeBName specified.";
+      resultMsg = FAIL_DEVICE_UNREGISTER + deviceId + ", " + ENODEBNAME + "=" + enodeBName
+              + ". Invalid deviceId/enodeBName specified.";
       LOG.info(resultMsg);
       return resultMsg;
     }
@@ -342,7 +351,7 @@ public class NetConfServerManagerImpl {
       LOG.info(resultMsg);
       delteHeartBeatTimer(deviceId);
     } else {
-      resultMsg = "Failed to unregister the device " + deviceId + ", enodeBName=" + enodeBName;
+      resultMsg = FAIL_DEVICE_UNREGISTER + deviceId + ", " + ENODEBNAME + "=" + enodeBName;
       LOG.error(resultMsg);
     }
 

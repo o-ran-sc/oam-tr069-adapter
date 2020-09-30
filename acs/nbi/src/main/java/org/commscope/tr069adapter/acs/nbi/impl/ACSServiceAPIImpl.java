@@ -25,7 +25,7 @@ import org.commscope.tr069adapter.acs.common.DeviceRPCRequest;
 import org.commscope.tr069adapter.acs.common.OperationCode;
 import org.commscope.tr069adapter.acs.common.exception.MapperServiceException;
 import org.commscope.tr069adapter.acs.common.mapper.ACSServiceAPI;
-import org.commscope.tr069adapter.acs.nbi.util.OperationIdGenerator;
+import org.commscope.tr069adapter.acs.common.utils.OperationIdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

@@ -110,7 +110,7 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
         if (null != deviceRPCResponse) {
           return;
         }
-      } catch (DeviceOperationException | SessionManagerException deo) {
+      } catch (DeviceOperationException deo) {
         logger.error(deo.getMessage());
         deviceRPCResponse = tr069RequestProcessEngineUtility.buildAbortedOperationresult(
             tr069DeviceDetails, deviceRPCRequest, AcsFaultCode.FAULT_CODE_8000);
@@ -164,7 +164,7 @@ public class TR069RequestProcessEngine extends TR069RequestProcessEngineHelper {
   }
 
   private DeviceRPCResponse checkForDeviceAvailabilityRequest(DeviceRPCRequest deviceRPCRequest,
-      TR069DeviceDetails tr069DeviceDetails) throws SessionManagerException {
+      TR069DeviceDetails tr069DeviceDetails) {
     DeviceRPCResponse deviceRPCResponse = null;
 
     if (!deviceRPCRequest.getOpDetails().getOpCode().equals(CustomOperationCode.CONNECT)) {

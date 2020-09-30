@@ -97,14 +97,7 @@ public class VesAgentServiceHelper {
                 .equalsIgnoreCase(VesAgentConstants.REMOVE_HEART_BEAT_TIMER_VAL))) {
       return false;
     }
-    if (null != countDownTimer
-        && !countDownTimer.equalsIgnoreCase(VesAgentConstants.COUNT_DOWN_TIMER_ZERO)) {
-      if (null == heartBeatPeriod || heartBeatPeriod.equalsIgnoreCase(existingHeartBeatPeriod)) {
-        String exceptionReason = "Can't change timer value if heartbeat value is same";
-        throw new VesAgentException(VesAgentConstants.INVALID_PARAMETER_VALUE, exceptionReason);
-      }
-
-    }
+    validateTimers(heartBeatPeriod, countDownTimer, existingHeartBeatPeriod);
 
     if (!VesAgentUtils.isNullOrEmpty(heartBeatPeriod)) {
       attrJsonMap.put(VesAgentConstants.HEART_BEAT_PERIOD, heartBeatPeriod);
@@ -115,6 +108,23 @@ public class VesAgentServiceHelper {
     vesDataRepository.save(deviceDataEntity);
 
     return true;
+  }
+
+  private void validateTimers(String heartBeatPeriod, String countDownTimer,
+      String existingHeartBeatPeriod) throws VesAgentException {
+    if (null != countDownTimer
+        && !countDownTimer.equalsIgnoreCase(VesAgentConstants.COUNT_DOWN_TIMER_ZERO)) {
+      validateHeartBeatPeriod(heartBeatPeriod, existingHeartBeatPeriod);
+
+    }
+  }
+
+  private void validateHeartBeatPeriod(String heartBeatPeriod, String existingHeartBeatPeriod)
+      throws VesAgentException {
+    if (null == heartBeatPeriod || heartBeatPeriod.equalsIgnoreCase(existingHeartBeatPeriod)) {
+      String exceptionReason = "Can't change timer value if heartbeat value is same";
+      throw new VesAgentException(VesAgentConstants.INVALID_PARAMETER_VALUE, exceptionReason);
+    }
   }
 
   public void processHeartBeatSetRequest(DeviceRPCRequest deviceRPCRequest, String heartBeatPeriod,

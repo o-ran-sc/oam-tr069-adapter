@@ -20,41 +20,27 @@ package org.commscope.tr069adapter.netconf.rpc;
 
 import org.commscope.tr069adapter.netconf.boot.NetConfServiceBooter;
 import org.commscope.tr069adapter.netconf.config.NetConfServerProperties;
-import org.opendaylight.netconf.api.DocumentedException;
 import org.opendaylight.netconf.api.xml.XmlElement;
-import org.opendaylight.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-public class SoftwareActivateOperation implements NetconfOperation {
+public class SoftwareActivateOperation extends GenericOperation {
   private static final Logger logger = LoggerFactory.getLogger(SoftwareActivateOperation.class);
-  public static final String SOFT_MGMT_NAMESPACE = "urn:o-ran:software-management:1.0";
-
-  private String deviceID;
-  private String swVersion;
-  private String hwVersion;
 
   public SoftwareActivateOperation(String deviceID, String swVersion, String hwVersion) {
     this.deviceID = deviceID;
     this.swVersion = swVersion;
     this.hwVersion = hwVersion;
-  }
-
-  @Override
-  public HandlingPriority canHandle(final Document message) throws DocumentedException {
-    OperationNameAndNamespace operationNameAndNamespace = null;
-    operationNameAndNamespace = new OperationNameAndNamespace(message);
-    return canHandle(operationNameAndNamespace.getOperationName(),
-        operationNameAndNamespace.getNamespace());
+    setOpString("softwareActivate");
+    setOpName("software-activate");
+    setOpNamespace("urn:o-ran:software-management:1.0");
   }
 
   @Override
   public Document handle(Document requestMessage,
-      NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
+      NetconfOperationChainedExecution subsequentOperation) {
 
     logger.debug("sw-activate rpc recevied in netconf server");
     final XmlElement requestElement = XmlElement.fromDomDocument(requestMessage);
@@ -64,49 +50,8 @@ public class SoftwareActivateOperation implements NetconfOperation {
     NetConfServerProperties config =
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
-    final String baseUrl = config.getMapperPath() + "/softwareActivate";
+    final String baseUrl = config.getMapperPath() + "/" + getOpString();
     XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
     return null;
-  }
-
-  protected HandlingPriority canHandle(final String operationName,
-      final String operationNamespace) {
-    return operationName.equals("software-activate")
-        && operationNamespace.equals(SOFT_MGMT_NAMESPACE)
-            ? HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1100)
-            : HandlingPriority.CANNOT_HANDLE;
-  }
-
-  public static final class OperationNameAndNamespace {
-    private final String operationName;
-    private final String namespace;
-
-    private final XmlElement operationElement;
-
-    public OperationNameAndNamespace(final Document message) throws DocumentedException {
-      XmlElement requestElement = null;
-      requestElement = getRequestElementWithCheck(message);
-      operationElement = requestElement.getOnlyChildElement();
-      operationName = operationElement.getName();
-      namespace = operationElement.getNamespace();
-    }
-
-    public String getOperationName() {
-      return operationName;
-    }
-
-    public String getNamespace() {
-      return namespace;
-    }
-
-    public XmlElement getOperationElement() {
-      return operationElement;
-    }
-  }
-
-  protected static XmlElement getRequestElementWithCheck(final Document message)
-      throws DocumentedException {
-    return XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
-        XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
   }
 }

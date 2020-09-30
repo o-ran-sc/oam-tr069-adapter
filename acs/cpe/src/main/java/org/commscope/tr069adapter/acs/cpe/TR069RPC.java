@@ -169,7 +169,7 @@ public abstract class TR069RPC implements Serializable {
     while (pfxs.hasNext()) {
       String pfx = pfxs.next();
       String uri = env.getNamespaceURI(pfx);
-      if (uri.startsWith("urn:dslforum-org:cwmp-")) {
+      if (CWMP.equalsIgnoreCase(pfx)) {
         urnCWMP = uri;
       }
     }

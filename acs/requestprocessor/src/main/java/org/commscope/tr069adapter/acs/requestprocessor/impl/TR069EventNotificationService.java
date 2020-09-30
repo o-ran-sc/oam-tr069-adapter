@@ -30,10 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+//@Profile(value="default")
 public class TR069EventNotificationService {
 
   private static final Logger logger = LoggerFactory.getLogger(TR069EventNotificationService.class);
@@ -50,6 +52,7 @@ public class TR069EventNotificationService {
     String deviceId = deviceNotification.getDeviceDetails().getDeviceId();
     try {
       MDC.put(CLIENT_STR, deviceId);
+
       TR069InformType notificationType = (TR069InformType) deviceNotification.getInformType();
 
       logger.debug("Device Inform Event received: '{}'", notificationType.getNotificationCode());

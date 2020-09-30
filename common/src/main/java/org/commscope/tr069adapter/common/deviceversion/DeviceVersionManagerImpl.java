@@ -132,13 +132,8 @@ public class DeviceVersionManagerImpl implements DeviceVersionManager {
           if (deviceVersion.getSwVersion().equalsIgnoreCase(profileVersion.getSwVersion())
               || deviceVersion.getSwVersion().matches(profileVersion.getSwVersion())) {
             if (profileVersion.isHwRegex()) {
-              if (deviceVersion.getHwVersion() != null) {
-
-                if ("*".equalsIgnoreCase(profileVersion.getHwVersion())
-                    || deviceVersion.getHwVersion().equalsIgnoreCase(profileVersion.getHwVersion())
-                    || deviceVersion.getHwVersion().matches(profileVersion.getHwVersion())) {
+              if (deviceVersion.getHwVersion() != null && hwVersionCheck(deviceVersion, profileVersion)) {
                   return entry.getValue();
-                }
               }
             } else {
               // Check Strict match of Hardware
@@ -148,17 +143,11 @@ public class DeviceVersionManagerImpl implements DeviceVersionManager {
               }
             }
           }
-        } else if (profileVersion.isHwRegex()) {
-          if (deviceVersion.getHwVersion() != null) {
-            if ("*".equalsIgnoreCase(profileVersion.getHwVersion())
-                || deviceVersion.getHwVersion().equalsIgnoreCase(profileVersion.getHwVersion())
-                || deviceVersion.getHwVersion().matches(profileVersion.getHwVersion())) {
+        } else if (profileVersion.isHwRegex() && (deviceVersion.getHwVersion() != null && hwVersionCheck(deviceVersion, profileVersion)) ) {
               // Add all software version which matching
               if (profileVersion.getSwVersion()
                   .compareToIgnoreCase(deviceVersion.getSwVersion()) <= 0) {
                 mSoftwareList.add(profileVersion);
-              }
-            }
           }
         }
       } else {
@@ -180,5 +169,11 @@ public class DeviceVersionManagerImpl implements DeviceVersionManager {
     }
 
     return null;
+  }
+
+  private boolean hwVersionCheck(DeviceVersion deviceVersion, DeviceVersion profileVersion) {
+    return "*".equalsIgnoreCase(profileVersion.getHwVersion()) || deviceVersion.getHwVersion()
+        .equalsIgnoreCase(profileVersion.getHwVersion()) || deviceVersion.getHwVersion()
+        .matches(profileVersion.getHwVersion());
   }
 }

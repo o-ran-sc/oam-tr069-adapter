@@ -89,7 +89,6 @@ public class DeviceEventHandler {
     List<String> parameters = new ArrayList<>();
     parameters.add("InternetGatewayDevice.DeviceInfo.HardwareVersion");
     parameters.add("InternetGatewayDevice.DeviceInfo.SoftwareVersion");
-    parameters.add("InternetGatewayDevice.DeviceInfo.ProvisioningCode");
     parameters.add("InternetGatewayDevice.ManagementServer.ConnectionRequestURL");
     parameters.add("InternetGatewayDevice.ManagementServer.ParameterKey");
     informParameter.put("InternetGatewayDevice", parameters);

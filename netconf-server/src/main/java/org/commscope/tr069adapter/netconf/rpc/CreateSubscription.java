@@ -119,6 +119,14 @@ public class CreateSubscription extends AbstractLastNetconfOperation
   protected String getOperationNamespace() {
     return "urn:ietf:params:xml:ns:netconf:notification:1.0";
   }
+  
+  public String getSwVersion() {
+    return swVersion;
+  }
+
+  public String getHwVersion() {
+    return hwVersion;
+  }
 
   @Override
   protected Element handleWithNoSubsequentOperations(final Document document,

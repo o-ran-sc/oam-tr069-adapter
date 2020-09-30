@@ -34,35 +34,22 @@ import org.opendaylight.netconf.api.DocumentedException.ErrorTag;
 import org.opendaylight.netconf.api.DocumentedException.ErrorType;
 import org.opendaylight.netconf.api.xml.XmlElement;
 import org.opendaylight.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-public class GPAObjectOperation implements NetconfOperation {
+public class GPAObjectOperation extends GenericOperation {
   private static final Logger logger = LoggerFactory.getLogger(GPAObjectOperation.class);
-  public static final String OP_NAMESPACE = "urn:tr069rpc:1.0";
-  public static final String OP_NAME = "get-parameter-attributes";
-
-  private String deviceID;
-  private String swVersion;
-  private String hwVersion;
 
   public GPAObjectOperation(String deviceID, String swVersion, String hwVersion) {
     this.deviceID = deviceID;
     this.swVersion = swVersion;
     this.hwVersion = hwVersion;
-  }
-
-  @Override
-  public HandlingPriority canHandle(final Document message) throws DocumentedException {
-    OperationNameAndNamespace operationNameAndNamespace = null;
-    operationNameAndNamespace = new OperationNameAndNamespace(message);
-    return canHandle(operationNameAndNamespace.getOperationName(),
-        operationNameAndNamespace.getNamespace());
+    setOpString("gpaobject");
+    setOpNamespace("urn:tr069rpc:1.0");
+    setOpName("get-parameter-attributes");
   }
 
   @Override
@@ -79,7 +66,7 @@ public class GPAObjectOperation implements NetconfOperation {
     NetConfServerProperties config =
         NetConfServiceBooter.getApplicationContext().getBean(NetConfServerProperties.class);
 
-    final String baseUrl = config.getMapperPath() + "/gpaobject";
+    final String baseUrl = config.getMapperPath() + "/" + getOpString();
     NetConfResponse restResponse =
         XmlUtility.invokeMapperCall(baseUrl, requestXml, deviceID, swVersion, hwVersion);
     Document document = null;
@@ -102,7 +89,7 @@ public class GPAObjectOperation implements NetconfOperation {
         builder = factory.newDocumentBuilder();
         document =
             builder.parse(new InputSource(new StringReader(restResponse.getNetconfResponseXml())));
-        document.getDocumentElement().setAttribute("xmlns:ns1", getOperationNamespace());
+        document.getDocumentElement().setAttribute("xmlns:ns1", getOpNamespace());
         document.getDocumentElement().setAttribute("xmlns",
             XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         document.getDocumentElement().setAttribute(XmlNetconfConstants.MESSAGE_ID, msgId);
@@ -114,56 +101,6 @@ public class GPAObjectOperation implements NetconfOperation {
     }
 
     return document;
-  }
-
-  protected HandlingPriority canHandle(final String operationName,
-      final String operationNamespace) {
-    return operationName.equals(getOperationName())
-        && operationNamespace.equals(getOperationNamespace())
-            ? HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1100)
-            : HandlingPriority.CANNOT_HANDLE;
-  }
-
-  public static final class OperationNameAndNamespace {
-    private final String operationName;
-    private final String namespace;
-
-    private final XmlElement operationElement;
-
-    public OperationNameAndNamespace(final Document message) throws DocumentedException {
-      XmlElement requestElement = null;
-      requestElement = getRequestElementWithCheck(message);
-      operationElement = requestElement.getOnlyChildElement();
-      operationName = operationElement.getName();
-      namespace = operationElement.getNamespace();
-    }
-
-    public String getOperationName() {
-      return operationName;
-    }
-
-    public String getNamespace() {
-      return namespace;
-    }
-
-    public XmlElement getOperationElement() {
-      return operationElement;
-    }
-
-  }
-
-  protected static XmlElement getRequestElementWithCheck(final Document message)
-      throws DocumentedException {
-    return XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
-        XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-  }
-
-  protected String getOperationNamespace() {
-    return OP_NAMESPACE;
-  }
-
-  protected String getOperationName() {
-    return OP_NAME;
   }
 
 }

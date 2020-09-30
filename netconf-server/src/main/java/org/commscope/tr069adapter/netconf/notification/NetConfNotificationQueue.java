@@ -34,7 +34,7 @@ public class NetConfNotificationQueue {
   private static final Logger logger = LoggerFactory.getLogger(NetConfNotificationQueue.class);
 
   @Autowired
-  NetConfSessionUtil netConfSessionUtil;;
+  NetConfSessionUtil netConfSessionUtil;
 
   @JmsListener(destination = NetConfServerConstants.NETCONF_NOTIFICATION_Q,
       containerFactory = NetConfServerConstants.NETCONF_NOTIFICATION_CF)

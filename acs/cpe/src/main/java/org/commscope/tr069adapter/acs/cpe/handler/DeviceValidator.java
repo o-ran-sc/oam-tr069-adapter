@@ -18,6 +18,7 @@
 
 package org.commscope.tr069adapter.acs.cpe.handler;
 
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -27,6 +28,7 @@ import org.commscope.tr069adapter.acs.cpe.utils.FactorySrvcDependencyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -42,6 +44,9 @@ public class DeviceValidator {
   @Autowired
   RestTemplate restTemplate;
 
+  @Value("${config.isDeviceAuthorizationEnabled:true}")
+  private boolean isDeviceAuthorizationEnabled;
+
   public void setFactorySrvcDependencyConfig(
       FactorySrvcDependencyConfig factorySrvcDependencyConfig) {
     this.factorySrvcDependencyConfig = factorySrvcDependencyConfig;
@@ -53,6 +58,10 @@ public class DeviceValidator {
    * @return
    */
   public Boolean isDeviceAuthorized(Inform inform, String authorization) {
+    if(!isDeviceAuthorizationEnabled){
+      logger.debug("Device authentication is not needed here. Hence always authorizing.");
+      return true;
+    }
     if (authorization == null) {
       logger.debug("HTTP Challenge failed as Authorization header does not exist");
       return false;
