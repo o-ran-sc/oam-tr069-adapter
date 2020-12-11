@@ -29,15 +29,6 @@ BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Documentation License for the specific language governing
 permissions and limitations under the Documentation License.
 
-
-This tr-069-adapter software repository includes files that are Copyright 2014
-Cisco Systems, Inc.  and distributed under the Eclipse Public License v1.0. 
-You may not use this file except in compliance with the License. You may obtain a 
-copy of the License at https://www.eclipse.org/legal/epl-v10.html. 
-This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
-OF ANY KIND, either express or implied. See the License for the specific language 
-governing permissions and limitations under the License.
-
 This tr-069-adapter software repository includes files that are 
 Copyright 2010-2019 IETF Trust and distributed under the simplified BSD 
 License set forth in Section 4.c of the IETF Trust's Legal Provisions Relating 
@@ -45,51 +36,9 @@ to IETF Documents (http://trustee.ietf.org/license-info). This software is
 distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
 either express or implied. See the License for the specific language 
 governing permissions and limitations under the License.
-  
+
 This tr-069-adapter software repository includes files that are Copyright 2019 
 O-RAN Alliance and distributed under BSD-3-Clause License.	This software is 
 distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
 either express or implied. See the License for the specific language 
 governing permissions and limitations under the License.
-
-This tr-069-adapter software repository includes files that are Copyright (C) 2002-2020 Igor Sysoev, 
-Copyright (C) 2011-2020 Nginx, Inc. It is licensed under the 2-clause BSD-like license. This software is
-distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-
-This tr-069-adapter software repository includes files that are Copyright (C) 1991, 1999 
-Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-Everyone is permitted to copy and distribute verbatim copies of this license document,
-but changing it is not allowed. https://github.com/mariadb-corporation/mariadb-connector-j/blob/master/LICENSE
-
-This tr-069-adapter software repository includes files that are Copyright (c) 2007 Mockito contributors
-under MIT License(https://github.com/mockito/mockito/wiki/License).	THE SOFTWARE IS PROVIDED 
-"AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  
-OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-This tr-069-adapter software repository includes files that are Copyright (c) 2007, 
-Eclipse Foundation, Inc. and its licensors.(https://www.eclipse.org/org/documents/edl-v10.php)
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUTNOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-AND FITNESS FOR A PARTICULARPURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR  
-CONTRIBUTORS BE LIABLEFOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING,BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-DATA, OR PROFITS;OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT,STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-This tr-069-adapter software repository includes files that are Copyright (c) SAX LICENSE 
-(https://saas.solenovo.fi/solemove/lics/LICENSE-SAX.html) This module, both source code and 
-documentation, is in the Public Domain, and comes with NO WARRANTY. See http://www.saxproject.org 
-for further information.
-
-This tr-069-adapter software repository includes files that are Copyright (C) 1989, 1991 
-Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-Everyone is permitted to copy and distribute verbatim copies of this license document, 
-but changing it is not allowed. this is under The GNU General Public License (GPL)
-https://openjdk.java.net/legal/gplv2+ce.html
-
