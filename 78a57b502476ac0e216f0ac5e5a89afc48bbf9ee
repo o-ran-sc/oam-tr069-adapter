@@ -1,0 +1,8 @@
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Code-Review+1: Zhe Huang <zhehuang@research.att.com>
+Code-Review+2: Martin Skorupski <martin.skorupski@highstreet-technologies.com>
+Submitted-by: Martin Skorupski <martin.skorupski@highstreet-technologies.com>
+Submitted-at: Sat, 12 Dec 2020 11:28:38 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/oam/tr069-adapter/+/5316
+Project: oam/tr069-adapter
+Branch: refs/heads/master
