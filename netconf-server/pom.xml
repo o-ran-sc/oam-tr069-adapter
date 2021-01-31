@@ -30,6 +30,9 @@
    <groupId>org.commscope.tr069adapter.netconf.server</groupId>
    <artifactId>netconf-server</artifactId>
    <name>netconf-server</name>
+   <scm>
+		<url>https://gerrit.o-ran-sc.org/r/scp/oam/modeling</url>
+  </scm>
    <packaging>jar</packaging>
    <licenses>
       <license>
@@ -37,13 +40,7 @@
          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
       </license>
    </licenses>
-   <repositories>
-      <repository>
-         <id>onap-releases</id>
-         <name>onap-releases</name>
-         <url>https://nexus.onap.org/content/repositories/releases/</url>
-      </repository>
-   </repositories>
+
    <properties>
       <docker.image.name>o-ran-sc/tr069adapter-netconf-server</docker.image.name>
    </properties>
@@ -196,31 +193,104 @@
                                         mvn spotless:apply to rewrite source files use mvn spotless:check to validate
                                         source files -->
          </plugin>
+		 <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>exec-maven-plugin</artifactId>
+			<version>1.3.2</version>
+			<executions>
+				<execution>
+					<id>gerrit-wiki-clone</id>
+					<goals>
+						<goal>exec</goal>
+					</goals>
+					<phase>generate-resources</phase>
+					<configuration>
+						<executable>git</executable>
+						<arguments>
+							<argument>clone</argument>
+							<argument>-b</argument>
+							<argument>master</argument>
+							<argument>https://gerrit.o-ran-sc.org/r/scp/oam/modeling</argument>
+							<argument>target/gerrit-wiki</argument>
+						</arguments>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
+		<plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>2.6</version>
+            <executions>
+                <execution>
+                    <id>copy-commscope-yang-models</id>
+                    <phase>process-classes</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${basedir}/schemas/base/</outputDirectory>
+                        <resources>
+                            <resource>
+                                <directory>${basedir}/target/gerrit-wiki/data-model/yang/published/commscope</directory>
+                                <includes>
+                                    <include>**/*.*</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+				<execution>
+                    <id>copy-oran-yang-models</id>
+                    <phase>process-classes</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${basedir}/schemas/common/</outputDirectory>
+                        <resources>
+                            <resource>
+                                <directory>${basedir}/target/gerrit-wiki/data-model/yang/published/o-ran/ru-fh/</directory>
+                                <includes>
+									<include>**/o-ran-file-management@2019-07-03.yang</include>
+									<include>**/o-ran-hardware@2019-07-03.yang</include>
+									<include>**/o-ran-software-management@2019-07-03.yang</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+				<execution>
+                    <id>copy-ietf-yang-models</id>
+                    <phase>process-classes</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${basedir}/schemas/common/</outputDirectory>
+                        <resources>
+                            <resource>
+                                <directory>${basedir}/target/gerrit-wiki/data-model/yang/published/ietf/</directory>
+                                <includes>
+                                    <include>**/iana-hardware@2018-03-13.yang</include>
+									<include>**/ietf-crypto-types@2019-10-18.yang</include>
+									<include>**/ietf-hardware@2018-03-13.yang</include>
+									<include>**/ietf-inet-types@2013-07-15.yang</include>
+									<include>**/ietf-netconf-acm@2018-02-14.yang</include>
+									<include>**/ietf-yang-types@2013-07-15.yang</include>
+									<include>**/ietf-netconf-monitoring@2010-10-04.yang</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
                <skipTests>false</skipTests>
             </configuration>
-         </plugin>
-         <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>prepare-agent</goal>
-                  </goals>
-               </execution>
-               <!-- attached to Maven test phase -->
-               <execution>
-                  <id>report</id>
-                  <phase>test</phase>
-                  <goals>
-                     <goal>report</goal>
-                  </goals>
-               </execution>
-            </executions>
          </plugin>
          <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
@@ -294,6 +364,55 @@
          </plugin>
       </plugins>
    </build>
+    <repositories>
+    <repository>
+      <id>onap-public</id>
+      <url>https://nexus.onap.org/content/groups/public/</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>onap-staging</id>
+      <url>https://nexus.onap.org/content/groups/staging/</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>ecomp-release</id>
+      <name>onap-repository-releases</name>
+      <url>https://nexus.onap.org/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>ecomp-snapshot</id>
+      <name>onap-repository-snapshots</name>
+      <url>https://nexus.onap.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
    <issueManagement>
       <system>JIRA</system>
       <url>https://jira.o-ran-sc.org/</url>
