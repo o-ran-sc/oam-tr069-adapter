@@ -32,6 +32,10 @@ target/
 # Opendaylight yang-tools
 yang-gen-sal/
 
+#IntelliJ related
+.idea
+*.iml
+
 # Eclipse related
 .project
 .classpath
