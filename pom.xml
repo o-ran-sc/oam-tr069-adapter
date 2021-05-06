@@ -29,7 +29,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.commscope.tr069adapter</groupId>
    <artifactId>tr069adapter</artifactId>
-   <version>1.0.0</version>
+   <version>1.0.0-SNAPSHOT</version>
    <packaging>pom</packaging>
    <name>tr069adapter</name>
    <properties>
