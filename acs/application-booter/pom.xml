@@ -24,7 +24,7 @@
    <parent>
       <groupId>org.commscope.tr069adapter.acs</groupId>
       <artifactId>acs</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.commscope.tr069adapter.acs.booter</groupId>
@@ -90,27 +90,27 @@
 	  <dependency>
          <groupId>org.commscope.tr069adapter.acs.common</groupId>
          <artifactId>acs-common</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.commscope.tr069adapter.common</groupId>
          <artifactId>common</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.commscope.tr069adapter.acs.cpe</groupId>
          <artifactId>cpe</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.commscope.tr069adapter.acs.requestprocessor</groupId>
          <artifactId>requestprocessor</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.commscope.tr069adapter.acs.nbi</groupId>
          <artifactId>acsnbi</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>com.google.guava</groupId>

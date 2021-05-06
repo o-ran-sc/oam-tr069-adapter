@@ -24,7 +24,7 @@
    <parent>
       <groupId>org.commscope.tr069adapter</groupId>
       <artifactId>tr069adapter</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.commscope.tr069adapter.ves.agent</groupId>
@@ -117,12 +117,12 @@
       <dependency>
          <groupId>org.commscope.tr069adapter.acs.common</groupId>
          <artifactId>acs-common</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.commscope.tr069adapter.mapper</groupId>
          <artifactId>mapper</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
          <classifier>lib</classifier>
       </dependency>
       <dependency>

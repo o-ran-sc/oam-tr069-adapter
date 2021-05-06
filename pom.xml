@@ -29,10 +29,11 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.commscope.tr069adapter</groupId>
    <artifactId>tr069adapter</artifactId>
-   <version>1.0.0</version>
+   <version>${project.version}</version>
    <packaging>pom</packaging>
    <name>tr069adapter</name>
    <properties>
+	  <project.version>1.0.0-SNAPSHOT</project.version>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <build.version>latest</build.version>
       <jdk.version>1.7</jdk.version>

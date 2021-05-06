@@ -25,7 +25,7 @@
    <parent>
       <groupId>org.commscope.tr069adapter</groupId>
       <artifactId>tr069adapter</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
    </parent>
    <groupId>org.commscope.tr069adapter.netconf.server</groupId>
    <artifactId>netconf-server</artifactId>
@@ -95,13 +95,13 @@
       <dependency>
          <groupId>org.commscope.tr069adapter.mapper</groupId>
          <artifactId>mapper</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
          <classifier>lib</classifier>
       </dependency>
       <dependency>
          <groupId>org.commscope.tr069adapter.common</groupId>
          <artifactId>common</artifactId>
-         <version>1.0.0</version>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>

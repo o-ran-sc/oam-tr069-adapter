@@ -27,7 +27,7 @@
    <parent>
       <groupId>org.commscope.tr069adapter</groupId>
       <artifactId>tr069adapter</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
    </parent>
    <dependencies>
       <dependency>
