@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "052a67b7_ebfa7efb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000444
+      },
+      "writtenOn": "2021-05-06T13:13:56Z",
+      "side": 1,
+      "message": "Added SNAPSHOT tag in pom file",
+      "revId": "c7bdaa0bcf871b2aae05a3e3dc0de1aa2e10d7a9",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    }
+  ]
+}
