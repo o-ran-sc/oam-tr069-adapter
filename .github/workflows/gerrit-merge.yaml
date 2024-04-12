@@ -98,7 +98,7 @@ jobs:
 
   report-status:
     if: ${{ always() }}
-    needs: [notify, run-maven-clm, run-maven-sonar]
+    needs: [notify, run-maven-sonar]
     runs-on: ubuntu-latest
     steps:
       - name: Get workflow conclusion
