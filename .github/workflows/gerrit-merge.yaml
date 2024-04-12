@@ -89,9 +89,9 @@ jobs:
         -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
         -Dmaven.repo.local=/tmp/r -Dorg.ops4j.pax.url.mvn.localRepository=/tmp/r
         -DaltDeploymentRepository=staging::default::file:"${GITHUB_WORKSPACE}"/m2repo
+      SONAR_PROJECT_KEY: "o-ran-sc_oam-tr069-adapter"
+      SONAR_ORG: "o-ran-sc"
       SONAR_ARGS: >
-        -Dsonar.organization=o-ran-sc
-        -Dsonar.projectKey=o-ran-sc_oam-tr069-adapter
         -Dsonar.verbose=true
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
