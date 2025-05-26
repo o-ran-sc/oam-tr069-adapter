@@ -16,6 +16,23 @@
       "message": "many thanks",
       "revId": "0d3e5e50cbfb4becb55a3513f6d3b3a6cfafd23d",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e45edd76_9eb1ac32",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000060
+      },
+      "writtenOn": "2025-05-26T05:43:51Z",
+      "side": 1,
+      "message": "I like to merge, but I\u0027m blocked - the gerrit is \"active\" but I can only \"REBASE\" it. If I do so, I get the following error: \"Change is alerady up-to-date\". Please advice. Abandon?",
+      "revId": "0d3e5e50cbfb4becb55a3513f6d3b3a6cfafd23d",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53"
     }
   ]
 }
